@@ -7,11 +7,14 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.Getter;
+import org.pytenix.service.OmniConnectionService;
+import org.pytenix.service.RestfulService;
+import org.pytenix.bridge.VelocityBridge;
 import org.pytenix.config.ConfigService;
 import org.pytenix.config.ConfigurationFile;
 import org.pytenix.listener.PlayerConnectionChangeListener;
-import org.pytenix.motd.GeoService;
-import org.pytenix.motd.MotDEvent;
+import org.pytenix.service.GeoService;
+import org.pytenix.listener.ProxyPingListener;
 import org.pytenix.util.CaffeineCache;
 import org.slf4j.Logger;
 
@@ -31,6 +34,9 @@ public class VelocityTranslator {
 
 
     @Getter
+    OmniConnectionService connectionService;
+
+    @Getter
     GeoService geoService;
 
     @Getter
@@ -40,7 +46,7 @@ public class VelocityTranslator {
     private final CaffeineCache caffeineCache;
 
     @Getter
-    String remoteAddress = "ws.omni-translate.me";
+    String remoteAddress = "192.168.178.121:8083";
 
 
     @Getter
@@ -86,11 +92,24 @@ public class VelocityTranslator {
         velocityBridge.setSecretKey(configurationFile.getLicenseKey());
 
 
-        this.geoService = new GeoService(this, configurationFile.getLicenseKey(), server);
+        this.connectionService = new OmniConnectionService(
+                this,
+                configurationFile.getLicenseKey(),
+                proxyServer
+        );
+
+        this.restfulService = new RestfulService(
+                this,
+                velocityBridge, proxyServer,
+                connectionService
+        );
+        this.geoService = new GeoService(this, proxyServer, connectionService);
+
+        connectionService.setServices(restfulService, geoService);
+        connectionService.connect();
 
         server.getEventManager().register(this,velocityBridge );
 
-        this.restfulService = new RestfulService(this,velocityBridge, configurationFile.getLicenseKey(),server); //CONFIG ANBINDUNG
 
 
 
@@ -101,7 +120,7 @@ public class VelocityTranslator {
             }
         };
 
-        server.getEventManager().register(this, new MotDEvent(this));
+        server.getEventManager().register(this, new ProxyPingListener(this));
         server.getEventManager().register(this, new PlayerConnectionChangeListener(this));
 
         logger.info("Translator Proxy erfolgreich gestartet!");

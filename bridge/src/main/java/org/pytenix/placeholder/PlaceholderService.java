@@ -41,7 +41,7 @@ public class PlaceholderService {
 
     final PlaceholderNormalizer placeholderNormalizer;
 
-    public static final Pattern COLOR_PATTERN = Pattern.compile("(?:§x(?:§[0-9a-fA-F]){6})|(?:§[0-9a-fA-Fk-orK-OR])");
+    public static final Pattern COLOR_PATTERN = Pattern.compile("(?i)§x(?:§[0-9a-f]){6}|§#[0-9a-f]{6}|§[0-9a-fk-or]");
     public PlaceholderService(AdvancedTranslationBridge translationBridge) {
 
 

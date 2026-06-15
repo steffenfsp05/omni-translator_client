@@ -33,7 +33,7 @@ public class LocaleChangeEvent implements Listener {
             player.teleport(originalLocation);
             player.sendMessage("§a[Omni] §7Language updated!");
 
-        }, 3); // 3 Ticks warten
+        }, 3);
 
     }
 }

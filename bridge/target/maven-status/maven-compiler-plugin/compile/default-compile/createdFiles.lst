@@ -27,7 +27,6 @@ org\pytenix\proto\generated\NetworkPackets$ConfigRequestPacket.class
 org\pytenix\proto\generated\NetworkPackets$GeoRequestPacket$1.class
 org\pytenix\util\SerializationUtil.class
 org\pytenix\proto\generated\NetworkPackets$TranslationBatchRequestOrBuilder.class
-org\pytenix\placeholder\GradientService$GradientInfo.class
 org\pytenix\placeholder\protect\WordProtector$ProtectionResult.class
 org\pytenix\proto\generated\NetworkPackets$ConfigRequestPacket$Builder.class
 org\pytenix\proto\generated\NetworkPackets$GeoBatchRequest$Builder.class
@@ -73,5 +72,6 @@ org\pytenix\proto\generated\NetworkPackets$GeoResultPacketOrBuilder.class
 org\pytenix\placeholder\impl\ExtendedPlaceholder.class
 org\pytenix\proto\generated\NetworkPackets$GeoBatchResult.class
 org\pytenix\proto\generated\NetworkPackets$GeoResultPacket.class
+org\pytenix\placeholder\GradientService$GradientData.class
 org\pytenix\placeholder\protect\PlayernameProtector.class
 org\pytenix\proto\generated\NetworkPackets$GeoRequestPacket$Builder.class

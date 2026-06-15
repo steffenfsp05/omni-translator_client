@@ -3,7 +3,7 @@ package org.pytenix.listener;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
-import org.pytenix.VelocityBridge;
+import org.pytenix.bridge.VelocityBridge;
 import org.pytenix.VelocityTranslator;
 
 public class PlayerConnectionChangeListener {

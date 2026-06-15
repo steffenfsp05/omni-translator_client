@@ -9,6 +9,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBl
 import io.github.retrooper.packetevents.adventure.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
+import org.pytenix.PlayerLocaleService;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -104,7 +105,7 @@ public class SignViewListener implements PacketListener {
     private CompletableFuture<Void> processSignSide(NBTCompound root, String sideKey, Player player) {
         if (!root.contains(sideKey)) return CompletableFuture.completedFuture(null);
 
-        final String locale = player.getLocale();
+        final String locale = PlayerLocaleService.getPlayerLocale(player.getUniqueId());
         final NBTCompound side = root.getCompoundTagOrNull(sideKey);
 
         if (side == null || !side.contains("messages")) return CompletableFuture.completedFuture(null);

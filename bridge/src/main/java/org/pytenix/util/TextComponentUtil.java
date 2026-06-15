@@ -25,6 +25,7 @@ public class TextComponentUtil {
             .build();
 
     private static final Pattern SANITIZE_PATTERN = Pattern.compile("§(?![0-9a-fA-Fk-oK-OrRxX#])");
+    private static final Pattern PATTERN = Pattern.compile("(?s)<([AH])(\\d+)>((?:(?!<[AH]\\d+>).)*?)</\\1\\2>");
 
     private final AsyncCache<TranslationKey, Component> translationCache = Caffeine.newBuilder()
             .maximumSize(10_000)
@@ -78,46 +79,45 @@ public class TextComponentUtil {
 
         String preparedMain = translatorService.preparePayload(mainBatchId, mainPayload);
         CompletableFuture<String> mainFuture = translatorService.processAndRestore(mainBatchId, preparedMain, lang, module, started);
-
         return mainFuture.thenCombineAsync(
                 CompletableFuture.allOf(hoverFutures.values().toArray(new CompletableFuture[0])),
                 (translatedMainText, v) -> {
                     String cleanMainText = sanitizeLegacyText(translatedMainText);
 
                     List<Map.Entry<String, Component>> replacements = new ArrayList<>();
+                    boolean found;
 
-                    Matcher mA = Pattern.compile("(?s)<A(\\d+)>(.*?)</A\\1>").matcher(cleanMainText);
-                    StringBuffer sbA = new StringBuffer();
-                    while (mA.find()) {
-                        int id = Integer.parseInt(mA.group(1));
-                        String inner = mA.group(2);
-                        String uuid = UUID.randomUUID().toString();
+                    // Iteratively extract the INNERMOST tags first, handling infinite nesting!
+                    do {
+                        found = false;
+                        // Matches <A> or <H> that do NOT contain another <A> or <H> inside them
+                        Matcher m = PATTERN.matcher(cleanMainText);
+                        StringBuffer sb = new StringBuffer();
 
-                        ClickEvent originalClick = ctx.clicks.get(id);
-                        Component innerComp = legacySerializer.deserialize(inner).clickEvent(originalClick);
+                        while (m.find()) {
+                            found = true;
+                            String type = m.group(1);
+                            int id = Integer.parseInt(m.group(2));
+                            String inner = m.group(3);
+                            String uuid = UUID.randomUUID().toString();
 
-                        replacements.add(new AbstractMap.SimpleEntry<>(uuid, innerComp));
-                        mA.appendReplacement(sbA, uuid);
-                    }
-                    mA.appendTail(sbA);
-                    cleanMainText = sbA.toString();
+                            Component innerComp = legacySerializer.deserialize(inner);
 
-                    Matcher mH = Pattern.compile("(?s)<H(\\d+)>(.*?)</H\\1>").matcher(cleanMainText);
-                    StringBuffer sbH = new StringBuffer();
-                    while (mH.find()) {
-                        int id = Integer.parseInt(mH.group(1));
-                        String inner = mH.group(2);
-                        String uuid = UUID.randomUUID().toString();
+                            if (type.equals("A")) {
+                                ClickEvent originalClick = ctx.clicks.get(id);
+                                innerComp = innerComp.clickEvent(originalClick);
+                            } else if (type.equals("H")) {
+                                String translatedHoverText = sanitizeLegacyText(hoverFutures.get(id).join());
+                                Component hoverComp = legacySerializer.deserialize(translatedHoverText);
+                                innerComp = innerComp.hoverEvent(HoverEvent.showText(hoverComp));
+                            }
 
-                        String translatedHoverText = sanitizeLegacyText(hoverFutures.get(id).join());
-                        Component hoverComp = legacySerializer.deserialize(translatedHoverText);
-                        Component innerComp = legacySerializer.deserialize(inner).hoverEvent(HoverEvent.showText(hoverComp));
-
-                        replacements.add(new AbstractMap.SimpleEntry<>(uuid, innerComp));
-                        mH.appendReplacement(sbH, uuid);
-                    }
-                    mH.appendTail(sbH);
-                    cleanMainText = sbH.toString();
+                            replacements.add(new AbstractMap.SimpleEntry<>(uuid, innerComp));
+                            m.appendReplacement(sb, uuid);
+                        }
+                        m.appendTail(sb);
+                        cleanMainText = sb.toString();
+                    } while (found);
 
                     Component finalComponent = legacySerializer.deserialize(cleanMainText);
 
@@ -141,27 +141,34 @@ public class TextComponentUtil {
 
         Component modified = c.children(newChildren);
 
-        if (modified instanceof TextComponent tc) {
-            ClickEvent click = tc.clickEvent();
-            HoverEvent<?> hover = tc.hoverEvent();
+        ClickEvent click = modified.clickEvent();
+        HoverEvent<?> hover = modified.hoverEvent();
 
-            if (click != null || hover != null) {
-                String content = tc.content();
-                if (!content.isEmpty()) {
-                    if (click != null) {
-                        int id = ctx.clickIndex++;
-                        ctx.clicks.put(id, click);
-                        content = "<A" + id + ">" + content + "</A" + id + ">";
-                    }
-                    if (hover != null) {
-                        int id = ctx.hoverIndex++;
-                        ctx.hovers.put(id, (Component) hover.value());
-                        content = "<H" + id + ">" + content + "</H" + id + ">";
-                    }
-                    modified = tc.content(content).clickEvent(null).hoverEvent(null);
-                }
+        if (click != null || hover != null) {
+            String startTag = "";
+            String endTag = "";
+
+            if (click != null) {
+                int id = ctx.clickIndex++;
+                ctx.clicks.put(id, click);
+                startTag += "<A" + id + ">";
+                endTag = "</A" + id + ">" + endTag;
             }
+            if (hover != null) {
+                int id = ctx.hoverIndex++;
+                ctx.hovers.put(id, (Component) hover.value());
+                startTag += "<H" + id + ">";
+                endTag = "</H" + id + ">" + endTag;
+            }
+
+            Component nodeWithoutEvents = modified.clickEvent(null).hoverEvent(null);
+
+            return Component.empty()
+                    .append(Component.text(startTag))
+                    .append(nodeWithoutEvents)
+                    .append(Component.text(endTag));
         }
+
         return modified;
     }
 }

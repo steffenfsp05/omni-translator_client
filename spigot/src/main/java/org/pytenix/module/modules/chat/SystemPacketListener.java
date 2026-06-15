@@ -13,6 +13,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
+import org.pytenix.PlayerLocaleService;
 import org.pytenix.SpigotTranslator;
 import org.pytenix.util.TextComponentUtil;
 
@@ -66,7 +67,7 @@ public class SystemPacketListener implements PacketListener {
             }
 
             event.setCancelled(true);
-            messageSequencer.translateWithOrder(uuid, messageComponent, rawText, player.getLocale(), isOverlay);
+            messageSequencer.translateWithOrder(uuid, messageComponent, rawText, PlayerLocaleService.getPlayerLocale(player.getUniqueId()), isOverlay);
         }
     }
 }

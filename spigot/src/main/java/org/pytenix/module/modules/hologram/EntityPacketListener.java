@@ -20,6 +20,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.pytenix.PlayerLocaleService;
 import org.pytenix.module.modules.player.LiveChatModule;
 
 import java.util.ArrayList;
@@ -84,7 +85,7 @@ public class EntityPacketListener implements PacketListener, Listener {
         if(!hologramModule.checkIfNeed(event.getUser().getUUID()))
             return;
 
-        Cache<Component, Component> personalCache = getHologramCache(player.getLocale());
+        Cache<Component, Component> personalCache = getHologramCache(PlayerLocaleService.getPlayerLocale(player.getUniqueId()));
         if (personalCache == null) return;
 
         List<EntityData<?>> newMetadataList = new ArrayList<>();
@@ -178,7 +179,7 @@ public class EntityPacketListener implements PacketListener, Listener {
     }
     private CompletableFuture<Component> translateHologramLine(Player player, String text) {
         if (player == null) return CompletableFuture.completedFuture(null);
-        String lang = player.getLocale();
+        String lang = PlayerLocaleService.getPlayerLocale(player.getUniqueId());
 
        return hologramModule.translate(text, lang)
                 .thenApply(translatedString -> {

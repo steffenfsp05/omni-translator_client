@@ -10,6 +10,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWi
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.pytenix.PlayerLocaleService;
 import org.pytenix.module.modules.gui.InventoryModule;
 
 import java.util.*;
@@ -57,28 +58,28 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
     {
         WrapperPlayServerWindowItems wrapper = new WrapperPlayServerWindowItems(event);
         latestStateIdMap.put(event.getUser().getUUID(), wrapper.getStateId());
-        if (wrapper.getWindowId() == 0) {
+
+        if (wrapper.getWindowId() == 0)
             return;
-        }
+
+
         com.github.retrooper.packetevents.protocol.player.User user = event.getUser();
         if (user == null) return;
 
-
-
         String lockKey = user.getUUID().toString() + ":" + wrapper.getWindowId() + ":" + wrapper.getStateId();
 
-        if (activeTranslations.contains(lockKey)) {
+        if (activeTranslations.contains(lockKey))
             return;
-        }
+
         activeTranslations.add(lockKey);
         {
 
 
             Player player = org.bukkit.Bukkit.getPlayer(user.getUUID());
 
-            if (player == null) {
+            if (player == null)
                 return;
-            }
+
 
 
             try {
@@ -98,7 +99,7 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
                         .map(SpigotConversionUtil::toBukkitItemStack)
                         .orElse(null);
 
-                String locale = player.getLocale();
+                String locale = PlayerLocaleService.getPlayerLocale(player.getUniqueId());
 
 
 
@@ -143,7 +144,7 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
         int stateId = wrapper.getStateId();
         int slot = wrapper.getSlot();
         final ItemStack item = SpigotConversionUtil.toBukkitItemStack(wrapper.getItem()).clone();
-        String locale = player.getLocale();
+        String locale = PlayerLocaleService.getPlayerLocale(player.getUniqueId());
 
 
         inventoryModule.translateItem(item, locale).thenAccept(translatedItem -> {

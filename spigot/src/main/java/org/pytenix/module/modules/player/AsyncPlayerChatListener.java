@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.pytenix.PlayerLocaleService;
 import org.pytenix.SpigotTranslator;
 import org.pytenix.util.TaskScheduler;
 
@@ -43,14 +44,14 @@ public class AsyncPlayerChatListener implements Listener {
         System.out.println("ORIGINAL MESSAGE: " + rawJson);
         System.out.println("MESSAGE: " + rawJson2);
 
-        String senderLang = sender.getLocale().split("_")[0].toLowerCase();
+        String senderLang = PlayerLocaleService.getPlayerLocale(sender.getUniqueId()).split("_")[0].toLowerCase();
 
         Map<String, List<Player>> languageGroups = new HashMap<>();
 
         for (Audience audience : event.viewers()) {
             if (audience instanceof Player p && !p.getUniqueId().equals(sender.getUniqueId())) {
 
-                String targetLang = p.getLocale().split("_")[0].toLowerCase();
+                String targetLang = PlayerLocaleService.getPlayerLocale(p.getUniqueId()).split("_")[0].toLowerCase();
 
                 // 2. DER KOSTEN-KILLER: Gleiche Sprache? -> Direkt senden, kein API Call!
                 //HIER AMBESTEN NICHT AUF DEFAULTLANGUAGE VERLASSEN!!

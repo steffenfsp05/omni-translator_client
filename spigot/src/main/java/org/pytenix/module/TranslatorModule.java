@@ -2,6 +2,7 @@ package org.pytenix.module;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.pytenix.PlayerLocaleService;
 import org.pytenix.SpigotTranslator;
 import org.pytenix.TranslatorService;
 import org.pytenix.entity.ServerConfiguration;
@@ -45,7 +46,7 @@ public abstract class TranslatorModule {
         if(getServerConfiguration() == null || getServerConfiguration().getDefaultLanguage() == null)
             return true;
 
-        return !Bukkit.getPlayer(playerUUID).getLocale().startsWith(getServerConfiguration().getDefaultLanguage());
+        return !PlayerLocaleService.getPlayerLocale(playerUUID).startsWith(getServerConfiguration().getDefaultLanguage());
     }
 
     public ServerConfiguration getServerConfiguration()

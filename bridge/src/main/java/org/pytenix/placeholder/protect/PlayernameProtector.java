@@ -24,9 +24,6 @@ public class PlayernameProtector {
 
     public PlayernameProtector(AdvancedTranslationBridge translationBridge)
     {
-
-
-
         this.translationBridge = translationBridge;
 
     }
