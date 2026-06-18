@@ -1,4 +1,4 @@
-package org.pytenix.brigde;
+package org.pytenix.bridge;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
