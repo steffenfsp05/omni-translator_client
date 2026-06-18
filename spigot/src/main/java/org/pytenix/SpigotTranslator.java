@@ -56,7 +56,6 @@ public class SpigotTranslator extends JavaPlugin {
 
         this.configService = new ConfigService();
 
-        this.spigotTransport = new SpigotTransport(this, "ABC", pluginMessagingChannel);
 
 
         if (!configService.exists("config.json")) {
@@ -82,6 +81,10 @@ public class SpigotTranslator extends JavaPlugin {
                 return getSpigotTransport().translate(id, text, targetLang, module);
             }
         };
+
+
+        this.spigotTransport = new SpigotTransport(this, "ABC", pluginMessagingChannel);
+
 
         this.textComponentUtil = new TextComponentUtil(translatorService);
 
