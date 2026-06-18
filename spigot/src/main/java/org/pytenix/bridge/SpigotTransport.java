@@ -2,6 +2,8 @@ package org.pytenix.bridge;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -9,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRegisterChannelEvent;
+import org.bukkit.event.player.PlayerUnregisterChannelEvent;
 import org.pytenix.SpigotTranslator;
 import org.pytenix.bridge.consumer.ConfigUpdateConsumer;
 import org.pytenix.bridge.listener.ConfigUpdateListener;
@@ -20,7 +23,9 @@ import org.transport.TransportService;
 import org.transport.service.impl.DefaultPacketService;
 
 import java.time.Duration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
 
@@ -37,22 +42,23 @@ public class SpigotTransport implements Listener {
     @Getter
     final TransportService<String> transportService;
     private final SpigotTranslator plugin;
-    private final ExecutorService apiExecutor = Executors.newFixedThreadPool(4, runnable -> {
-        Thread thread = new Thread(runnable);
-        thread.setName("Translation-API-Worker");
-        thread.setDaemon(true);
-        return thread;
-    });
+
+
     @Setter
     public boolean hasConfiguration;
 
     public String pluginMessagingChannel;
+
+    private final ThreadLocal<byte[]> reusableBuffer = ThreadLocal.withInitial(() -> new byte[65536]); // 64KB Puffer
+
+    public Set<UUID> availableCarriers;
 
     public SpigotTransport(SpigotTranslator plugin, String secret, String pluginMessagingChannel) {
 
         this.pluginMessagingChannel = pluginMessagingChannel;
         this.plugin = plugin;
         this.hasConfiguration = false;
+        this.availableCarriers = new HashSet<>();
 
         plugin.getTranslatorService().getEventService().register(new ConfigUpdateListener(plugin));
 
@@ -60,20 +66,46 @@ public class SpigotTransport implements Listener {
         this.transportService = TransportService.<String>builder()
                 .packetService(new DefaultPacketService<>())
                 .secret(secret)
-                .encryptionEnabled(true)
+                .encryptionEnabled(false)
                 .options(
                         TransportOptions.builder()
                                 .batchingEnabled(true)
                                 .maxBatchSize(100)
-                                .batchingIntervalMs(20)
+                                .batchingIntervalMs(5)
+                                .maxPayloadSize(20000)
                                 .build()
                 )
                 .networkSender((channel, bytes) ->
                 {
                     Bukkit.getScheduler().runTask(plugin, () -> {
-                        Player carrier = Bukkit.getOnlinePlayers().stream().findAny().orElse(null);
-                        if (carrier == null) return;
-                        carrier.sendPluginMessage(plugin, channel, bytes);
+
+                        if(availableCarriers.isEmpty())
+                        {
+                            System.out.println("NO CARRIER FOUND!");
+                            return;
+                        }
+
+                        Player carrier = Bukkit.getPlayer(availableCarriers.stream().findAny().get());
+
+                        if (carrier == null) {
+                            System.out.println("NO CARRIER FOUND!AAA");
+                            return;
+                        }
+
+
+                        int length = bytes.readableBytes();
+
+                        byte[] data;
+                        if (length <= 65536) {
+                            data = reusableBuffer.get();
+                        } else {
+                            data = new byte[length];
+                        }
+
+                        bytes.readBytes(data, 0, length);
+                        carrier.sendPluginMessage(plugin, channel, data);
+
+
                     });
                 })
                 .build();
@@ -86,7 +118,11 @@ public class SpigotTransport implements Listener {
 
                     if (ch.equalsIgnoreCase(pluginMessagingChannel)) {
                         transportService.ready(ch);
-                        transportService.onReceiveRaw(ch, msg);
+
+                        ByteBuf nettyBuf = Unpooled.directBuffer(msg.length);
+                        nettyBuf.writeBytes(msg);
+                        transportService.onReceiveRaw(ch, nettyBuf);
+
                     }
 
                 });
@@ -156,20 +192,45 @@ public class SpigotTransport implements Listener {
 
     @EventHandler
     public void onChannelRegister(PlayerRegisterChannelEvent event) {
-        if (event.getChannel().equals(pluginMessagingChannel)) {
+        if (event.getChannel().equalsIgnoreCase(pluginMessagingChannel)) {
             String channel = event.getChannel();
+
+            System.out.println("CHANNEL REGISTERED!" + pluginMessagingChannel);
+
 
 
             transportService.ready(channel);
 
+            availableCarriers.add(event.getPlayer().getUniqueId());
+
             if (!hasConfiguration)
-                transportService.send(channel, Packets.CONFIG_REQUEST, NetworkPackets.ConfigRequestPacket.newBuilder()
+                System.out.println(transportService.send(channel, Packets.CONFIG_REQUEST, NetworkPackets.ConfigRequestPacket.newBuilder()
                         .setTimestamp(System.currentTimeMillis())
-                        .build());
+                        .build()));
 
 
         }
     }
+    @EventHandler
+    public void onChannelUnregister(PlayerUnregisterChannelEvent event) {
+        if (event.getChannel().equals(pluginMessagingChannel)) {
+
+            String channel = event.getChannel();
+
+            availableCarriers.remove(event.getPlayer().getUniqueId());
+
+            if(availableCarriers.isEmpty())
+            {
+                transportService.disconnect(channel);
+                transportService.connect(channel);
+            }
+
+
+
+
+        }
+    }
+
 
 
     public record DeduplicationKey(String text, String lang, String module) {

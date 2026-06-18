@@ -73,7 +73,7 @@ public class SpigotTranslator extends JavaPlugin {
         //   this.spigotBridge = new SpigotBridge(this);
         //  spigotBridge.setSecretKey(configurationFile.getLicenseKey());
 
-        loadConfigFromDisk();
+
 
         this.translatorService = new TranslatorService() {
             @Override
@@ -84,7 +84,9 @@ public class SpigotTranslator extends JavaPlugin {
 
 
         this.spigotTransport = new SpigotTransport(this, "ABC", pluginMessagingChannel);
+        Bukkit.getPluginManager().registerEvents(spigotTransport, this);
 
+        loadConfigFromDisk();
 
         this.textComponentUtil = new TextComponentUtil(translatorService);
 
@@ -134,5 +136,6 @@ public class SpigotTranslator extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        spigotTransport.getTransportService().close();
     }
 }

@@ -18,9 +18,14 @@ public class ConfigRequestConsumer implements PacketReceiveConsumer<RegisteredSe
 
     @Override
     public void accept(PacketContext<RegisteredServer> context, NetworkPackets.ConfigRequestPacket configRequestPacket) {
-        if (translatorService.getTranslationConfiguration() == null) return;
+        System.out.println("CONFIG REGUEST");
+        if (translatorService.getTranslationConfiguration() == null) {
+            System.out.println("CONFIG REGUEST ABORTED");
+            return;
+        };
 
-        context.reply(Packets.SERVER_CONFIG, translatorService.convertConfigToProtobuf(translatorService.getTranslationConfiguration()));
+        System.out.println("REPLYING WITH: " + Packets.SERVER_CONFIG.id() + " " + context.getConnection().getServerInfo().getName());
+        System.out.println("RESULT:: "+context.reply(Packets.SERVER_CONFIG, translatorService.convertConfigToProtobuf(translatorService.getTranslationConfiguration())));
     }
 
 
