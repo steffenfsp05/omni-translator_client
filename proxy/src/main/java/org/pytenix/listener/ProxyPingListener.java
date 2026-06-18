@@ -6,6 +6,7 @@ import com.velocitypowered.api.proxy.server.ServerPing;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.pytenix.TranslatorService;
 import org.pytenix.VelocityTranslator;
 import org.pytenix.backend.GeoService;
 import org.pytenix.entity.ServerConfiguration;
@@ -74,15 +75,18 @@ public class ProxyPingListener {
 
     @Subscribe
     public EventTask onPing(com.velocitypowered.api.event.proxy.ProxyPingEvent event) {
+
+        ServerConfiguration configuration = translator.getTranslatorService().getTranslationConfiguration();
+
         System.out.println("ONPING!");
-        if (translator.getServerConfiguration() == null) {
+        if (configuration == null) {
             return null;
         }
 
         //COLORCODE FIXXEN
         //TODO
 
-        if (!translator.getServerConfiguration().getModules().getOrDefault(ServerConfiguration.Module.MOTD.getModuleName(), true)) {
+        if (!configuration.getModules().getOrDefault(ServerConfiguration.Module.MOTD.getModuleName(), true)) {
             return null;
         }
 

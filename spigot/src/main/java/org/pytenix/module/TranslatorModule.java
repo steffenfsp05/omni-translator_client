@@ -32,7 +32,7 @@ public abstract class TranslatorModule {
 
 
     public boolean isActive() {
-        return spigotTranslator.getSpigotBridge().getServerConfiguration().getModules().getOrDefault(moduleName, true);
+        return getServerConfiguration().getModules().getOrDefault(moduleName, true);
     }
 
     public boolean checkIfNeed(UUID playerUUID) {
@@ -44,7 +44,7 @@ public abstract class TranslatorModule {
     }
 
     public ServerConfiguration getServerConfiguration() {
-        return spigotTranslator.getSpigotBridge().getServerConfiguration();
+        return spigotTranslator.getTranslatorService().getTranslationConfiguration();
     }
 
 
