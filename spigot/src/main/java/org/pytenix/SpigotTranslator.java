@@ -7,7 +7,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.pytenix.brigde.SpigotBridge;
+import org.pytenix.bridge.SpigotTransport;
 import org.pytenix.config.ConfigService;
 import org.pytenix.config.ConfigurationFile;
 import org.pytenix.entity.ServerConfiguration;
@@ -20,59 +20,50 @@ import org.pytenix.util.TextComponentUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 
 @Getter
 public class SpigotTranslator extends JavaPlugin {
 
-    private String serverName;
-
-    private TranslatorService translatorService;
-
-    private SpigotBridge spigotBridge;
-    private ModuleService moduleService;
-
-
-    private TaskScheduler taskScheduler;
-
-    private File configFile;
-
-    private ObjectMapper mapper = new ObjectMapper();
-
+    public String pluginMessagingChannel;
     @Getter
     TextComponentUtil textComponentUtil;
-
     CaffeineCache caffeineCache;
-
     LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.builder()
             .character('§')
             .extractUrls()
             .hexColors()
             .flattener(ComponentFlattener.basic())
             .build();
-
-
     ConfigService configService;
     ConfigurationFile configurationFile;
+    private String serverName;
+    private TranslatorService translatorService;
+    private ModuleService moduleService;
+    private TaskScheduler taskScheduler;
+    private File configFile;
+    private SpigotTransport spigotTransport;
+    private ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public void onEnable() {
+
+        this.pluginMessagingChannel = "translator:main";
 
         this.caffeineCache = new CaffeineCache();
 
         this.configService = new ConfigService();
 
+        this.spigotTransport = new SpigotTransport(this, "ABC", pluginMessagingChannel);
 
-        if(!configService.exists("config.json")) {
-            configService.saveConfig("config.json",new ConfigurationFile("DEIN-LIZENZ-SCHLÜSSEL"));
+
+        if (!configService.exists("config.json")) {
+            configService.saveConfig("config.json", new ConfigurationFile("DEIN-LIZENZ-SCHLÜSSEL"));
             System.out.println("[AITranslator] Please check in config.json for the license key!");
         }
-        this.configurationFile = configService.loadConfig("config.json",ConfigurationFile.class);
-
-
-
+        this.configurationFile = configService.loadConfig("config.json", ConfigurationFile.class);
 
 
         this.serverName = this.getServer().getName();
@@ -80,27 +71,23 @@ public class SpigotTranslator extends JavaPlugin {
         this.configFile = new File(getDataFolder(), "proxy_sync_config.json");
 
 
-
-
-
-        this.spigotBridge = new SpigotBridge(this);
-        spigotBridge.setSecretKey(configurationFile.getLicenseKey());
+        //   this.spigotBridge = new SpigotBridge(this);
+        //  spigotBridge.setSecretKey(configurationFile.getLicenseKey());
 
         loadConfigFromDisk();
 
-        this.translatorService = new TranslatorService(spigotBridge) {
+        this.translatorService = new TranslatorService() {
             @Override
             protected CompletableFuture<String> process(UUID id, String text, String targetLang, String module) {
-                return spigotBridge.translate(id,text,targetLang,module);
+                return getSpigotTransport().translate(id, text, targetLang, module);
             }
         };
 
         this.textComponentUtil = new TextComponentUtil(translatorService);
 
-        spigotBridge.initPlayernames();
 
-        Bukkit.getPluginManager().registerEvents(new JoinQuitListener(this),this);
-        Bukkit.getPluginManager().registerEvents(new LocaleChangeEvent(this),this);
+        Bukkit.getPluginManager().registerEvents(new JoinQuitListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new LocaleChangeEvent(this), this);
 
         moduleService = new ModuleService(this);
 
@@ -119,26 +106,27 @@ public class SpigotTranslator extends JavaPlugin {
     }
 
 
-
     private void loadConfigFromDisk() {
         if (!configFile.exists()) {
 
             getLogger().info("Keine lokale Config gefunden. Nutze Default bis Proxy sendet.");
-            spigotBridge.setServerConfiguration(ServerConfiguration.createDefault("DEIN-LIZENZ-SCHLÜSSEL"));
+            resetConfiguration();
             return;
         }
 
         try {
-            spigotBridge.setServerConfiguration(mapper.readValue(configFile, ServerConfiguration.class));
+            translatorService.setTranslationConfiguration(mapper.readValue(configFile, ServerConfiguration.class));
         } catch (IOException e) {
             getLogger().severe("Konnte lokale Config nicht laden: " + e.getMessage());
-            spigotBridge.setServerConfiguration(ServerConfiguration.createDefault("DEIN-LIZENZ-SCHLÜSSEL"));
+            resetConfiguration();
         }
     }
 
+    private void resetConfiguration() {
+        translatorService.setTranslationConfiguration(ServerConfiguration.createDefault("DEIN-LIZENZ-SCHLÜSSEL"));
 
 
-
+    }
 
 
     @Override

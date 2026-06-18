@@ -1,7 +1,5 @@
 package org.pytenix.module.modules.gui.listener;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
@@ -16,7 +14,6 @@ import org.pytenix.module.modules.gui.InventoryModule;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class PacketListener implements com.github.retrooper.packetevents.event.PacketListener {
@@ -26,8 +23,7 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
     private final Set<String> activeTranslations = ConcurrentHashMap.newKeySet();
     private final Map<UUID, Integer> latestStateIdMap = new ConcurrentHashMap<>();
 
-    public PacketListener(InventoryModule inventoryModule)
-    {
+    public PacketListener(InventoryModule inventoryModule) {
         this.inventoryModule = inventoryModule;
     }
 
@@ -37,25 +33,23 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
 
         if (event.isCancelled()) return;
 
-        if(!inventoryModule.isActive())
+        if (!inventoryModule.isActive())
             return;
 
         if (event.getPacketType() == PacketType.Play.Server.WINDOW_ITEMS) {
-            if(!inventoryModule.isActive() || !inventoryModule.checkIfNeed(event.getUser().getUUID()))
+            if (!inventoryModule.isActive() || !inventoryModule.checkIfNeed(event.getUser().getUUID()))
                 return;
 
             handleWindowItems(event);
-        }
-        else if (event.getPacketType() == PacketType.Play.Server.SET_SLOT) {
-            if(!inventoryModule.isActive()|| !inventoryModule.checkIfNeed(event.getUser().getUUID()))
+        } else if (event.getPacketType() == PacketType.Play.Server.SET_SLOT) {
+            if (!inventoryModule.isActive() || !inventoryModule.checkIfNeed(event.getUser().getUUID()))
                 return;
 
             handleSetSlot(event);
         }
     }
 
-    public void handleWindowItems(PacketSendEvent event)
-    {
+    public void handleWindowItems(PacketSendEvent event) {
         WrapperPlayServerWindowItems wrapper = new WrapperPlayServerWindowItems(event);
         latestStateIdMap.put(event.getUser().getUUID(), wrapper.getStateId());
 
@@ -81,7 +75,6 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
                 return;
 
 
-
             try {
 
 
@@ -94,13 +87,11 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
                         .collect(Collectors.toList());
 
 
-
                 ItemStack carriedItem = wrapper.getCarriedItem()
                         .map(SpigotConversionUtil::toBukkitItemStack)
                         .orElse(null);
 
                 String locale = PlayerLocaleService.getPlayerLocale(player.getUniqueId());
-
 
 
                 CompletableFuture.runAsync(() -> {
@@ -153,10 +144,9 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
             Integer lastId = latestStateIdMap.get(player.getUniqueId());
             if (lastId != null && stateId < lastId)
 
-                if(player.getOpenInventory() == null || player.getOpenInventory().getTopInventory() == null ||
+                if (player.getOpenInventory() == null || player.getOpenInventory().getTopInventory() == null ||
                         !player.getOpenInventory().getTopInventory().getItem(slot).isSimilar(item))
                     return;
-
 
 
             WrapperPlayServerSetSlot updatePacket = new WrapperPlayServerSetSlot(
@@ -194,6 +184,7 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
 
         PacketEvents.getAPI().getPlayerManager().sendPacketSilently(player, updatePacket);
     }
+
     private void translateAndSendUpdate(Player player, int windowId, int stateId, List<ItemStack> items, ItemStack carriedItem, String locale) {
         int topInventorySize = items.size() - 36;
 
@@ -226,11 +217,8 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
             if (!player.isOnline()) return;
 
 
-
             ItemStack translatedCarried = translatedBatch.get(translatedBatch.size() - 1);
             List<ItemStack> translatedItems = new ArrayList<>();
-
-
 
 
             for (int i = 0; i < topInventorySize; i++) {

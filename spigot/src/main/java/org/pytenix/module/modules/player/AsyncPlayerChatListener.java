@@ -3,8 +3,6 @@ package org.pytenix.module.modules.player;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,9 +12,11 @@ import org.pytenix.PlayerLocaleService;
 import org.pytenix.SpigotTranslator;
 import org.pytenix.util.TaskScheduler;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class AsyncPlayerChatListener implements Listener {
 
@@ -87,7 +87,6 @@ public class AsyncPlayerChatListener implements Listener {
                     });
         });
     }
-
 
 
     private Component replaceContent(Component base, String original, Component translated) {

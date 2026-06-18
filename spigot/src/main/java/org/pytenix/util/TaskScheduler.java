@@ -51,6 +51,7 @@ public class TaskScheduler {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, task);
         }
     }
+
     public void runAsyncLater(Runnable task, int ticks) {
         if (isFolia) {
 

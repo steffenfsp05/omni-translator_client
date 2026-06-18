@@ -13,14 +13,12 @@ public class LocaleChangeEvent implements Listener {
 
     public SpigotTranslator translator;
 
-    public LocaleChangeEvent(SpigotTranslator translator)
-    {
+    public LocaleChangeEvent(SpigotTranslator translator) {
         this.translator = translator;
     }
 
     @EventHandler
-    public void onLocaleChange(PlayerLocaleChangeEvent event)
-    {
+    public void onLocaleChange(PlayerLocaleChangeEvent event) {
         Player player = event.getPlayer();
 
         final Location originalLocation = player.getLocation().clone();

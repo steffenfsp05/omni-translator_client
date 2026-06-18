@@ -9,36 +9,30 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-@Setter @Getter @AllArgsConstructor
+@Setter
+@Getter
+@AllArgsConstructor
 public class ServerConfiguration {
 
+    String licenseKey;
+    HashMap<String, Boolean> modules;
+    String defaultLanguage;
+    Set<String> blacklistedWords;
     private String type = "CONFIG_UPDATE";
 
 
-
-    String licenseKey;
-    HashMap<String,Boolean> modules;
-
-    String defaultLanguage;
-
-    Set<String> blacklistedWords;
-
-
-    public ServerConfiguration()
-    {
+    public ServerConfiguration() {
 
     }
 
 
-
-    public static ServerConfiguration createDefault(String licenseKey)
-    {
+    public static ServerConfiguration createDefault(String licenseKey) {
         ServerConfiguration serverConfiguration = new ServerConfiguration();
 
 
-        HashMap<String,Boolean> hash = new HashMap<>();
+        HashMap<String, Boolean> hash = new HashMap<>();
         for (Module value : Module.values()) {
-            hash.put(value.getModuleName(),true);
+            hash.put(value.getModuleName(), true);
         }
 
         serverConfiguration.setModules(hash);
@@ -50,9 +44,10 @@ public class ServerConfiguration {
     }
 
 
-    @Getter @AllArgsConstructor @NoArgsConstructor
-    public enum Module
-    {
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public enum Module {
         LIVE_CHAT("live_chat"),
         GUI("gui"),
         HOLOGRAM("hologram"),
@@ -64,8 +59,7 @@ public class ServerConfiguration {
         String moduleName;
 
 
-        public static Module getModule(String name)
-        {
+        public static Module getModule(String name) {
             return valueOf(name.toUpperCase());
         }
 

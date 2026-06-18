@@ -57,8 +57,7 @@ public class ConfigService {
     }
 
 
-    public boolean exists(String fileName)
-    {
+    public boolean exists(String fileName) {
         return new File("plugins/AITranslator/" + fileName).exists();
     }
 

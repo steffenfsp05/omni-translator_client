@@ -1,0 +1,64 @@
+package org.pytenix.pluginmessage.consumer;
+
+import com.velocitypowered.api.proxy.server.RegisteredServer;
+import org.pytenix.VelocityTranslator;
+import org.pytenix.packets.Packets;
+import org.pytenix.proto.generated.NetworkPackets;
+import org.pytenix.util.UuidUtil;
+import org.transport.service.PacketContext;
+import org.transport.service.PacketReceiveConsumer;
+
+import java.util.UUID;
+import java.util.concurrent.Executor;
+
+public class TranslationRequestConsumer implements PacketReceiveConsumer<RegisteredServer, NetworkPackets.TranslationRequest> {
+
+    final VelocityTranslator velocityTranslator;
+    final Executor executor;
+
+    public TranslationRequestConsumer(VelocityTranslator velocityTranslator, Executor executor) {
+        this.velocityTranslator = velocityTranslator;
+        this.executor = executor;
+    }
+
+
+    @Override
+    public void accept(PacketContext<RegisteredServer> context, NetworkPackets.TranslationRequest translationRequest) {
+
+
+        UUID id = UuidUtil.fromByteString(translationRequest.getRequestId());
+        String text = translationRequest.getText();
+        String lang = translationRequest.getTargetLang();
+
+
+        String cached = velocityTranslator.getCaffeineCache().get(text, lang);
+
+        if (cached != null) {
+            context.reply(Packets.TRANSLATION_RESULT,
+                    NetworkPackets.TranslationResult.newBuilder()
+                            .setRequestId(translationRequest.getRequestId())
+                            .setResult(cached)
+                            .build());
+        } else {
+            velocityTranslator.getRestfulService()
+                    .sendTranslationRequest(id, text, lang, translationRequest.getModule())
+                    .thenAcceptAsync(translatedText -> {
+                        String finalString = (isSuccessfull(translatedText) && !translatedText.equals(text)) ? translatedText : text;
+
+                        context.reply(Packets.TRANSLATION_RESULT,
+                                NetworkPackets.TranslationResult.newBuilder()
+                                        .setRequestId(translationRequest.getRequestId())
+                                        .setResult(finalString)
+                                        .build());
+                        velocityTranslator.getCaffeineCache().set(text, lang, finalString);
+
+                    }, executor);
+        }
+
+
+    }
+
+    public boolean isSuccessfull(String string) {
+        return string != null && !string.equalsIgnoreCase("TIMEOUT") && !string.startsWith("ERROR");
+    }
+}

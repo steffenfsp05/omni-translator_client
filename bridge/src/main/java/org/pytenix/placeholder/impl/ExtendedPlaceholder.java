@@ -4,16 +4,13 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.pytenix.placeholder.BasePlaceholder;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ExtendedPlaceholder implements BasePlaceholder {
-
 
 
     Cache<UUID, Map<Integer, String>> cachedValues = CacheBuilder.newBuilder()
@@ -23,8 +20,7 @@ public class ExtendedPlaceholder implements BasePlaceholder {
     String placeHolderKey;
     Supplier<Pattern> patternSupplier;
 
-    public ExtendedPlaceholder(String placeholderKey, Supplier<Pattern> patternSupplier)
-    {
+    public ExtendedPlaceholder(String placeholderKey, Supplier<Pattern> patternSupplier) {
         this.placeHolderKey = placeholderKey;
         this.patternSupplier = patternSupplier;
     }

@@ -2,7 +2,6 @@ package org.pytenix;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.Getter;
@@ -15,7 +14,6 @@ import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.proto.generated.NetworkPackets.*;
 import org.pytenix.util.UuidUtil;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -26,42 +24,21 @@ import java.util.concurrent.TimeUnit;
 public abstract class AdvancedTranslationBridge {
 
 
-
-
-    private final PlaceholderService placeholderService = new PlaceholderService(this);
-
-    private final GradientService gradientService = new GradientService();
-
-    @Setter
-    protected String secretKey;
-
-
-
-
-    @Setter
-    private org.pytenix.entity.ServerConfiguration serverConfiguration;
-
+    private static final int MAGIC_HEADER = 0x50595458;
     public final Map<UUID, List<CompletableFuture<String>>> pendingRequests = new ConcurrentHashMap<>();
-
-    protected record DeduplicationKey(String text, String lang, String module) {}
-
+    private final PlaceholderService placeholderService = new PlaceholderService(null);
+    private final GradientService gradientService = new GradientService();
     private final Map<DeduplicationKey, UUID> deduplicationQueue = new ConcurrentHashMap<>();
-
     private final Cache<String, Map<Integer, byte[]>> chunkAssembler = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .build();
-
-
-
-
     private final Cache<UUID, List<UUID>> cachedReferences = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .build();
-
-
-    private static final int MAGIC_HEADER = 0x50595458;
-
-
+    @Setter
+    protected String secretKey;
+    @Setter
+    private org.pytenix.entity.ServerConfiguration serverConfiguration;
 
     protected abstract void initPlayernames();
 
@@ -158,7 +135,6 @@ public abstract class AdvancedTranslationBridge {
         sendRequestBatch(batchBuilder.build(), null);
     }
 
-
     protected void sendRequestBatch(TranslationBatchRequest batch, String targetServer) {
         PacketWrapper wrapper = PacketWrapper.newBuilder().setBatchRequest(batch).build();
         byte[] wrapperBytes = wrapper.toByteArray();
@@ -203,8 +179,6 @@ public abstract class AdvancedTranslationBridge {
         }
     }
 
-
-
     public void onReceiveRaw(byte[] data, String originServer) {
         try {
             byte[] cleanPayload = secureUnwrap(data);
@@ -217,7 +191,6 @@ public abstract class AdvancedTranslationBridge {
             e.printStackTrace();
         }
     }
-
 
     private void routeWrapper(PacketWrapper wrapper, String originServer) {
         if (wrapper.hasBatchResult()) {
@@ -303,12 +276,9 @@ public abstract class AdvancedTranslationBridge {
 
     protected abstract void handleConfigRequest(String originServer);
 
-
-
     protected abstract void onConfigUpdate(org.pytenix.entity.ServerConfiguration configuration);
 
-
-    public void handleConfigUpdate(NetworkPackets.ServerConfiguration configPacket){
+    public void handleConfigUpdate(NetworkPackets.ServerConfiguration configPacket) {
         org.pytenix.entity.ServerConfiguration update = new org.pytenix.entity.ServerConfiguration();
 
         update.setModules(new HashMap<>(configPacket.getModulesMap()));
@@ -325,10 +295,10 @@ public abstract class AdvancedTranslationBridge {
     protected abstract void dispatchRaw(byte[] data, String originServer);
 
     protected abstract void handleFullResultPackage(TranslationBatchResult batch);
+
     protected abstract void handleFullRequestPackage(TranslationBatchRequest batch);
 
-    public String handlePlaceholders(UUID uuid, String result)
-    {
+    public String handlePlaceholders(UUID uuid, String result) {
 
         List<UUID> lineIds = cachedReferences.getIfPresent(uuid);
 
@@ -368,6 +338,9 @@ public abstract class AdvancedTranslationBridge {
 
 
         return String.join("\n", finalLines);
+    }
+
+    protected record DeduplicationKey(String text, String lang, String module) {
     }
 }
 

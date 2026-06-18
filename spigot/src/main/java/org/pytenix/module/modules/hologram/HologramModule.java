@@ -9,9 +9,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.pytenix.SpigotTranslator;
 import org.pytenix.module.TranslatorModule;
-import org.pytenix.module.modules.player.ChatPacketListener;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Getter
@@ -22,17 +20,14 @@ public class HologramModule extends TranslatorModule {
             .build();
 
 
-
-
     public HologramModule(SpigotTranslator spigotTranslator) {
         super(spigotTranslator, "hologram");
 
-        Bukkit.getPluginManager().registerEvents(new PlayerQuitListener(this),getSpigotTranslator());
+        Bukkit.getPluginManager().registerEvents(new PlayerQuitListener(this), getSpigotTranslator());
 
         PacketEvents.getAPI().getEventManager().registerListener(new EntityPacketListener(this),
                 PacketListenerPriority.HIGHEST);
     }
-
 
 
 }

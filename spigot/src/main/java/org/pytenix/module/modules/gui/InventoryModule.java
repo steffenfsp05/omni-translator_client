@@ -1,14 +1,10 @@
 package org.pytenix.module.modules.gui;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pytenix.SpigotTranslator;
@@ -16,31 +12,26 @@ import org.pytenix.module.TranslatorModule;
 import org.pytenix.module.modules.gui.listener.PacketListener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class InventoryModule extends TranslatorModule {
 
 
-    LegacyComponentSerializer legacyComponentSerializer;
     private static final Pattern COLOR_PATTERN = Pattern.compile("^§[0-9a-fk-or]+$");
-
+    LegacyComponentSerializer legacyComponentSerializer;
 
 
     public InventoryModule(SpigotTranslator spigotTranslator) {
-        super(spigotTranslator,"gui");
+        super(spigotTranslator, "gui");
 
         this.legacyComponentSerializer = this.getSpigotTranslator().getLegacyComponentSerializer();
 
         PacketEvents.getAPI().getEventManager().registerListener(new PacketListener(this),
                 PacketListenerPriority.NORMAL);
     }
-
 
 
     public CompletableFuture<ItemStack> translateItem(ItemStack item, String targetLanguage) {
@@ -105,8 +96,6 @@ public class InventoryModule extends TranslatorModule {
         //  allFutures.add(future);
 
 
-
-
         return CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0]))
                 .thenApply(v -> {
                     if (meta.hasDisplayName()) {
@@ -134,6 +123,7 @@ public class InventoryModule extends TranslatorModule {
                     return clonedItem;
                 });
     }
+
     public CompletableFuture<List<ItemStack>> translateInventoryBatch(List<ItemStack> items, String targetLanguage) {
         if (items == null || items.isEmpty()) {
             return CompletableFuture.completedFuture(items);
@@ -141,7 +131,7 @@ public class InventoryModule extends TranslatorModule {
 
 
         List<CompletableFuture<ItemStack>> itemFutures = items.stream()
-                .map(item -> translateItem( item, targetLanguage))
+                .map(item -> translateItem(item, targetLanguage))
                 .toList();
 
 

@@ -3,7 +3,6 @@ package org.pytenix.util;
 import com.github.benmanes.caffeine.cache.AsyncCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -17,32 +16,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextComponentUtil {
+    private static final Pattern SANITIZE_PATTERN = Pattern.compile("§(?![0-9a-fA-Fk-oK-OrRxX#])");
+    private static final Pattern PATTERN = Pattern.compile("(?s)<([AH])(\\d+)>((?:(?!<[AH]\\d+>).)*?)</\\1\\2>");
     private final TranslatorService translatorService;
     private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.builder()
             .character('§')
             .hexColors()
             .useUnusualXRepeatedCharacterHexFormat()
             .build();
-
-    private static final Pattern SANITIZE_PATTERN = Pattern.compile("§(?![0-9a-fA-Fk-oK-OrRxX#])");
-    private static final Pattern PATTERN = Pattern.compile("(?s)<([AH])(\\d+)>((?:(?!<[AH]\\d+>).)*?)</\\1\\2>");
-
     private final AsyncCache<TranslationKey, Component> translationCache = Caffeine.newBuilder()
             .maximumSize(10_000)
             .expireAfterAccess(30, TimeUnit.MINUTES)
             .buildAsync();
 
-    private record TranslationKey(Component component, String lang, String module) {}
-
     public TextComponentUtil(TranslatorService translatorService) {
         this.translatorService = translatorService;
-    }
-
-    private static class TranslationContext {
-        int clickIndex = 0;
-        int hoverIndex = 0;
-        final Map<Integer, ClickEvent> clicks = new HashMap<>();
-        final Map<Integer, Component> hovers = new HashMap<>();
     }
 
     public CompletableFuture<Component> translateComplexMessage(Component originalComponent, String lang, String module) {
@@ -170,5 +158,15 @@ public class TextComponentUtil {
         }
 
         return modified;
+    }
+
+    private record TranslationKey(Component component, String lang, String module) {
+    }
+
+    private static class TranslationContext {
+        final Map<Integer, ClickEvent> clicks = new HashMap<>();
+        final Map<Integer, Component> hovers = new HashMap<>();
+        int clickIndex = 0;
+        int hoverIndex = 0;
     }
 }

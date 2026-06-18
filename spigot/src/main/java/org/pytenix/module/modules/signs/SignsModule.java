@@ -4,7 +4,6 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import org.pytenix.SpigotTranslator;
 import org.pytenix.module.TranslatorModule;
-import org.pytenix.module.modules.gui.listener.PacketListener;
 
 public class SignsModule extends TranslatorModule {
 
@@ -20,7 +19,6 @@ public class SignsModule extends TranslatorModule {
                 PacketListenerPriority.NORMAL);
 
     }
-
 
 
 }

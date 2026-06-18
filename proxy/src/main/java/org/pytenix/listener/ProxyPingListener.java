@@ -6,9 +6,9 @@ import com.velocitypowered.api.proxy.server.ServerPing;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.VelocityTranslator;
-import org.pytenix.service.GeoService;
+import org.pytenix.backend.GeoService;
+import org.pytenix.entity.ServerConfiguration;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -35,60 +35,6 @@ public class ProxyPingListener {
 
 
     }
-
-
-    @Subscribe
-    public EventTask onPing(com.velocitypowered.api.event.proxy.ProxyPingEvent event) {
-        System.out.println("ONPING!");
-        if(translator.getVelocityBridge().getServerConfiguration() == null)
-        {
-            return null;
-        }
-
-        //COLORCODE FIXXEN
-        //TODO
-
-        if (!translator.getVelocityBridge().getServerConfiguration().getModules().getOrDefault(ServerConfiguration.Module.MOTD.getModuleName(), true)) {
-            return null;
-        }
-
-        String ipAddress = event.getConnection().getRemoteAddress().getAddress().getHostAddress();
-
-        final UUID uuid = UUID.randomUUID();
-
-
-        String finalIpAddress = getTestIps().get(new Random().nextInt(getTestIps().size()));
-        return EventTask.async(() -> {
-
-            CompletableFuture<String> localeFuture = geoService.sendGeoRequest(
-                    uuid,
-                    finalIpAddress
-            );
-
-            try {
-                String locale = localeFuture.get(2, TimeUnit.SECONDS);
-
-                String originalMotdText = legacyComponentSerializer
-                        .serialize(event.getPing().getDescriptionComponent());
-
-
-                CompletableFuture<String> translationFuture = translator.getTranslatorService()
-                        .translate( originalMotdText, locale, ServerConfiguration.Module.MOTD.getModuleName());
-
-                String translatedMotd = translationFuture.get(2, TimeUnit.SECONDS);
-
-                ServerPing ping = event.getPing();
-                ServerPing.Builder builder = ping.asBuilder();
-
-                builder.description(Component.text(translatedMotd));
-                event.setPing(builder.build());
-
-            } catch (Exception e) {
-                System.out.println("MOTD Translation failed: " + e.getMessage());
-            }
-        });
-    }
-
 
     public static List<String> getTestIps() {
         return new ArrayList<>(Arrays.asList(
@@ -124,5 +70,56 @@ public class ProxyPingListener {
                 "13.32.0.1", "23.227.38.1", "108.138.0.1", "143.204.0.1", "13.224.0.1",
                 "64.4.0.1", "157.55.0.1", "20.184.0.1", "40.74.0.1", "52.114.0.1"
         ));
+    }
+
+    @Subscribe
+    public EventTask onPing(com.velocitypowered.api.event.proxy.ProxyPingEvent event) {
+        System.out.println("ONPING!");
+        if (translator.getServerConfiguration() == null) {
+            return null;
+        }
+
+        //COLORCODE FIXXEN
+        //TODO
+
+        if (!translator.getServerConfiguration().getModules().getOrDefault(ServerConfiguration.Module.MOTD.getModuleName(), true)) {
+            return null;
+        }
+
+        String ipAddress = event.getConnection().getRemoteAddress().getAddress().getHostAddress();
+
+        final UUID uuid = UUID.randomUUID();
+
+
+        String finalIpAddress = getTestIps().get(new Random().nextInt(getTestIps().size()));
+        return EventTask.async(() -> {
+
+            CompletableFuture<String> localeFuture = geoService.sendGeoRequest(
+                    uuid,
+                    finalIpAddress
+            );
+
+            try {
+                String locale = localeFuture.get(2, TimeUnit.SECONDS);
+
+                String originalMotdText = legacyComponentSerializer
+                        .serialize(event.getPing().getDescriptionComponent());
+
+
+                CompletableFuture<String> translationFuture = translator.getTranslatorService()
+                        .translate(originalMotdText, locale, ServerConfiguration.Module.MOTD.getModuleName());
+
+                String translatedMotd = translationFuture.get(2, TimeUnit.SECONDS);
+
+                ServerPing ping = event.getPing();
+                ServerPing.Builder builder = ping.asBuilder();
+
+                builder.description(Component.text(translatedMotd));
+                event.setPing(builder.build());
+
+            } catch (Exception e) {
+                System.out.println("MOTD Translation failed: " + e.getMessage());
+            }
+        });
     }
 }

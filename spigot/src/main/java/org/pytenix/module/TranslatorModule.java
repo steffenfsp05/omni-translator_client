@@ -1,7 +1,6 @@
 package org.pytenix.module;
 
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.pytenix.PlayerLocaleService;
 import org.pytenix.SpigotTranslator;
 import org.pytenix.TranslatorService;
@@ -23,8 +22,7 @@ public abstract class TranslatorModule {
     @Getter
     final TranslatorService translatorService;
 
-    public TranslatorModule(SpigotTranslator spigotTranslator, String moduleName)
-    {
+    public TranslatorModule(SpigotTranslator spigotTranslator, String moduleName) {
 
         this.spigotTranslator = spigotTranslator;
         this.moduleName = moduleName;
@@ -33,35 +31,29 @@ public abstract class TranslatorModule {
     }
 
 
-
-
-    public boolean isActive()
-    {
-        return spigotTranslator.getSpigotBridge().getServerConfiguration().getModules().getOrDefault(moduleName,true);
+    public boolean isActive() {
+        return spigotTranslator.getSpigotBridge().getServerConfiguration().getModules().getOrDefault(moduleName, true);
     }
 
-    public boolean checkIfNeed(UUID playerUUID)
-    {
+    public boolean checkIfNeed(UUID playerUUID) {
 
-        if(getServerConfiguration() == null || getServerConfiguration().getDefaultLanguage() == null)
+        if (getServerConfiguration() == null || getServerConfiguration().getDefaultLanguage() == null)
             return true;
 
         return !PlayerLocaleService.getPlayerLocale(playerUUID).startsWith(getServerConfiguration().getDefaultLanguage());
     }
 
-    public ServerConfiguration getServerConfiguration()
-    {
+    public ServerConfiguration getServerConfiguration() {
         return spigotTranslator.getSpigotBridge().getServerConfiguration();
     }
 
 
-    public CompletableFuture<String> translate(String text, String locale)
-    {
+    public CompletableFuture<String> translate(String text, String locale) {
 
 
         String cached = spigotTranslator.getCaffeineCache().get(text, locale);
 
-        if(cached != null)
+        if (cached != null)
             return CompletableFuture.completedFuture(cached);
 
         return translatorService.translate(text, locale, this.moduleName).whenComplete((result, throwable) -> {
@@ -72,10 +64,6 @@ public abstract class TranslatorModule {
 
         });
     }
-
-
-
-
 
 
 }

@@ -3,7 +3,7 @@ package org.pytenix.placeholder;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
-import org.pytenix.AdvancedTranslationBridge;
+import org.pytenix.TranslatorService;
 import org.pytenix.placeholder.impl.ExtendedPlaceholder;
 import org.pytenix.placeholder.protect.PlayernameProtector;
 import org.pytenix.placeholder.protect.WordProtector;
@@ -17,47 +17,38 @@ import java.util.stream.Collectors;
 @Getter
 public class PlaceholderService {
 
-    final AdvancedTranslationBridge translationBridge;
-
-    public TreeMap<Integer, ExtendedPlaceholder> registeredPlaceholders;
-
-    private Pattern atomicPattern;
-    private List<ExtendedPlaceholder> indexedPlaceholders;
-
-
     //NOTE: KI GENERATED/IMPROVED
     public static final Pattern PRICE_PATTERN = Pattern.compile("\\d+(?:[.,]\\d+)*");
     public static final Pattern SYSTEM_PROTECTION_PATTERN = Pattern.compile("(?:\\{[a-zA-Z]\\d+\\})|(?:\\[#[A-Z]+-\\d+#\\])|(?:</?[HAG]\\d+>)");
-
-
+    public static final Pattern COLOR_PATTERN = Pattern.compile("(?i)§x(?:§[0-9a-f]){6}|§#[0-9a-f]{6}|§[0-9a-fk-or]");
+    final TranslatorService translatorService;
     final PlayernameProtector playernameProtector;
     final WordProtector wordProtector;
-
+    final PlaceholderNormalizer placeholderNormalizer;
+    public TreeMap<Integer, ExtendedPlaceholder> registeredPlaceholders;
     Cache<UUID, PlayernameProtector.ProtectionResult> cachedNames = CacheBuilder.newBuilder()
             .expireAfterWrite(30, TimeUnit.SECONDS).build();
 
     Cache<UUID, WordProtector.ProtectionResult> cachedWords = CacheBuilder.newBuilder()
             .expireAfterWrite(30, TimeUnit.SECONDS).build();
+    private Pattern atomicPattern;
+    private List<ExtendedPlaceholder> indexedPlaceholders;
 
-    final PlaceholderNormalizer placeholderNormalizer;
+    public PlaceholderService(TranslatorService translatorService) {
 
-    public static final Pattern COLOR_PATTERN = Pattern.compile("(?i)§x(?:§[0-9a-f]){6}|§#[0-9a-f]{6}|§[0-9a-fk-or]");
-    public PlaceholderService(AdvancedTranslationBridge translationBridge) {
 
+        this.translatorService = translatorService;
 
         this.placeholderNormalizer = new PlaceholderNormalizer();
         this.registeredPlaceholders = new TreeMap<>();
         this.wordProtector = new WordProtector();
 
 
-        this.translationBridge = translationBridge;
+        this.playernameProtector = new PlayernameProtector();
 
-
-        this.playernameProtector = new PlayernameProtector(translationBridge);
-
-        if(translationBridge.getServerConfiguration() != null)
-            updateProtectedWords(translationBridge.getServerConfiguration().getBlacklistedWords() != null ?
-                    translationBridge.getServerConfiguration().getBlacklistedWords() : new HashSet<>());
+        if (translatorService.getTranslationConfiguration() != null)
+            updateProtectedWords(translatorService.getTranslationConfiguration().getBlacklistedWords() != null ?
+                    translatorService.getTranslationConfiguration().getBlacklistedWords() : new HashSet<>());
 
 
         registerPlaceholder(0, new ExtendedPlaceholder("SKIP", () -> SYSTEM_PROTECTION_PATTERN));
@@ -100,7 +91,6 @@ public class PlaceholderService {
 
     public String toPlaceholders(UUID id, String text) {
         if (atomicPattern == null || text == null || text.isEmpty()) return text;
-
 
 
         PlayernameProtector.ProtectionResult result = playernameProtector.maskNames(text);
@@ -160,17 +150,16 @@ public class PlaceholderService {
         }
 
 
-
-        return placeholderNormalizer.normalizeText(id,text);
+        return placeholderNormalizer.normalizeText(id, text);
     }
 
     public String fromPlaceholders(UUID id, String text) {
         List<ExtendedPlaceholder> reverseList = new ArrayList<>(registeredPlaceholders.values());
         Collections.reverse(reverseList);
 
-        text = placeholderNormalizer.denormalizeText(id,text);
+        text = placeholderNormalizer.denormalizeText(id, text);
         for (ExtendedPlaceholder ph : reverseList) {
-            if(ph.placeholder().equals("SKIP")) continue;
+            if (ph.placeholder().equals("SKIP")) continue;
 
             Map<Integer, String> cache = ph.cachedValues().getIfPresent(id);
             if (cache == null || cache.isEmpty()) continue;
@@ -188,8 +177,7 @@ public class PlaceholderService {
             cachedNames.invalidate(id);
         }
 
-        if(cachedWords.getIfPresent(id) != null)
-        {
+        if (cachedWords.getIfPresent(id) != null) {
             text = wordProtector.restore(text, cachedWords.getIfPresent(id).replacements());
             cachedWords.invalidate(id);
         }

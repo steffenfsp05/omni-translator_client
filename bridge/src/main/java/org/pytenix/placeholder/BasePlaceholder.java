@@ -5,8 +5,8 @@ import java.util.regex.Pattern;
 public interface BasePlaceholder {
 
 
-  //  public String toPlaceholder(UUID id, String text);
-  //  public String fromPlaceholder(UUID id, String text);
+    //  public String toPlaceholder(UUID id, String text);
+    //  public String fromPlaceholder(UUID id, String text);
 
 
     public Pattern getPattern();

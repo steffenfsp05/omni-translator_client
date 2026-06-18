@@ -18,13 +18,7 @@ public class PlaceholderNormalizer {
     Cache<UUID, NormalizationResult> cachedNormalized = CacheBuilder.newBuilder()
             .expireAfterWrite(30, TimeUnit.SECONDS).build();
 
-
-    public record NormalizationResult(String cleanedText, Map<String, String> mappings) {}
-
-
-
-    public String normalizeText(UUID uuid, String text)
-    {
+    public String normalizeText(UUID uuid, String text) {
 
         NormalizationResult normalizationResult = normalize(text);
         cachedNormalized.put(uuid, normalizationResult);
@@ -33,14 +27,14 @@ public class PlaceholderNormalizer {
 
     }
 
-    public String denormalizeText(UUID uuid, String text)
-    {
-        if(cachedNormalized.getIfPresent(uuid) == null)
+    public String denormalizeText(UUID uuid, String text) {
+        if (cachedNormalized.getIfPresent(uuid) == null)
             return "";
 
-        return denormalize(text,cachedNormalized.getIfPresent(uuid).mappings);
+        return denormalize(text, cachedNormalized.getIfPresent(uuid).mappings);
 
     }
+
     private String denormalize(String normalizedText, Map<String, String> mappings) {
         if (normalizedText == null || mappings == null || mappings.isEmpty()) {
             return normalizedText;
@@ -98,6 +92,9 @@ public class PlaceholderNormalizer {
         matcher.appendTail(sb);
 
         return new NormalizationResult(sb.toString(), translationMap);
+    }
+
+    public record NormalizationResult(String cleanedText, Map<String, String> mappings) {
     }
 
 

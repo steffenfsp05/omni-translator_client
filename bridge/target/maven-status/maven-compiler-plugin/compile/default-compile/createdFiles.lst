@@ -15,6 +15,7 @@ org\pytenix\proto\generated\NetworkPackets$PacketWrapper$1.class
 org\pytenix\proto\generated\NetworkPackets$GeoBatchResult$Builder.class
 org\pytenix\proto\generated\NetworkPackets$TranslationResult$Builder.class
 org\pytenix\proto\generated\NetworkPackets$ConfigRequestPacketOrBuilder.class
+org\pytenix\event\register\ConfigUpdateEvent.class
 org\pytenix\proto\generated\NetworkPackets$TranslationBatchResult$Builder.class
 org\pytenix\proto\generated\NetworkPackets$GeoBatchRequest$1.class
 org\pytenix\proto\generated\NetworkPackets$TranslationRequest$1.class
@@ -48,6 +49,7 @@ org\pytenix\proto\generated\NetworkPackets$GeoBatchResultOrBuilder.class
 org\pytenix\proto\generated\NetworkPackets$GeoResultPacket$Builder.class
 org\pytenix\placeholder\GradientService$ExtractionResult.class
 org\pytenix\proto\generated\NetworkPackets$ServerConfiguration$Builder.class
+org\pytenix\packets\Packets.class
 org\pytenix\proto\generated\NetworkPackets$TranslationBatchResult$1.class
 org\pytenix\AdvancedTranslationBridge$DeduplicationKey.class
 org\pytenix\proto\generated\NetworkPackets$GeoBatchRequestOrBuilder.class
@@ -62,14 +64,18 @@ org\pytenix\config\ConfigService.class
 org\pytenix\util\TextComponentUtil$TranslationContext.class
 org\pytenix\util\TextComponentUtil$TranslationKey.class
 org\pytenix\entity\ServerConfiguration.class
+org\pytenix\placeholder\listener\ConfigUpdateListener.class
+org\pytenix\event\handler\RegisteredHandler.class
 org\pytenix\proto\generated\NetworkPackets$TranslationRequestOrBuilder.class
 org\pytenix\AdvancedTranslationBridge.class
 org\pytenix\proto\generated\NetworkPackets$TranslationResult.class
 org\pytenix\proto\generated\NetworkPackets$TranslationResult$1.class
 org\pytenix\proto\generated\NetworkPackets$ServerConfiguration.class
+org\pytenix\event\EventService.class
 org\pytenix\placeholder\GradientService.class
 org\pytenix\proto\generated\NetworkPackets$GeoResultPacketOrBuilder.class
 org\pytenix\placeholder\impl\ExtendedPlaceholder.class
+org\pytenix\event\annotation\OmniSubscribe.class
 org\pytenix\proto\generated\NetworkPackets$GeoBatchResult.class
 org\pytenix\proto\generated\NetworkPackets$GeoResultPacket.class
 org\pytenix\placeholder\GradientService$GradientData.class

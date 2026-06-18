@@ -9,7 +9,7 @@ public class CaffeineCache {
 
     private final Cache<String, String> translationCache = Caffeine.newBuilder()
             .maximumSize(10_000)
-            .expireAfterWrite(Duration.ofSeconds(3))
+            .expireAfterWrite(Duration.ofSeconds(5))
             .build();
 
 
@@ -20,7 +20,7 @@ public class CaffeineCache {
 
     public void set(String text, String lang, String translated) {
         String cacheKey = lang + ":" + text;
-        translationCache.put(cacheKey,translated);
+        translationCache.put(cacheKey, translated);
     }
 
 

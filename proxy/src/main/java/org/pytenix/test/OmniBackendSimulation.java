@@ -1,4 +1,5 @@
 package org.pytenix.test;
+
 /*
 import io.gatling.app.Gatling;
 import io.gatling.javaapi.core.*;
@@ -21,7 +22,7 @@ import static io.gatling.javaapi.http.HttpDsl.*;
 
  */
 public class OmniBackendSimulation /*extends Simulation
- */{
+ */ {
 
 /*
     public static void main(String[] args) {

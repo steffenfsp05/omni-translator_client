@@ -17,8 +17,7 @@ public class ModuleService {
 
     final List<TranslatorModule> modules;
 
-    public ModuleService(SpigotTranslator spigotTranslator)
-    {
+    public ModuleService(SpigotTranslator spigotTranslator) {
         this.spigotTranslator = spigotTranslator;
         this.modules = new ArrayList<>();
 
@@ -30,13 +29,9 @@ public class ModuleService {
     }
 
 
-
-
-    public void registerModule(TranslatorModule translatorModule)
-    {
+    public void registerModule(TranslatorModule translatorModule) {
         modules.add(translatorModule);
     }
-
 
 
 }

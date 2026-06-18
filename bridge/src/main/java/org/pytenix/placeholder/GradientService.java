@@ -25,6 +25,10 @@ public class GradientService {
     public Cache<UUID, Map<String, GradientData>> cachedGradients = CacheBuilder.newBuilder()
             .expireAfterWrite(30, TimeUnit.SECONDS).build();
 
+    private static String toModernHex(Color c) {
+        return String.format("§#%06x", c.getRGB() & 0xFFFFFF);
+    }
+
     public ExtractionResult stripAndAnalyze(String input) {
         if (input == null || input.isEmpty()) return new ExtractionResult(input, new HashMap<>());
 
@@ -155,15 +159,12 @@ public class GradientService {
         return new Color(Integer.parseInt(hexString.substring(2), 16));
     }
 
-    private static String toModernHex(Color c) {
-        return String.format("§#%06x", c.getRGB() & 0xFFFFFF);
-    }
-
     public record ExtractionResult(String cleanText, Map<String, GradientData> gradients) {
         public boolean hasGradients() {
             return !gradients.isEmpty();
         }
     }
 
-    public record GradientData(Color startColor, Color endColor, boolean bold, boolean italic) {}
+    public record GradientData(Color startColor, Color endColor, boolean bold, boolean italic) {
+    }
 }

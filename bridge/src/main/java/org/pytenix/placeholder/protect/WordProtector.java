@@ -73,5 +73,6 @@ public class WordProtector {
         return text;
     }
 
-    public record ProtectionResult(String maskedText, Map<String, String> replacements) {}
+    public record ProtectionResult(String maskedText, Map<String, String> replacements) {
+    }
 }

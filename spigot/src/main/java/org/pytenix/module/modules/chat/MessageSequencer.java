@@ -1,8 +1,5 @@
 package org.pytenix.module.modules.chat;
 
-import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSystemChatMessage;
-import com.google.gson.Gson;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -10,7 +7,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.pytenix.TranslatorService;
 import org.pytenix.util.TextComponentUtil;
 
 import java.util.Map;
@@ -26,6 +22,8 @@ public class MessageSequencer implements Listener {
     private final Map<UUID, Queue<QueuedMessage>> userQueues = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final TextComponentUtil textComponentUtil;
+    private final com.google.common.cache.Cache<UUID, com.google.common.cache.Cache<String, java.util.concurrent.atomic.AtomicInteger>> ignoredMessagesCache =
+            com.google.common.cache.CacheBuilder.newBuilder().expireAfterAccess(30, java.util.concurrent.TimeUnit.MINUTES).build();
 
     public MessageSequencer(PluginChatModule pluginChatModule) {
         this.textComponentUtil = pluginChatModule.getSpigotTranslator().getTextComponentUtil();
@@ -65,11 +63,6 @@ public class MessageSequencer implements Listener {
                 });
     }
 
-
-
-    private final com.google.common.cache.Cache<UUID, com.google.common.cache.Cache<String, java.util.concurrent.atomic.AtomicInteger>> ignoredMessagesCache =
-            com.google.common.cache.CacheBuilder.newBuilder().expireAfterAccess(30, java.util.concurrent.TimeUnit.MINUTES).build();
-
     public void ignoreNextMessage(UUID uuid, Component component) {
         try {
             String json = net.kyori.adventure.text.serializer.gson.GsonComponentSerializer.gson().serialize(component);
@@ -80,7 +73,8 @@ public class MessageSequencer implements Listener {
             java.util.concurrent.atomic.AtomicInteger count = playerCache.get(json, () -> new java.util.concurrent.atomic.AtomicInteger(0));
             count.incrementAndGet();
 
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     public boolean isIgnored(UUID uuid, Component component) {
@@ -100,7 +94,8 @@ public class MessageSequencer implements Listener {
                     return true;
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return false;
     }
@@ -136,7 +131,6 @@ public class MessageSequencer implements Listener {
             }
         }
     }
-
 
 
     private boolean sendPacket(UUID uuid, Component comp, boolean isOverlay) {

@@ -2,7 +2,10 @@ package org.pytenix.module.modules.signs;
 
 import com.github.retrooper.packetevents.event.PacketListener;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
-import com.github.retrooper.packetevents.protocol.nbt.*;
+import com.github.retrooper.packetevents.protocol.nbt.NBTCompound;
+import com.github.retrooper.packetevents.protocol.nbt.NBTList;
+import com.github.retrooper.packetevents.protocol.nbt.NBTString;
+import com.github.retrooper.packetevents.protocol.nbt.NBTType;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.player.User;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockEntityData;
@@ -11,13 +14,10 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.pytenix.PlayerLocaleService;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class SignViewListener implements PacketListener {
 
@@ -26,16 +26,14 @@ public class SignViewListener implements PacketListener {
 
     private final SignsModule signsModule;
 
-    public SignViewListener(SignsModule signsModule)
-    {
+    public SignViewListener(SignsModule signsModule) {
         this.signsModule = signsModule;
     }
 
     @Override
-    public void onPacketSend(PacketSendEvent event)
-    {
+    public void onPacketSend(PacketSendEvent event) {
 
-        if (event.getConnectionState() !=  com.github.retrooper.packetevents.protocol.ConnectionState.PLAY) return;
+        if (event.getConnectionState() != com.github.retrooper.packetevents.protocol.ConnectionState.PLAY) return;
 
        /*
         String name = event.getPacketType().getName().toLowerCase();
@@ -55,8 +53,8 @@ public class SignViewListener implements PacketListener {
         */
 
 
-       // if(!signsModule.isActive())   return;
-        if(event.getPacketType() != PacketType.Play.Server.BLOCK_ENTITY_DATA) return;
+        // if(!signsModule.isActive())   return;
+        if (event.getPacketType() != PacketType.Play.Server.BLOCK_ENTITY_DATA) return;
 
         WrapperPlayServerBlockEntityData packet = new WrapperPlayServerBlockEntityData(event);
 
@@ -64,17 +62,16 @@ public class SignViewListener implements PacketListener {
         if (type != 9 && type != 7) return;
 
 
-
         User user = event.getUser();
         Player player = org.bukkit.Bukkit.getPlayer(user.getUUID()); //SAFER
 
-        if(player == null) return;
+        if (player == null) return;
 
 
         event.setCancelled(true);
 
         NBTCompound nbtCompound = packet.getNBT();
-        if(nbtCompound == null) return;
+        if (nbtCompound == null) return;
 
         boolean isSign = nbtCompound.contains("front_text") || nbtCompound.contains("messages") || nbtCompound.contains("Text1");
         if (!isSign)
@@ -82,11 +79,11 @@ public class SignViewListener implements PacketListener {
 
         signsModule.getSpigotTranslator().getTaskScheduler().runAsync(() ->
         {
-            CompletableFuture<Void> front =  processSignSide(nbtCompound,"front_text",player);
-            CompletableFuture<Void> back =  processSignSide(nbtCompound,"back_text",player);
+            CompletableFuture<Void> front = processSignSide(nbtCompound, "front_text", player);
+            CompletableFuture<Void> back = processSignSide(nbtCompound, "back_text", player);
 
 
-            CompletableFuture.allOf(front,back).join();
+            CompletableFuture.allOf(front, back).join();
 
 
             WrapperPlayServerBlockEntityData newPacket = new WrapperPlayServerBlockEntityData(
@@ -102,6 +99,7 @@ public class SignViewListener implements PacketListener {
 
 
     }
+
     private CompletableFuture<Void> processSignSide(NBTCompound root, String sideKey, Player player) {
         if (!root.contains(sideKey)) return CompletableFuture.completedFuture(null);
 
@@ -179,13 +177,12 @@ public class SignViewListener implements PacketListener {
     }
 
 
-
     private String cleanTranslatedText(String input) {
         if (input == null) return "";
         String text = input.trim();
         text = text.replace("```", "").replace("`", "");
         text = QUOTE_PATTERN.matcher(text).replaceAll("");
-        text = text.replace("\"","");
+        text = text.replace("\"", "");
         return text;
     }
 

@@ -8,18 +8,14 @@ public class PlayerQuitListener implements Listener {
 
     final HologramModule hologramModule;
 
-    public PlayerQuitListener(HologramModule hologramModule)
-    {
+    public PlayerQuitListener(HologramModule hologramModule) {
         this.hologramModule = hologramModule;
     }
 
     @EventHandler
-    public void onQuit(PlayerQuitEvent event)
-    {
+    public void onQuit(PlayerQuitEvent event) {
         hologramModule.getPlayerTranslationCache().invalidate(event.getPlayer().getUniqueId());
     }
-
-
 
 
 }

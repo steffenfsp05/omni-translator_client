@@ -4,38 +4,26 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListener;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.chat.message.*;
-import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerChatMessage;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSystemChatMessage;
-import com.google.gson.Gson;
-import io.papermc.paper.chat.ChatRenderer;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class ChatPacketListener implements PacketListener {
 
 
     final LiveChatModule liveChatModule;
 
-    public ChatPacketListener(LiveChatModule liveChatModule)
-    {
+    public ChatPacketListener(LiveChatModule liveChatModule) {
         this.liveChatModule = liveChatModule;
     }
 
     @Override
     public void onPacketSend(PacketSendEvent event) {
 
-        if(!liveChatModule.isActive())
+        if (!liveChatModule.isActive())
             return;
 
         /*
@@ -142,7 +130,7 @@ public class ChatPacketListener implements PacketListener {
 
         final Class<?> clazz;
 
-       final Function<Object, UUID> uuidExtractor;
+        final Function<Object, UUID> uuidExtractor;
 
         <T> MessageVersion(Class<T> clazz, Function<T, UUID> specificExtractor) {
             this.clazz = clazz;
@@ -150,10 +138,10 @@ public class ChatPacketListener implements PacketListener {
             this.uuidExtractor = obj -> specificExtractor.apply(clazz.cast(obj));
         }
 
-         public static UUID getSenderUuid(ChatMessage message) {
+        public static UUID getSenderUuid(ChatMessage message) {
             for (MessageVersion version : values()) {
                 if (version.clazz.isInstance(message)) {
-                   return version.uuidExtractor.apply(message);
+                    return version.uuidExtractor.apply(message);
                 }
             }
             return null;
