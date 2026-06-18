@@ -15,13 +15,13 @@ The project is built as a multi-module Maven project, featuring native integrati
 
 * **Real-Time Translation:** Dynamically translates content for each player based on their individual locale settings.
 * **Comprehensive Module Coverage (Spigot):**
-    * 💬 **Live Chat:** Intercepts and translates player chat and plugin-broadcasted messages.
-    * 🪧 **Signs:** Provides dynamic translation for text written on signs.
-    * ✨ **Holograms:** Compatible with popular hologram systems via packet interception.
-    * 🎒 **Inventories/GUIs:** Translates item names and descriptions within server-side GUIs.
+    *  **Live Chat:** Intercepts and translates player chat and plugin-broadcasted messages.
+    *  **Signs:** Provides dynamic translation for text written on signs.
+    *  **Holograms:** Compatible with popular hologram systems via packet interception.
+    *  **Inventories/GUIs:** Translates item names and descriptions within server-side GUIs.
 * **High Performance:** Utilizes efficient caching via `CaffeineCache` and asynchronous task execution to maintain
   server TPS.
-* **Secure Communication:** Uses Protocol Buffers (`packets.proto`) for standardized data exchange and HMAC
+* **Secure Communication:** Uses Protocol Buffers (`packets.proto`) for standardized data exchange and AES
   encryption (`HmacService`) for secure verification.
 
 ## 🏗️ Project Structure
@@ -74,15 +74,5 @@ mvn clean install
   like `TranslationRequest` and `ConfigRequestPacket`.
 * **Caffeine:** A high-performance caching library used to reduce redundant translation API calls.
 
-## 📝 Configuration
 
-Upon the first launch, the plugin generates configuration files in the respective server folders.
-The main configuration allows you to:
-
-* Connect to external translation APIs (RESTful Translation Services).
-* Define caching durations.
-* Exclude specific words, placeholders, or player names from being translated using the `PlayernameProtector`
-  and `WordProtector` services.
-
-***
 *This project (GroupId: `org.example`, ArtifactId: `Omni`) is currently under development in version `1.0-SNAPSHOT`.*
