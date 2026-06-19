@@ -1,11 +1,12 @@
-package org.pytenix.module.features.player;
+package org.pytenix.module.player;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSystemChatMessage;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.module.TranslatorModule;
+import org.pytenix.module.player.listener.AsyncPlayerChatListener;
+import org.pytenix.service.TranslatorModule;
 
 public class LiveChatModule extends TranslatorModule {
 

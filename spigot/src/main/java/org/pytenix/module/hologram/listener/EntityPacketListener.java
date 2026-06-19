@@ -1,4 +1,4 @@
-package org.pytenix.module.features.hologram;
+package org.pytenix.module.hologram.listener;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListener;
@@ -14,7 +14,8 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.pytenix.PlayerLocaleService;
+import org.pytenix.service.PlayerLocaleService;
+import org.pytenix.module.hologram.HologramModule;
 
 import java.util.ArrayList;
 import java.util.List;

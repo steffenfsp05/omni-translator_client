@@ -1,10 +1,11 @@
-package org.pytenix.module.features.chat;
+package org.pytenix.module.chat;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import lombok.Getter;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.module.TranslatorModule;
+import org.pytenix.module.chat.listener.SystemPacketListener;
+import org.pytenix.service.TranslatorModule;
 
 @Getter
 public class PluginChatModule extends TranslatorModule {

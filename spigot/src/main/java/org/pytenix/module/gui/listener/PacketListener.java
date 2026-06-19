@@ -1,4 +1,4 @@
-package org.pytenix.module.features.gui.listener;
+package org.pytenix.module.gui.listener;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
@@ -8,8 +8,8 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWi
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.pytenix.PlayerLocaleService;
-import org.pytenix.module.features.gui.InventoryModule;
+import org.pytenix.service.PlayerLocaleService;
+import org.pytenix.module.gui.InventoryModule;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;

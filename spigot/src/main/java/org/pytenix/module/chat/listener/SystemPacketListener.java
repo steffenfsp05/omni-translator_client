@@ -1,4 +1,4 @@
-package org.pytenix.module.features.chat;
+package org.pytenix.module.chat.listener;
 
 import com.github.retrooper.packetevents.event.PacketListener;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
@@ -7,7 +7,9 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSy
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
-import org.pytenix.PlayerLocaleService;
+import org.pytenix.service.PlayerLocaleService;
+import org.pytenix.module.chat.MessageSequencer;
+import org.pytenix.module.chat.PluginChatModule;
 import org.pytenix.util.TextComponentUtil;
 
 import java.util.UUID;

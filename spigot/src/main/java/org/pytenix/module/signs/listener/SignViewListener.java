@@ -1,4 +1,4 @@
-package org.pytenix.module.features.signs;
+package org.pytenix.module.signs.listener;
 
 import com.github.retrooper.packetevents.event.PacketListener;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
@@ -12,7 +12,8 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBl
 import io.github.retrooper.packetevents.adventure.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
-import org.pytenix.PlayerLocaleService;
+import org.pytenix.service.PlayerLocaleService;
+import org.pytenix.module.signs.SignsModule;
 
 import java.util.ArrayList;
 import java.util.List;

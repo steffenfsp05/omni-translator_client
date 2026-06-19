@@ -14,12 +14,12 @@ import org.pytenix.config.ConfigurationFile;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.listener.PlayerJoinQuitListener;
 import org.pytenix.listener.PlayerLocaleChangeListener;
-import org.pytenix.module.ModuleService;
+import org.pytenix.service.ModuleService;
 import org.pytenix.network.SpigotTransport;
 import org.pytenix.network.VelocitySecretReader;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.impl.DefaultTranslationService;
-import org.pytenix.util.TaskScheduler;
+import org.pytenix.service.TaskScheduler;
 import org.pytenix.util.TextComponentUtil;
 
 import java.io.File;

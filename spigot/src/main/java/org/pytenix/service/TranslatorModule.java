@@ -1,7 +1,6 @@
-package org.pytenix.module;
+package org.pytenix.service;
 
 import lombok.Getter;
-import org.pytenix.PlayerLocaleService;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.translation.TranslatorService;

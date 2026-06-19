@@ -1,4 +1,4 @@
-package org.pytenix.module.features.hologram;
+package org.pytenix.module.hologram;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
@@ -8,8 +8,10 @@ import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.module.TranslatorModule;
+import org.pytenix.module.hologram.listener.EntityPacketListener;
+import org.pytenix.service.TranslatorModule;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Getter
@@ -23,7 +25,6 @@ public class HologramModule extends TranslatorModule {
     public HologramModule(TranslatorPlugin translatorPlugin) {
         super(translatorPlugin, "hologram");
 
-        Bukkit.getPluginManager().registerEvents(new PlayerQuitListener(this), getTranslatorPlugin());
 
         PacketEvents.getAPI().getEventManager().registerListener(new EntityPacketListener(this),
                 PacketListenerPriority.HIGHEST);

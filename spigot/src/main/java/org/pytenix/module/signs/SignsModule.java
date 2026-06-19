@@ -1,9 +1,10 @@
-package org.pytenix.module.features.signs;
+package org.pytenix.module.signs;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.module.TranslatorModule;
+import org.pytenix.module.signs.listener.SignViewListener;
+import org.pytenix.service.TranslatorModule;
 
 public class SignsModule extends TranslatorModule {
 

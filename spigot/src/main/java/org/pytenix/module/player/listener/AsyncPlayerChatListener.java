@@ -1,4 +1,4 @@
-package org.pytenix.module.features.player;
+package org.pytenix.module.player.listener;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.audience.Audience;
@@ -8,9 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.pytenix.PlayerLocaleService;
+import org.pytenix.service.PlayerLocaleService;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.util.TaskScheduler;
+import org.pytenix.module.player.LiveChatModule;
+import org.pytenix.service.TaskScheduler;
 
 import java.util.ArrayList;
 import java.util.HashMap;

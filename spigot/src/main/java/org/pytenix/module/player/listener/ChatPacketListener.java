@@ -1,4 +1,4 @@
-package org.pytenix.module.features.player;
+package org.pytenix.module.player.listener;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListener;
@@ -7,6 +7,7 @@ import com.github.retrooper.packetevents.protocol.chat.message.*;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSystemChatMessage;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
+import org.pytenix.module.player.LiveChatModule;
 
 import java.util.UUID;
 import java.util.function.Function;

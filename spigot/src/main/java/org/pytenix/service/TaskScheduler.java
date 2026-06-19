@@ -1,4 +1,4 @@
-package org.pytenix.util;
+package org.pytenix.service;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
