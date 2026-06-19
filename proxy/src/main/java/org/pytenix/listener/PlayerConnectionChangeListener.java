@@ -3,16 +3,16 @@ package org.pytenix.listener;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
-import org.pytenix.VelocityTranslator;
+import org.pytenix.TranslatorPlugin;
 
 public class PlayerConnectionChangeListener {
 
 
-    final VelocityTranslator translator;
+    final TranslatorPlugin translator;
     // final VelocityBridge velocityBridge;
 
 
-    public PlayerConnectionChangeListener(VelocityTranslator translator) {
+    public PlayerConnectionChangeListener(TranslatorPlugin translator) {
         this.translator = translator;
         //   this.velocityBridge = translator.getVelocityBridge();
     }

@@ -1,7 +1,7 @@
 package org.pytenix.pluginmessage.consumer;
 
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import org.pytenix.VelocityTranslator;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.packets.PacketRegistry;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.UuidUtil;
@@ -13,11 +13,11 @@ import java.util.concurrent.Executor;
 
 public class TranslationRequestConsumer implements PacketReceiveConsumer<RegisteredServer, NetworkPackets.TranslationRequest> {
 
-    final VelocityTranslator velocityTranslator;
+    final TranslatorPlugin translatorPlugin;
     final Executor executor;
 
-    public TranslationRequestConsumer(VelocityTranslator velocityTranslator, Executor executor) {
-        this.velocityTranslator = velocityTranslator;
+    public TranslationRequestConsumer(TranslatorPlugin translatorPlugin, Executor executor) {
+        this.translatorPlugin = translatorPlugin;
         this.executor = executor;
     }
 
@@ -36,7 +36,7 @@ public class TranslationRequestConsumer implements PacketReceiveConsumer<Registe
 
         String cacheKey = generateKey(text, lang);
 
-        String cached = velocityTranslator.getCaffeineCache().get(cacheKey);
+        String cached = translatorPlugin.getCaffeineCache().get(cacheKey);
 
         if (cached != null) {
             context.reply(PacketRegistry.TRANSLATION_RESULT,
@@ -45,7 +45,7 @@ public class TranslationRequestConsumer implements PacketReceiveConsumer<Registe
                             .setResult(cached)
                             .build());
         } else {
-            velocityTranslator.getRestfulService()
+            translatorPlugin.getRestfulService()
                     .sendTranslationRequest(id, text, lang, translationRequest.getModule())
                     .thenAcceptAsync(translatedText -> {
                         String finalString = (isSuccessfull(translatedText) && !translatedText.equals(text)) ? translatedText : text;
@@ -55,7 +55,7 @@ public class TranslationRequestConsumer implements PacketReceiveConsumer<Registe
                                         .setRequestId(translationRequest.getRequestId())
                                         .setResult(finalString)
                                         .build());
-                        velocityTranslator.getCaffeineCache().set(cacheKey, finalString);
+                        translatorPlugin.getCaffeineCache().set(cacheKey, finalString);
 
                     }, executor);
         }

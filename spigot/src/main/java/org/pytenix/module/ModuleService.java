@@ -1,6 +1,6 @@
 package org.pytenix.module;
 
-import org.pytenix.SpigotTranslator;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.modules.chat.PluginChatModule;
 import org.pytenix.module.modules.gui.InventoryModule;
 import org.pytenix.module.modules.hologram.HologramModule;
@@ -13,19 +13,19 @@ import java.util.List;
 public class ModuleService {
 
 
-    final SpigotTranslator spigotTranslator;
+    final TranslatorPlugin translatorPlugin;
 
     final List<TranslatorModule> modules;
 
-    public ModuleService(SpigotTranslator spigotTranslator) {
-        this.spigotTranslator = spigotTranslator;
+    public ModuleService(TranslatorPlugin translatorPlugin) {
+        this.translatorPlugin = translatorPlugin;
         this.modules = new ArrayList<>();
 
-        registerModule(new InventoryModule(spigotTranslator));
-        registerModule(new PluginChatModule(spigotTranslator));
-        registerModule(new LiveChatModule(spigotTranslator));
-        registerModule(new HologramModule(spigotTranslator));
-        registerModule(new SignsModule(spigotTranslator));
+        registerModule(new InventoryModule(translatorPlugin));
+        registerModule(new PluginChatModule(translatorPlugin));
+        registerModule(new LiveChatModule(translatorPlugin));
+        registerModule(new HologramModule(translatorPlugin));
+        registerModule(new SignsModule(translatorPlugin));
     }
 
 

@@ -6,14 +6,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLocaleChangeEvent;
-import org.pytenix.SpigotTranslator;
+import org.pytenix.TranslatorPlugin;
 
 //ONLY FOR DEMO SERVER
 public class LocaleChangeEvent implements Listener {
 
-    public SpigotTranslator translator;
+    public TranslatorPlugin translator;
 
-    public LocaleChangeEvent(SpigotTranslator translator) {
+    public LocaleChangeEvent(TranslatorPlugin translator) {
         this.translator = translator;
     }
 

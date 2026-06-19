@@ -7,7 +7,7 @@ import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.pytenix.SpigotTranslator;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.TranslatorModule;
 
 import java.util.concurrent.TimeUnit;
@@ -20,10 +20,10 @@ public class HologramModule extends TranslatorModule {
             .build();
 
 
-    public HologramModule(SpigotTranslator spigotTranslator) {
-        super(spigotTranslator, "hologram");
+    public HologramModule(TranslatorPlugin translatorPlugin) {
+        super(translatorPlugin, "hologram");
 
-        Bukkit.getPluginManager().registerEvents(new PlayerQuitListener(this), getSpigotTranslator());
+        Bukkit.getPluginManager().registerEvents(new PlayerQuitListener(this), getTranslatorPlugin());
 
         PacketEvents.getAPI().getEventManager().registerListener(new EntityPacketListener(this),
                 PacketListenerPriority.HIGHEST);

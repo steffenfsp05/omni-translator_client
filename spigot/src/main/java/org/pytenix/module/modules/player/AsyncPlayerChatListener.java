@@ -9,7 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.pytenix.PlayerLocaleService;
-import org.pytenix.SpigotTranslator;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.util.TaskScheduler;
 
 import java.util.ArrayList;
@@ -22,14 +22,14 @@ public class AsyncPlayerChatListener implements Listener {
 
 
     final LiveChatModule liveChatModule;
-    final SpigotTranslator spigotTranslator;
+    final TranslatorPlugin translatorPlugin;
     final TaskScheduler taskScheduler;
 
     public AsyncPlayerChatListener(LiveChatModule liveChatModule) {
         this.liveChatModule = liveChatModule;
-        this.spigotTranslator = liveChatModule.getSpigotTranslator();
-        this.taskScheduler = spigotTranslator.getTaskScheduler();
-        Bukkit.getPluginManager().registerEvents(this, spigotTranslator);
+        this.translatorPlugin = liveChatModule.getTranslatorPlugin();
+        this.taskScheduler = translatorPlugin.getTaskScheduler();
+        Bukkit.getPluginManager().registerEvents(this, translatorPlugin);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -72,7 +72,7 @@ public class AsyncPlayerChatListener implements Listener {
 
         languageGroups.forEach((targetLang, groupMembers) -> {
 
-            spigotTranslator.getTextComponentUtil().translateComplexMessage(originalMessage, targetLang, liveChatModule.getModuleName())
+            translatorPlugin.getTextComponentUtil().translateComplexMessage(originalMessage, targetLang, liveChatModule.getModuleName())
                     .orTimeout(5, TimeUnit.SECONDS)
                     .whenComplete((translatedText, ex) -> {
 
@@ -129,7 +129,7 @@ if(!liveChatModule.isActive())
         event.setCancelled(true);
 
         Component originalMessage = event.message();
-        String rawText = spigotTranslator.getLegacyComponentSerializer().serialize(originalMessage);
+        String rawText = translatorPlugin.getLegacyComponentSerializer().serialize(originalMessage);
         ChatRenderer currentRenderer = event.renderer();
 
 
@@ -149,7 +149,7 @@ if(!liveChatModule.isActive())
                          liveChatModule.deliver(sender, originalMessage, originalMessage, recipients, currentRenderer);
                     } else {
 
-                         Component translated = spigotTranslator.getLegacyComponentSerializer().deserialize(translatedText);
+                         Component translated = translatorPlugin.getLegacyComponentSerializer().deserialize(translatedText);
 
                          liveChatModule.deliver(sender, originalMessage, translated, recipients, currentRenderer);
                     }

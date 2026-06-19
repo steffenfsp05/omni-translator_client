@@ -7,6 +7,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.pytenix.cache.CacheProvider;
 import org.pytenix.cache.impl.CaffeineCacheProvider;
 import org.pytenix.config.ConfigService;
 import org.pytenix.config.ConfigurationFile;
@@ -26,12 +27,13 @@ import java.io.IOException;
 
 
 @Getter
-public class SpigotTranslator extends JavaPlugin {
+public class TranslatorPlugin extends JavaPlugin {
 
     public String pluginMessagingChannel;
     @Getter
     TextComponentUtil textComponentUtil;
-    CaffeineCacheProvider caffeineCache;
+    CacheProvider<String,String> caffeineCache;
+
     LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.builder()
             .character('§')
             .extractUrls()
@@ -40,6 +42,7 @@ public class SpigotTranslator extends JavaPlugin {
             .build();
     ConfigService configService;
     ConfigurationFile configurationFile;
+
     private String serverName;
     private TranslatorService translatorService;
     private ModuleService moduleService;

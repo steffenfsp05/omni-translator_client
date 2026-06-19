@@ -6,7 +6,7 @@ import com.velocitypowered.api.proxy.server.ServerPing;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.pytenix.VelocityTranslator;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.backend.GeoService;
 import org.pytenix.entity.ServerConfiguration;
 
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 public class ProxyPingListener {
 
 
-    final VelocityTranslator translator;
+    final TranslatorPlugin translator;
     final GeoService geoService;
 
 
@@ -29,7 +29,7 @@ public class ProxyPingListener {
             .build();
 
 
-    public ProxyPingListener(VelocityTranslator translator) {
+    public ProxyPingListener(TranslatorPlugin translator) {
         this.translator = translator;
         this.geoService = translator.getGeoService();
 

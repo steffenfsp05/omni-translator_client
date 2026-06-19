@@ -34,7 +34,7 @@ import java.util.List;
         version = "1.0-SNAPSHOT",
         authors = {"PytenixOG"}
 )
-public class VelocityTranslator {
+public class TranslatorPlugin {
 
     final ConfigService configService;
     final ConfigurationFile configurationFile;
@@ -58,7 +58,7 @@ public class VelocityTranslator {
     private RestfulService restfulService;
 
     @Inject
-    public VelocityTranslator(ProxyServer server, Logger logger) {
+    public TranslatorPlugin(ProxyServer server, Logger logger) {
         this.server = server;
         this.proxyServer = server;
         this.logger = logger;

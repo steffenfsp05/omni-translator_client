@@ -50,7 +50,7 @@ public class ChatPacketListener implements PacketListener {
             if (renderer == null) renderer = ChatRenderer.defaultRenderer();
 
 
-            String plainText = liveChatModule.getSpigotTranslator().getLegacyComponentSerializer().serialize(originalRawContent);
+            String plainText = liveChatModule.getTranslatorPlugin().getLegacyComponentSerializer().serialize(originalRawContent);
             String targetLang = receiver.getLocale();
 
 
@@ -73,7 +73,7 @@ public class ChatPacketListener implements PacketListener {
 
                         if (translatedText != null && ex == null) {
 
-                            var serializer = liveChatModule.getSpigotTranslator().getLegacyComponentSerializer();
+                            var serializer = liveChatModule.getTranslatorPlugin().getLegacyComponentSerializer();
 
 
                             String fullChatString = serializer.serialize(renderedMessage);

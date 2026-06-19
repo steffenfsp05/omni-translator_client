@@ -4,14 +4,14 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSystemChatMessage;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
-import org.pytenix.SpigotTranslator;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.TranslatorModule;
 
 public class LiveChatModule extends TranslatorModule {
 
 
-    public LiveChatModule(SpigotTranslator spigotTranslator) {
-        super(spigotTranslator, "live_chat");
+    public LiveChatModule(TranslatorPlugin translatorPlugin) {
+        super(translatorPlugin, "live_chat");
 
 
         new AsyncPlayerChatListener(this);

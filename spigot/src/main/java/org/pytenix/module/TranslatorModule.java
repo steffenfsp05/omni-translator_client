@@ -2,7 +2,7 @@ package org.pytenix.module;
 
 import lombok.Getter;
 import org.pytenix.PlayerLocaleService;
-import org.pytenix.SpigotTranslator;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.translation.TranslatorService;
 
@@ -13,7 +13,7 @@ public abstract class TranslatorModule {
 
 
     @Getter
-    final SpigotTranslator spigotTranslator;
+    final TranslatorPlugin translatorPlugin;
 
     @Getter
     final String moduleName;
@@ -22,12 +22,12 @@ public abstract class TranslatorModule {
     @Getter
     final TranslatorService translatorService;
 
-    public TranslatorModule(SpigotTranslator spigotTranslator, String moduleName) {
+    public TranslatorModule(TranslatorPlugin translatorPlugin, String moduleName) {
 
-        this.spigotTranslator = spigotTranslator;
+        this.translatorPlugin = translatorPlugin;
         this.moduleName = moduleName;
 
-        this.translatorService = spigotTranslator.getTranslatorService();
+        this.translatorService = translatorPlugin.getTranslatorService();
     }
 
 
@@ -44,7 +44,7 @@ public abstract class TranslatorModule {
     }
 
     public ServerConfiguration getServerConfiguration() {
-        return spigotTranslator.getTranslatorService().getTranslationConfiguration();
+        return translatorPlugin.getTranslatorService().getTranslationConfiguration();
     }
 
 
@@ -56,7 +56,7 @@ public abstract class TranslatorModule {
     public CompletableFuture<String> translate(String text, String locale) {
 
 
-        String cached = spigotTranslator.getCaffeineCache().get(generateKey(text, locale));
+        String cached = translatorPlugin.getCaffeineCache().get(generateKey(text, locale));
 
         if (cached != null)
             return CompletableFuture.completedFuture(cached);
@@ -64,7 +64,7 @@ public abstract class TranslatorModule {
         return translatorService.translate(text, locale, this.moduleName).whenComplete((result, throwable) -> {
 
             if (throwable == null && result != null) {
-                spigotTranslator.getCaffeineCache().set(generateKey(text, locale), result);
+                translatorPlugin.getCaffeineCache().set(generateKey(text, locale), result);
             }
 
         });

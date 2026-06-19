@@ -10,7 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRegisterChannelEvent;
 import org.bukkit.event.player.PlayerUnregisterChannelEvent;
-import org.pytenix.SpigotTranslator;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.packets.PacketRegistry;
 import org.pytenix.pluginmessage.consumer.ConfigUpdateConsumer;
 import org.pytenix.pluginmessage.listener.ConfigUpdateListener;
@@ -43,7 +43,7 @@ public class SpigotTransport implements Listener {
             .build();
     @Getter
     final TransportService<String> transportService;
-    private final SpigotTranslator plugin;
+    private final TranslatorPlugin plugin;
 
 
     @Setter
@@ -53,7 +53,7 @@ public class SpigotTransport implements Listener {
 
     public Set<UUID> availableCarriers;
 
-    public SpigotTransport(SpigotTranslator plugin, String secret, String pluginMessagingChannel) {
+    public SpigotTransport(TranslatorPlugin plugin, String secret, String pluginMessagingChannel) {
 
         this.pluginMessagingChannel = pluginMessagingChannel;
         this.plugin = plugin;

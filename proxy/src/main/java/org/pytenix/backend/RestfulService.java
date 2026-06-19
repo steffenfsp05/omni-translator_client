@@ -1,7 +1,7 @@
 package org.pytenix.backend;
 
 import com.velocitypowered.api.scheduler.ScheduledTask;
-import org.pytenix.VelocityTranslator;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.event.EventService;
 import org.pytenix.event.register.ConfigUpdateEvent;
@@ -21,7 +21,7 @@ public class RestfulService {
 
     private static final int MAX_BATCH_SIZE = 25;
     private static final long MAX_WAIT_TIME_MS = 20;
-    private final VelocityTranslator velocityTranslator;
+    private final TranslatorPlugin translatorPlugin;
     private final OmniConnectionService connectionManager;
     private final TranslatorService translatorService;
     private final ProxyTransport proxyTransport;
@@ -31,13 +31,13 @@ public class RestfulService {
     private ScheduledTask flushTask = null;
 
 
-    public RestfulService(VelocityTranslator velocityTranslator, OmniConnectionService connectionManager) {
-        this.velocityTranslator = velocityTranslator;
+    public RestfulService(TranslatorPlugin translatorPlugin, OmniConnectionService connectionManager) {
+        this.translatorPlugin = translatorPlugin;
         this.connectionManager = connectionManager;
 
-        this.translatorService = velocityTranslator.getTranslatorService();
-        this.proxyTransport = velocityTranslator.getProxyTransport();
-        this.eventService = velocityTranslator.getTranslatorService().getEventService();
+        this.translatorService = translatorPlugin.getTranslatorService();
+        this.proxyTransport = translatorPlugin.getProxyTransport();
+        this.eventService = translatorPlugin.getTranslatorService().getEventService();
     }
 
     public void handleConfigUpdate(ServerConfiguration config) {
@@ -74,7 +74,7 @@ public class RestfulService {
             if (pendingRequests.size() >= MAX_BATCH_SIZE) {
                 flushBatch();
             } else if (flushTask == null) {
-                flushTask = velocityTranslator.getProxyServer().getScheduler().buildTask(velocityTranslator, this::flushBatch)
+                flushTask = translatorPlugin.getProxyServer().getScheduler().buildTask(translatorPlugin, this::flushBatch)
                         .delay(MAX_WAIT_TIME_MS, TimeUnit.MILLISECONDS)
                         .schedule();
             }

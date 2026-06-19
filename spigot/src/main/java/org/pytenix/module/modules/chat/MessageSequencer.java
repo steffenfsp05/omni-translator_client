@@ -26,9 +26,9 @@ public class MessageSequencer implements Listener {
             com.google.common.cache.CacheBuilder.newBuilder().expireAfterAccess(30, java.util.concurrent.TimeUnit.MINUTES).build();
 
     public MessageSequencer(PluginChatModule pluginChatModule) {
-        this.textComponentUtil = pluginChatModule.getSpigotTranslator().getTextComponentUtil();
+        this.textComponentUtil = pluginChatModule.getTranslatorPlugin().getTextComponentUtil();
         this.pluginChatModule = pluginChatModule;
-        Bukkit.getPluginManager().registerEvents(this, pluginChatModule.getSpigotTranslator());
+        Bukkit.getPluginManager().registerEvents(this, pluginChatModule.getTranslatorPlugin());
     }
 
     @EventHandler

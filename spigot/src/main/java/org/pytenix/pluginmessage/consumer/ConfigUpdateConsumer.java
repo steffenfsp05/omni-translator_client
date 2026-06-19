@@ -1,7 +1,7 @@
 package org.pytenix.pluginmessage.consumer;
 
 import lombok.AllArgsConstructor;
-import org.pytenix.SpigotTranslator;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.event.register.ConfigUpdateEvent;
 import org.pytenix.proto.generated.NetworkPackets;
@@ -14,7 +14,7 @@ import org.transport.service.PacketReceiveConsumer;
 public class ConfigUpdateConsumer implements PacketReceiveConsumer<String, NetworkPackets.ServerConfiguration> {
 
 
-    final SpigotTranslator spigotTranslator;
+    final TranslatorPlugin translatorPlugin;
     final TranslatorService translatorService;
 
 
@@ -23,9 +23,9 @@ public class ConfigUpdateConsumer implements PacketReceiveConsumer<String, Netwo
 
         ServerConfiguration config = translatorService.convertConfigToNormal(serverConfiguration);
 
-        spigotTranslator.getTranslatorService().setTranslationConfiguration(config);
+        translatorPlugin.getTranslatorService().setTranslationConfiguration(config);
 
-        spigotTranslator.getSpigotTransport().setHasConfiguration(true);
+        translatorPlugin.getSpigotTransport().setHasConfiguration(true);
 
         translatorService.getEventService().callEvent(new ConfigUpdateEvent(config));
     }

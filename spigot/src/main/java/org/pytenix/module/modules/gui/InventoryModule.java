@@ -7,7 +7,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.pytenix.SpigotTranslator;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.TranslatorModule;
 import org.pytenix.module.modules.gui.listener.PacketListener;
 
@@ -24,10 +24,10 @@ public class InventoryModule extends TranslatorModule {
     LegacyComponentSerializer legacyComponentSerializer;
 
 
-    public InventoryModule(SpigotTranslator spigotTranslator) {
-        super(spigotTranslator, "gui");
+    public InventoryModule(TranslatorPlugin translatorPlugin) {
+        super(translatorPlugin, "gui");
 
-        this.legacyComponentSerializer = this.getSpigotTranslator().getLegacyComponentSerializer();
+        this.legacyComponentSerializer = this.getTranslatorPlugin().getLegacyComponentSerializer();
 
         PacketEvents.getAPI().getEventManager().registerListener(new PacketListener(this),
                 PacketListenerPriority.NORMAL);

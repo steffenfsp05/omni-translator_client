@@ -6,7 +6,7 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import org.pytenix.VelocityTranslator;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.packets.PacketRegistry;
 import org.pytenix.pluginmessage.consumer.ConfigRequestConsumer;
 import org.pytenix.pluginmessage.consumer.TranslationRequestConsumer;
@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
 
 public class ProxyTransport {
 
-    final VelocityTranslator velocityTranslator;
+    final TranslatorPlugin translatorPlugin;
     final TransportService<RegisteredServer> transportService;
     private final ChannelIdentifier identifier = MinecraftChannelIdentifier.from("translator:main");
     private final ExecutorService apiExecutor = Executors.newFixedThreadPool(4, runnable -> {
@@ -33,11 +33,11 @@ public class ProxyTransport {
     });
 
 
-    public ProxyTransport(VelocityTranslator velocityTranslator, String secret) {
+    public ProxyTransport(TranslatorPlugin translatorPlugin, String secret) {
 
-        this.velocityTranslator = velocityTranslator;
+        this.translatorPlugin = translatorPlugin;
 
-        velocityTranslator.getProxyServer().getChannelRegistrar().register(identifier);
+        translatorPlugin.getProxyServer().getChannelRegistrar().register(identifier);
 
         //TODO IMPLEMENT VELOCITY SECRET FROM CFG!
         this.transportService = TransportService.<RegisteredServer>builder()
@@ -57,7 +57,7 @@ public class ProxyTransport {
 
         PluginMessageReceiver<RegisteredServer> receiver = PluginMessageReceiver.autoConnectBridge(transportService);
 
-        velocityTranslator.getProxyServer().getEventManager().register(velocityTranslator, new Object() {
+        translatorPlugin.getProxyServer().getEventManager().register(translatorPlugin, new Object() {
             @Subscribe
             public void onPluginMessage(PluginMessageEvent event) {
 
@@ -73,13 +73,13 @@ public class ProxyTransport {
         this.transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT, (stringPacketContext, translationResult) -> {
         });
 
-        this.transportService.registerPacket(PacketRegistry.CONFIG_REQUEST, new ConfigRequestConsumer(velocityTranslator.getTranslatorService()));
-        this.transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST, new TranslationRequestConsumer(velocityTranslator, apiExecutor));
+        this.transportService.registerPacket(PacketRegistry.CONFIG_REQUEST, new ConfigRequestConsumer(translatorPlugin.getTranslatorService()));
+        this.transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST, new TranslationRequestConsumer(translatorPlugin, apiExecutor));
 
     }
 
     public void broadcastConfigurationUpdate(NetworkPackets.ServerConfiguration packet) {
-        for (RegisteredServer server : velocityTranslator.getProxyServer().getAllServers()) {
+        for (RegisteredServer server : translatorPlugin.getProxyServer().getAllServers()) {
 
             if (!server.getPlayersConnected().isEmpty()) {
 

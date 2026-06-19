@@ -1,7 +1,7 @@
 package org.pytenix.backend;
 
 import com.velocitypowered.api.proxy.ProxyServer;
-import org.pytenix.VelocityTranslator;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.FastByteArrayOutputStream;
@@ -31,17 +31,17 @@ public class OmniConnectionService {
 
     private final AtomicInteger reconnectAttempts = new AtomicInteger(0);
     private final ProxyServer proxyServer;
-    private final VelocityTranslator velocityTranslator;
+    private final TranslatorPlugin translatorPlugin;
     private WebSocket webSocket;
     private RestfulService restfulService;
     private GeoService geoService;
 
-    public OmniConnectionService(VelocityTranslator velocityTranslator, String apiKey, ProxyServer proxyServer) {
-        this.velocityTranslator = velocityTranslator;
+    public OmniConnectionService(TranslatorPlugin translatorPlugin, String apiKey, ProxyServer proxyServer) {
+        this.translatorPlugin = translatorPlugin;
         this.proxyServer = proxyServer;
         this.apiKey = apiKey;
 
-        this.url = "ws://" + velocityTranslator.getRemoteAddress() + "/ws/omni";
+        this.url = "ws://" + translatorPlugin.getRemoteAddress() + "/ws/omni";
 
         this.httpClient = HttpClient.newBuilder()
                 .executor(Executors.newCachedThreadPool())
@@ -98,7 +98,7 @@ public class OmniConnectionService {
         long waitTime = Math.min((long) Math.pow(4, attempts), 60);
 
         System.err.println("[OmniTranslator] Reconnect in " + waitTime + "s...");
-        proxyServer.getScheduler().buildTask(velocityTranslator, this::connect)
+        proxyServer.getScheduler().buildTask(translatorPlugin, this::connect)
                 .delay(waitTime, TimeUnit.SECONDS)
                 .schedule();
     }

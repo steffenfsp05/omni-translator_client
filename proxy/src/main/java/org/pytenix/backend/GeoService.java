@@ -2,7 +2,7 @@ package org.pytenix.backend;
 
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.scheduler.ScheduledTask;
-import org.pytenix.VelocityTranslator;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.UuidUtil;
 
@@ -18,14 +18,14 @@ public class GeoService {
     private static final int MAX_BATCH_SIZE = 50;
     private static final long MAX_WAIT_TIME_MS = 10;
     private final ProxyServer proxyServer;
-    private final VelocityTranslator velocityTranslator;
+    private final TranslatorPlugin translatorPlugin;
     private final OmniConnectionService connectionManager;
     private final ConcurrentHashMap<UUID, CompletableFuture<String>> queue = new ConcurrentHashMap<>();
     private final List<QueuedRequest> pendingRequests = new ArrayList<>();
     private ScheduledTask flushTask = null;
 
-    public GeoService(VelocityTranslator velocityTranslator, ProxyServer proxyServer, OmniConnectionService connectionManager) {
-        this.velocityTranslator = velocityTranslator;
+    public GeoService(TranslatorPlugin translatorPlugin, ProxyServer proxyServer, OmniConnectionService connectionManager) {
+        this.translatorPlugin = translatorPlugin;
         this.proxyServer = proxyServer;
         this.connectionManager = connectionManager;
     }
@@ -53,7 +53,7 @@ public class GeoService {
             if (pendingRequests.size() >= MAX_BATCH_SIZE) {
                 flushBatch();
             } else if (flushTask == null) {
-                flushTask = proxyServer.getScheduler().buildTask(velocityTranslator, this::flushBatch)
+                flushTask = proxyServer.getScheduler().buildTask(translatorPlugin, this::flushBatch)
                         .delay(MAX_WAIT_TIME_MS, TimeUnit.MILLISECONDS)
                         .schedule();
             }

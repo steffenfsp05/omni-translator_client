@@ -139,7 +139,7 @@ public class EntityPacketListener implements PacketListener, Listener {
                         originalComponent = (Component) value;
                     }
 
-                    String legacyText = hologramModule.getSpigotTranslator().getLegacyComponentSerializer().serialize(originalComponent);
+                    String legacyText = hologramModule.getTranslatorPlugin().getLegacyComponentSerializer().serialize(originalComponent);
 
                     if (!legacyText.trim().isEmpty()) {
                         final Component keyComponent = originalComponent;
@@ -174,7 +174,7 @@ public class EntityPacketListener implements PacketListener, Listener {
 
         return hologramModule.translate(text, lang)
                 .thenApply(translatedString -> {
-                    return hologramModule.getSpigotTranslator().getLegacyComponentSerializer().deserialize(translatedString);
+                    return hologramModule.getTranslatorPlugin().getLegacyComponentSerializer().deserialize(translatedString);
                 });
     }
 

@@ -77,7 +77,7 @@ public class SignViewListener implements PacketListener {
         if (!isSign)
             return;
 
-        signsModule.getSpigotTranslator().getTaskScheduler().runAsync(() ->
+        signsModule.getTranslatorPlugin().getTaskScheduler().runAsync(() ->
         {
             CompletableFuture<Void> front = processSignSide(nbtCompound, "front_text", player);
             CompletableFuture<Void> back = processSignSide(nbtCompound, "back_text", player);
@@ -127,9 +127,9 @@ public class SignViewListener implements PacketListener {
                         component = GsonComponentSerializer.gson().deserialize(rawText);
                     } catch (Exception e) {
 
-                        component = signsModule.getSpigotTranslator().getLegacyComponentSerializer().deserialize(rawText);
+                        component = signsModule.getTranslatorPlugin().getLegacyComponentSerializer().deserialize(rawText);
                     }
-                    plainMessage = signsModule.getSpigotTranslator().getLegacyComponentSerializer().serialize(component);
+                    plainMessage = signsModule.getTranslatorPlugin().getLegacyComponentSerializer().serialize(component);
                 } catch (Exception ignored) {
                     plainMessage = rawText;
                 }
@@ -164,7 +164,7 @@ public class SignViewListener implements PacketListener {
 
                 translatedLineRaw = cleanTranslatedText(translatedLineRaw);
 
-                Component c = signsModule.getSpigotTranslator().getLegacyComponentSerializer().deserialize(translatedLineRaw);
+                Component c = signsModule.getTranslatorPlugin().getLegacyComponentSerializer().deserialize(translatedLineRaw);
                 String json = GsonComponentSerializer.gson().serialize(c);
 
 
