@@ -8,6 +8,7 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.pytenix.VelocityTranslator;
 import org.pytenix.packets.Packets;
 import org.pytenix.pluginmessage.consumer.ConfigRequestConsumer;
@@ -15,6 +16,8 @@ import org.pytenix.pluginmessage.consumer.TranslationRequestConsumer;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.transport.TransportOptions;
 import org.transport.TransportService;
+import org.transport.io.minecraft.PluginMessageReceiver;
+import org.transport.io.minecraft.PluginMessageSender;
 import org.transport.service.impl.DefaultPacketService;
 
 import java.util.Arrays;
@@ -33,7 +36,6 @@ public class ProxyTransport {
         return thread;
     });
 
-    private final ThreadLocal<byte[]> reusableBuffer = ThreadLocal.withInitial(() -> new byte[65536]); // 64KB Puffer
 
     public ProxyTransport(VelocityTranslator velocityTranslator, String secret) {
 
@@ -41,10 +43,11 @@ public class ProxyTransport {
 
         velocityTranslator.getProxyServer().getChannelRegistrar().register(identifier);
 
+        //TODO IMPLEMENT VELOCITY SECRET FROM CFG!
         this.transportService = TransportService.<RegisteredServer>builder()
                 .packetService(new DefaultPacketService<>())
                 .secret(secret)
-                .encryptionEnabled(false)
+                .encryptionEnabled(true)
                 .options(
                         TransportOptions.builder()
                                 .batchingEnabled(true)
@@ -53,47 +56,19 @@ public class ProxyTransport {
                                 .maxPayloadSize(20000)
                                 .build()
                 )
-                .networkSender((channel, bytes) -> {
-                    try {
-                        int length = bytes.readableBytes();
-
-                        byte[] data;
-                        if (length <= 65536) {
-                            data = reusableBuffer.get();
-                        } else {
-                            data = new byte[length];
-                        }
-
-                        bytes.readBytes(data, 0, length);
-
-                        channel.sendPluginMessage(identifier, Arrays.copyOf(data, length));
-
-                    } finally {
-                        bytes.release();
-                    }
-
-                })
+                .networkSender((PluginMessageSender<RegisteredServer>) (registeredServer, bytes) -> registeredServer.sendPluginMessage(identifier, bytes))
                 .build();
+
+        PluginMessageReceiver<RegisteredServer> receiver = PluginMessageReceiver.autoConnectBridge(transportService);
 
         velocityTranslator.getProxyServer().getEventManager().register(velocityTranslator,new Object() {
             @Subscribe
             public void onPluginMessage(PluginMessageEvent event) {
 
                 if (event.getSource() instanceof ServerConnection serverConnection) {
-
                     if (event.getIdentifier().getId().equalsIgnoreCase(identifier.getId())) {
-                        System.out.println("PMC!! " + event.getIdentifier().getId());
                         RegisteredServer server = serverConnection.getServer();
-
-                        transportService.connect(server);
-                        transportService.ready(server);
-
-
-                        byte[] data = event.getData();
-                        ByteBuf nettyBuf = Unpooled.directBuffer(data.length);
-                        nettyBuf.writeBytes(data);
-
-                        transportService.onReceiveRaw(server, nettyBuf);
+                        receiver.handle(server, event.getData());
                     }
                 }
             }

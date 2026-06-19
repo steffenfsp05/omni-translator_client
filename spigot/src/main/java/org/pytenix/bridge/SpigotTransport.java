@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -20,6 +21,8 @@ import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.UuidUtil;
 import org.transport.TransportOptions;
 import org.transport.TransportService;
+import org.transport.io.minecraft.PluginMessageReceiver;
+import org.transport.io.minecraft.PluginMessageSender;
 import org.transport.service.impl.DefaultPacketService;
 
 import java.time.Duration;
@@ -63,10 +66,12 @@ public class SpigotTransport implements Listener {
         plugin.getTranslatorService().getEventService().register(new ConfigUpdateListener(plugin));
 
 
+
+        //TODO IMPLEMENT VELOCITY SECRET FROM CFG!
         this.transportService = TransportService.<String>builder()
                 .packetService(new DefaultPacketService<>())
                 .secret(secret)
-                .encryptionEnabled(false)
+                .encryptionEnabled(true)
                 .options(
                         TransportOptions.builder()
                                 .batchingEnabled(true)
@@ -75,40 +80,21 @@ public class SpigotTransport implements Listener {
                                 .maxPayloadSize(20000)
                                 .build()
                 )
-                .networkSender((channel, bytes) ->
-                {
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                .networkSender((PluginMessageSender<String>) (s, bytes) -> {
 
-                        if(availableCarriers.isEmpty())
-                        {
-                            System.out.println("NO CARRIER FOUND!");
-                            return;
-                        }
+                    if(availableCarriers.isEmpty())
+                        return;
 
-                        Player carrier = Bukkit.getPlayer(availableCarriers.stream().findAny().get());
+                    Player carrier = Bukkit.getPlayer(availableCarriers.stream().findAny().get());
 
-                        if (carrier == null) {
-                            System.out.println("NO CARRIER FOUND!AAA");
-                            return;
-                        }
+                    if (carrier == null)
+                        return;
 
-
-                        int length = bytes.readableBytes();
-
-                        byte[] data;
-                        if (length <= 65536) {
-                            data = reusableBuffer.get();
-                        } else {
-                            data = new byte[length];
-                        }
-
-                        bytes.readBytes(data, 0, length);
-                        carrier.sendPluginMessage(plugin, channel, data);
-
-
-                    });
+                    carrier.sendPluginMessage(plugin, s, bytes);
                 })
                 .build();
+
+        PluginMessageReceiver<String> receiver = PluginMessageReceiver.zeroCopyBridge(transportService);
 
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, pluginMessagingChannel);
@@ -119,9 +105,7 @@ public class SpigotTransport implements Listener {
                     if (ch.equalsIgnoreCase(pluginMessagingChannel)) {
                         transportService.ready(ch);
 
-                        ByteBuf nettyBuf = Unpooled.directBuffer(msg.length);
-                        nettyBuf.writeBytes(msg);
-                        transportService.onReceiveRaw(ch, nettyBuf);
+                        receiver.handle(ch, msg);
 
                     }
 
@@ -134,10 +118,8 @@ public class SpigotTransport implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
 
 
-        this.transportService.registerPacket(Packets.CONFIG_REQUEST, (stringPacketContext, configRequestPacket) -> {
-        });
-        this.transportService.registerPacket(Packets.TRANSLATION_REQUEST, (stringPacketContext, translationRequest) -> {
-        });
+        this.transportService.registerPacket(Packets.CONFIG_REQUEST, (stringPacketContext, configRequestPacket) -> {});
+        this.transportService.registerPacket(Packets.TRANSLATION_REQUEST, (stringPacketContext, translationRequest) -> {});
 
         this.transportService.registerPacket(Packets.TRANSLATION_RESULT, (stringPacketContext, translationResult) -> {
 
@@ -163,6 +145,7 @@ public class SpigotTransport implements Listener {
     public CompletableFuture<String> translate(UUID id, String text, String targetLang, String module) {
         if (text == null || text.isEmpty()) return CompletableFuture.completedFuture("");
 
+        //TODO DEDUPLICATION BEVOR DEN GANZEN PLACEHOLDER....
         DeduplicationKey key = new DeduplicationKey(text, targetLang, module);
         CompletableFuture<String> future = new CompletableFuture<>();
         future.orTimeout(15, TimeUnit.SECONDS).exceptionally(ex -> text);
