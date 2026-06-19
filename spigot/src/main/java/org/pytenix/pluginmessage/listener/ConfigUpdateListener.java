@@ -1,7 +1,7 @@
-package org.pytenix.bridge.listener;
+package org.pytenix.pluginmessage.listener;
 
 import org.pytenix.SpigotTranslator;
-import org.pytenix.bridge.SpigotTransport;
+import org.pytenix.pluginmessage.SpigotTransport;
 import org.pytenix.event.annotation.OmniSubscribe;
 import org.pytenix.event.register.ConfigUpdateEvent;
 

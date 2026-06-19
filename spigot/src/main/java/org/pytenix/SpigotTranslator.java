@@ -7,13 +7,14 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.pytenix.bridge.SpigotTransport;
+import org.pytenix.pluginmessage.SpigotTransport;
 import org.pytenix.config.ConfigService;
 import org.pytenix.config.ConfigurationFile;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.listener.JoinQuitListener;
 import org.pytenix.listener.LocaleChangeEvent;
 import org.pytenix.module.ModuleService;
+import org.pytenix.pluginmessage.VelocitySecretReader;
 import org.pytenix.util.CaffeineCache;
 import org.pytenix.util.TaskScheduler;
 import org.pytenix.util.TextComponentUtil;
@@ -70,8 +71,6 @@ public class SpigotTranslator extends JavaPlugin {
         this.configFile = new File(getDataFolder(), "proxy_sync_config.json");
 
 
-        //   this.spigotBridge = new SpigotBridge(this);
-        //  spigotBridge.setSecretKey(configurationFile.getLicenseKey());
 
 
 
@@ -83,7 +82,20 @@ public class SpigotTranslator extends JavaPlugin {
         };
 
 
-        this.spigotTransport = new SpigotTransport(this, "ABC", pluginMessagingChannel);
+
+
+        final VelocitySecretReader secretReader = new VelocitySecretReader();
+        final String secret = secretReader.loadVelocitySecret();
+
+        if(secret == null || secret.equals(""))
+        {
+            System.out.println("Cant read Velocity secret from Paper/Spigot config!");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+
+
+        this.spigotTransport = new SpigotTransport(this, secret, pluginMessagingChannel);
         Bukkit.getPluginManager().registerEvents(spigotTransport, this);
 
         loadConfigFromDisk();

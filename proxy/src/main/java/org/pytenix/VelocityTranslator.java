@@ -19,6 +19,11 @@ import org.pytenix.pluginmessage.ProxyTransport;
 import org.pytenix.util.CaffeineCache;
 import org.slf4j.Logger;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -82,6 +87,24 @@ public class VelocityTranslator {
             }
         };
 
+        final String secret = loadForwardingSecret();
+
+        if (secret == null || secret.isEmpty()) {
+            logger.error(" ");
+            logger.error("====================================================");
+            logger.error("OMNIPROXY INITIALISIERUNG FEHLGESCHLAGEN!");
+            logger.error("Die Datei 'forwarding.secret' wurde nicht gefunden.");
+            logger.error("Stelle sicher, dass 'player-forwarding-mode = \"modern\"' in der velocity.toml aktiv ist.");
+            logger.error("Das Plugin wird jetzt DEAKTIVIERT.");
+            logger.error("====================================================");
+            logger.error(" ");
+
+            server.getEventManager().unregisterListeners(this);
+
+            return;
+        }
+
+
         this.proxyTransport = new ProxyTransport(this, "ABC");
 
 
@@ -111,6 +134,24 @@ public class VelocityTranslator {
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) {
         proxyTransport.shutdown();
+    }
+
+    private String loadForwardingSecret() {
+        Path secretPath = Paths.get("forwarding.secret");
+
+        if (!Files.exists(secretPath)) {
+            return null;
+        }
+
+        try {
+            List<String> lines = Files.readAllLines(secretPath);
+            if (!lines.isEmpty()) {
+                return lines.get(0).trim();
+            }
+        } catch (IOException e) {
+            logger.error("Fehler beim Lesen der forwarding.secret Datei:", e);
+        }
+        return null;
     }
 
 

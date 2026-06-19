@@ -1,10 +1,7 @@
-package org.pytenix.bridge;
+package org.pytenix.pluginmessage;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -14,8 +11,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRegisterChannelEvent;
 import org.bukkit.event.player.PlayerUnregisterChannelEvent;
 import org.pytenix.SpigotTranslator;
-import org.pytenix.bridge.consumer.ConfigUpdateConsumer;
-import org.pytenix.bridge.listener.ConfigUpdateListener;
+import org.pytenix.pluginmessage.consumer.ConfigUpdateConsumer;
+import org.pytenix.pluginmessage.listener.ConfigUpdateListener;
 import org.pytenix.packets.Packets;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.UuidUtil;
@@ -51,8 +48,6 @@ public class SpigotTransport implements Listener {
     public boolean hasConfiguration;
 
     public String pluginMessagingChannel;
-
-    private final ThreadLocal<byte[]> reusableBuffer = ThreadLocal.withInitial(() -> new byte[65536]); // 64KB Puffer
 
     public Set<UUID> availableCarriers;
 

@@ -1,4 +1,4 @@
-package org.pytenix.bridge.consumer;
+package org.pytenix.pluginmessage.consumer;
 
 import lombok.AllArgsConstructor;
 import org.pytenix.SpigotTranslator;
