@@ -1,4 +1,4 @@
-package org.pytenix.module.modules.hologram;
+package org.pytenix.module.features.hologram;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListener;

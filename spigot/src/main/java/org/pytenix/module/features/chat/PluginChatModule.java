@@ -1,4 +1,4 @@
-package org.pytenix.module.modules.chat;
+package org.pytenix.module.features.chat;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;

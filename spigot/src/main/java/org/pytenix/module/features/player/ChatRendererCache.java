@@ -1,4 +1,4 @@
-package org.pytenix.module.modules.player;
+package org.pytenix.module.features.player;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

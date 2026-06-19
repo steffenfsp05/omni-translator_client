@@ -1,4 +1,4 @@
-package org.pytenix.module.modules.player;
+package org.pytenix.module.features.player;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.audience.Audience;

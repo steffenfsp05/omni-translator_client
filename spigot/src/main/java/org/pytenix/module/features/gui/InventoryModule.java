@@ -1,4 +1,4 @@
-package org.pytenix.module.modules.gui;
+package org.pytenix.module.features.gui;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.TranslatorModule;
-import org.pytenix.module.modules.gui.listener.PacketListener;
+import org.pytenix.module.features.gui.listener.PacketListener;
 
 import java.util.ArrayList;
 import java.util.List;

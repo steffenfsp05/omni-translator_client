@@ -1,4 +1,4 @@
-package org.pytenix.module.modules.chat;
+package org.pytenix.module.features.chat;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;

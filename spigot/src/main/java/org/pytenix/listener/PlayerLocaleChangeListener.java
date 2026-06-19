@@ -9,11 +9,11 @@ import org.bukkit.event.player.PlayerLocaleChangeEvent;
 import org.pytenix.TranslatorPlugin;
 
 //ONLY FOR DEMO SERVER
-public class LocaleChangeEvent implements Listener {
+public class PlayerLocaleChangeListener implements Listener {
 
     public TranslatorPlugin translator;
 
-    public LocaleChangeEvent(TranslatorPlugin translator) {
+    public PlayerLocaleChangeListener(TranslatorPlugin translator) {
         this.translator = translator;
     }
 

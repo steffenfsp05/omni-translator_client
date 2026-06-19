@@ -1,11 +1,11 @@
 package org.pytenix.module;
 
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.module.modules.chat.PluginChatModule;
-import org.pytenix.module.modules.gui.InventoryModule;
-import org.pytenix.module.modules.hologram.HologramModule;
-import org.pytenix.module.modules.player.LiveChatModule;
-import org.pytenix.module.modules.signs.SignsModule;
+import org.pytenix.module.features.chat.PluginChatModule;
+import org.pytenix.module.features.gui.InventoryModule;
+import org.pytenix.module.features.hologram.HologramModule;
+import org.pytenix.module.features.player.LiveChatModule;
+import org.pytenix.module.features.signs.SignsModule;
 
 import java.util.ArrayList;
 import java.util.List;

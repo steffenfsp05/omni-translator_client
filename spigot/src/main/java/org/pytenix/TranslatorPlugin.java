@@ -12,8 +12,8 @@ import org.pytenix.cache.impl.CaffeineCacheProvider;
 import org.pytenix.config.ConfigService;
 import org.pytenix.config.ConfigurationFile;
 import org.pytenix.entity.ServerConfiguration;
-import org.pytenix.listener.JoinQuitListener;
-import org.pytenix.listener.LocaleChangeEvent;
+import org.pytenix.listener.PlayerJoinQuitListener;
+import org.pytenix.listener.PlayerLocaleChangeListener;
 import org.pytenix.module.ModuleService;
 import org.pytenix.pluginmessage.SpigotTransport;
 import org.pytenix.pluginmessage.VelocitySecretReader;
@@ -95,8 +95,8 @@ public class TranslatorPlugin extends JavaPlugin {
         this.textComponentUtil = new TextComponentUtil(translatorService);
 
 
-        Bukkit.getPluginManager().registerEvents(new JoinQuitListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new LocaleChangeEvent(this), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerJoinQuitListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerLocaleChangeListener(this), this);
 
         moduleService = new ModuleService(this);
 

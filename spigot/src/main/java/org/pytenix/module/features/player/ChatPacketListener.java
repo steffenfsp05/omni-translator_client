@@ -1,4 +1,4 @@
-package org.pytenix.module.modules.player;
+package org.pytenix.module.features.player;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListener;

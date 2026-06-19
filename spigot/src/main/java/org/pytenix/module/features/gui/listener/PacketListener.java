@@ -1,4 +1,4 @@
-package org.pytenix.module.modules.gui.listener;
+package org.pytenix.module.features.gui.listener;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
@@ -9,7 +9,7 @@ import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.pytenix.PlayerLocaleService;
-import org.pytenix.module.modules.gui.InventoryModule;
+import org.pytenix.module.features.gui.InventoryModule;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
