@@ -1,4 +1,6 @@
-package org.pytenix.placeholder.protect;
+package org.pytenix.placeholder.protect.impl;
+
+import org.pytenix.placeholder.protect.PlayerNameProtector;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,16 +10,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PlayernameProtector {
+public class DefaultPlayerNameProtector implements PlayerNameProtector {
 
 
     private static final Pattern ULTIMATE_PATTERN = Pattern.compile("((?:[&§][0-9a-fk-or])*)([a-zA-Z0-9_]+)");
     private final Set<String> onlinePlayerNames = ConcurrentHashMap.newKeySet();
-
-
-    public PlayernameProtector() {
-
-    }
 
 
     public void addPlayer(String name) {
@@ -82,8 +79,5 @@ public class PlayernameProtector {
         return result;
     }
 
-
-    public record ProtectionResult(String maskedText, Map<String, String> replacements) {
-    }
 }
 

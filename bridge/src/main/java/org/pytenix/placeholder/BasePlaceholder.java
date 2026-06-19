@@ -9,5 +9,5 @@ public interface BasePlaceholder {
     //  public String fromPlaceholder(UUID id, String text);
 
 
-    public Pattern getPattern();
+    Pattern getPattern();
 }

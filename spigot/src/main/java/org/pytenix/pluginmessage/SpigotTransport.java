@@ -11,9 +11,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRegisterChannelEvent;
 import org.bukkit.event.player.PlayerUnregisterChannelEvent;
 import org.pytenix.SpigotTranslator;
+import org.pytenix.packets.PacketRegistry;
 import org.pytenix.pluginmessage.consumer.ConfigUpdateConsumer;
 import org.pytenix.pluginmessage.listener.ConfigUpdateListener;
-import org.pytenix.packets.Packets;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.UuidUtil;
 import org.transport.TransportOptions;
@@ -27,7 +27,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class SpigotTransport implements Listener {
 
@@ -61,7 +63,6 @@ public class SpigotTransport implements Listener {
         plugin.getTranslatorService().getEventService().register(new ConfigUpdateListener(plugin));
 
 
-
         //TODO IMPLEMENT VELOCITY SECRET FROM CFG!
         this.transportService = TransportService.<String>builder()
                 .packetService(new DefaultPacketService<>())
@@ -77,7 +78,7 @@ public class SpigotTransport implements Listener {
                 )
                 .networkSender((PluginMessageSender<String>) (s, bytes) -> {
 
-                    if(availableCarriers.isEmpty())
+                    if (availableCarriers.isEmpty())
                         return;
 
                     Player carrier = Bukkit.getPlayer(availableCarriers.stream().findAny().get());
@@ -113,10 +114,12 @@ public class SpigotTransport implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
 
 
-        this.transportService.registerPacket(Packets.CONFIG_REQUEST, (stringPacketContext, configRequestPacket) -> {});
-        this.transportService.registerPacket(Packets.TRANSLATION_REQUEST, (stringPacketContext, translationRequest) -> {});
+        this.transportService.registerPacket(PacketRegistry.CONFIG_REQUEST, (stringPacketContext, configRequestPacket) -> {
+        });
+        this.transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST, (stringPacketContext, translationRequest) -> {
+        });
 
-        this.transportService.registerPacket(Packets.TRANSLATION_RESULT, (stringPacketContext, translationResult) -> {
+        this.transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT, (stringPacketContext, translationResult) -> {
 
             UUID id = UuidUtil.fromByteString(translationResult.getRequestId());
             String result = translationResult.getResult();
@@ -133,7 +136,7 @@ public class SpigotTransport implements Listener {
 
         });
 
-        this.transportService.registerPacket(Packets.SERVER_CONFIG, new ConfigUpdateConsumer(plugin, plugin.getTranslatorService()));
+        this.transportService.registerPacket(PacketRegistry.SERVER_CONFIG, new ConfigUpdateConsumer(plugin, plugin.getTranslatorService()));
 
     }
 
@@ -162,7 +165,7 @@ public class SpigotTransport implements Listener {
                     .setModule(module)
                     .build();
 
-            transportService.send(pluginMessagingChannel, Packets.TRANSLATION_REQUEST, req);
+            transportService.send(pluginMessagingChannel, PacketRegistry.TRANSLATION_REQUEST, req);
         }
 
         return future;
@@ -176,19 +179,19 @@ public class SpigotTransport implements Listener {
             System.out.println("CHANNEL REGISTERED!" + pluginMessagingChannel);
 
 
-
             transportService.ready(channel);
 
             availableCarriers.add(event.getPlayer().getUniqueId());
 
             if (!hasConfiguration)
-                System.out.println(transportService.send(channel, Packets.CONFIG_REQUEST, NetworkPackets.ConfigRequestPacket.newBuilder()
+                System.out.println(transportService.send(channel, PacketRegistry.CONFIG_REQUEST, NetworkPackets.ConfigRequestPacket.newBuilder()
                         .setTimestamp(System.currentTimeMillis())
                         .build()));
 
 
         }
     }
+
     @EventHandler
     public void onChannelUnregister(PlayerUnregisterChannelEvent event) {
         if (event.getChannel().equals(pluginMessagingChannel)) {
@@ -197,18 +200,14 @@ public class SpigotTransport implements Listener {
 
             availableCarriers.remove(event.getPlayer().getUniqueId());
 
-            if(availableCarriers.isEmpty())
-            {
+            if (availableCarriers.isEmpty()) {
                 transportService.disconnect(channel);
                 transportService.connect(channel);
             }
 
 
-
-
         }
     }
-
 
 
     public record DeduplicationKey(String text, String lang, String module) {

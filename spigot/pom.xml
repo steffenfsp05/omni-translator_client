@@ -56,7 +56,8 @@
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.2.15.Final</version>
-            <scope>provided</scope> </dependency>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.example</groupId>
             <artifactId>bridge</artifactId>

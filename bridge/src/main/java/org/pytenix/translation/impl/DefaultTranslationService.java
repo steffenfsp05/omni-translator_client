@@ -1,23 +1,27 @@
-package org.pytenix;
+package org.pytenix.translation.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import lombok.Setter;
-import org.jspecify.annotations.Nullable;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.event.EventService;
+import org.pytenix.event.impl.DefaultEventService;
 import org.pytenix.placeholder.GradientService;
 import org.pytenix.placeholder.PlaceholderService;
+import org.pytenix.placeholder.impl.DefaultGradientService;
+import org.pytenix.placeholder.impl.DefaultPlaceholderService;
 import org.pytenix.placeholder.listener.ConfigUpdateListener;
 import org.pytenix.proto.generated.NetworkPackets;
+import org.pytenix.translation.TranslationProcessor;
+import org.pytenix.translation.TranslatorService;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Getter
-public abstract class TranslatorService {
+public class DefaultTranslationService implements TranslatorService {
 
 
     final GradientService gradientService;
@@ -29,17 +33,18 @@ public abstract class TranslatorService {
 
 
     private final EventService eventService;
-
+    private final TranslationProcessor translationProcessor;
     @Setter
     private org.pytenix.entity.ServerConfiguration translationConfiguration;
 
+    public DefaultTranslationService(TranslationProcessor translationProcessor) {
 
-    public TranslatorService() {
+        this.translationProcessor = translationProcessor;
 
-        this.placeholderService = new PlaceholderService(this);
-        this.gradientService = new GradientService();
+        this.placeholderService = new DefaultPlaceholderService(this);
+        this.gradientService = new DefaultGradientService();
 
-        this.eventService = new EventService();
+        this.eventService = new DefaultEventService();
 
         eventService.register(new ConfigUpdateListener(placeholderService));
 
@@ -47,7 +52,9 @@ public abstract class TranslatorService {
     }
 
 
-    protected abstract CompletableFuture<String> process(UUID id, String text, String targetLang, String module);
+    public CompletableFuture<String> process(UUID id, String text, String targetLang, String module) {
+        return translationProcessor.endpointTranslation(id, text, targetLang, module);
+    }
 
 
     public String preparePayload(UUID batchId, String text) {
@@ -87,7 +94,7 @@ public abstract class TranslatorService {
     public String handleGradient(UUID uuid, String text) {
         GradientService.ExtractionResult extractionResult = gradientService.stripAndAnalyze(text);
         if (extractionResult.gradients() != null) {
-            gradientService.cachedGradients.put(uuid, extractionResult.gradients());
+            gradientService.cacheGradient(uuid, extractionResult.gradients());
             return extractionResult.cleanText();
         }
         return text;
@@ -134,10 +141,12 @@ public abstract class TranslatorService {
             }
 
             if (gradientService != null) {
-                @Nullable Map<String, GradientService.GradientData> gradientInfo = gradientService.cachedGradients.getIfPresent(lineUuid);
+
+                Map<String, GradientService.GradientData> gradientInfo = gradientService.getCachedGradient(lineUuid);
+
                 if (gradientInfo != null) {
                     currentLine = gradientService.restoreGradients(lineUuid, currentLine);
-                    gradientService.cachedGradients.invalidate(lineUuid);
+                    gradientService.invalidCachedGradient(lineUuid);
                 }
             }
 
@@ -152,3 +161,4 @@ public abstract class TranslatorService {
     }
 
 }
+

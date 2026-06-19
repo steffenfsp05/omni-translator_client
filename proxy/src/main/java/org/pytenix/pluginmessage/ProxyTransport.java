@@ -6,11 +6,8 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
 import org.pytenix.VelocityTranslator;
-import org.pytenix.packets.Packets;
+import org.pytenix.packets.PacketRegistry;
 import org.pytenix.pluginmessage.consumer.ConfigRequestConsumer;
 import org.pytenix.pluginmessage.consumer.TranslationRequestConsumer;
 import org.pytenix.proto.generated.NetworkPackets;
@@ -20,7 +17,6 @@ import org.transport.io.minecraft.PluginMessageReceiver;
 import org.transport.io.minecraft.PluginMessageSender;
 import org.transport.service.impl.DefaultPacketService;
 
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -61,7 +57,7 @@ public class ProxyTransport {
 
         PluginMessageReceiver<RegisteredServer> receiver = PluginMessageReceiver.autoConnectBridge(transportService);
 
-        velocityTranslator.getProxyServer().getEventManager().register(velocityTranslator,new Object() {
+        velocityTranslator.getProxyServer().getEventManager().register(velocityTranslator, new Object() {
             @Subscribe
             public void onPluginMessage(PluginMessageEvent event) {
 
@@ -74,11 +70,11 @@ public class ProxyTransport {
             }
         });
 
-        this.transportService.registerPacket(Packets.TRANSLATION_RESULT, (stringPacketContext, translationResult) -> {
+        this.transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT, (stringPacketContext, translationResult) -> {
         });
 
-        this.transportService.registerPacket(Packets.CONFIG_REQUEST, new ConfigRequestConsumer(velocityTranslator.getTranslatorService()));
-        this.transportService.registerPacket(Packets.TRANSLATION_REQUEST, new TranslationRequestConsumer(velocityTranslator, apiExecutor));
+        this.transportService.registerPacket(PacketRegistry.CONFIG_REQUEST, new ConfigRequestConsumer(velocityTranslator.getTranslatorService()));
+        this.transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST, new TranslationRequestConsumer(velocityTranslator, apiExecutor));
 
     }
 
@@ -87,7 +83,7 @@ public class ProxyTransport {
 
             if (!server.getPlayersConnected().isEmpty()) {
 
-                transportService.send(server, Packets.SERVER_CONFIG, packet);
+                transportService.send(server, PacketRegistry.SERVER_CONFIG, packet);
             }
         }
     }

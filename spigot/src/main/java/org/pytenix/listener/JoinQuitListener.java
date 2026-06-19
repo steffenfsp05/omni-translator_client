@@ -5,20 +5,20 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.pytenix.SpigotTranslator;
-import org.pytenix.TranslatorService;
-import org.pytenix.placeholder.protect.PlayernameProtector;
+import org.pytenix.placeholder.protect.PlayerNameProtector;
+import org.pytenix.translation.TranslatorService;
 
 public class JoinQuitListener implements Listener {
 
     final SpigotTranslator spigotTranslator;
     final TranslatorService translatorService;
-    final PlayernameProtector playernameProtector;
+    final PlayerNameProtector playernameProtector;
 
 
     public JoinQuitListener(SpigotTranslator plugin) {
         this.spigotTranslator = plugin;
         this.translatorService = plugin.getTranslatorService();
-        this.playernameProtector = translatorService.getPlaceholderService().getPlayernameProtector();
+        this.playernameProtector = translatorService.getPlaceholderService().getPlayerNameProtector();
 
     }
 

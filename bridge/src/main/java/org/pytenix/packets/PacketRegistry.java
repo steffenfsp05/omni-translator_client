@@ -3,7 +3,7 @@ package org.pytenix.packets;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.transport.service.impl.PacketDefinition;
 
-public class Packets {
+public class PacketRegistry {
 
     public static final PacketDefinition<NetworkPackets.ConfigRequestPacket> CONFIG_REQUEST =
             new PacketDefinition<>(

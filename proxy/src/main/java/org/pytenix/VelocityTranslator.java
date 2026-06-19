@@ -11,12 +11,15 @@ import lombok.Getter;
 import org.pytenix.backend.GeoService;
 import org.pytenix.backend.OmniConnectionService;
 import org.pytenix.backend.RestfulService;
+import org.pytenix.cache.CacheProvider;
+import org.pytenix.cache.impl.CaffeineCacheProvider;
 import org.pytenix.config.ConfigService;
 import org.pytenix.config.ConfigurationFile;
 import org.pytenix.listener.PlayerConnectionChangeListener;
 import org.pytenix.listener.ProxyPingListener;
 import org.pytenix.pluginmessage.ProxyTransport;
-import org.pytenix.util.CaffeineCache;
+import org.pytenix.translation.TranslatorService;
+import org.pytenix.translation.impl.DefaultTranslationService;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -24,8 +27,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 @Plugin(
         id = "translator",
@@ -40,7 +41,7 @@ public class VelocityTranslator {
     private final ProxyServer server;
     private final Logger logger;
     @Getter
-    private final CaffeineCache caffeineCache;
+    private final CacheProvider<String, String> caffeineCache;
     @Getter
     private final ProxyServer proxyServer;
     @Getter
@@ -61,7 +62,7 @@ public class VelocityTranslator {
         this.server = server;
         this.proxyServer = server;
         this.logger = logger;
-        this.caffeineCache = new CaffeineCache();
+        this.caffeineCache = new CaffeineCacheProvider();
 
 
         this.configService = new ConfigService();
@@ -80,12 +81,8 @@ public class VelocityTranslator {
     public void onProxyInitialization(ProxyInitializeEvent event) {
 
 
-        this.translatorService = new TranslatorService() {
-            @Override
-            protected CompletableFuture<String> process(UUID id, String text, String targetLang, String module) {
-                return restfulService.sendTranslationRequest(id, text, targetLang, module);
-            }
-        };
+        this.translatorService = new DefaultTranslationService((id, text, targetLang, module) ->
+                restfulService.sendTranslationRequest(id, text, targetLang, module));
 
         final String secret = loadForwardingSecret();
 

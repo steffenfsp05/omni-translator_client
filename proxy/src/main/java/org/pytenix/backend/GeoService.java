@@ -23,6 +23,7 @@ public class GeoService {
     private final ConcurrentHashMap<UUID, CompletableFuture<String>> queue = new ConcurrentHashMap<>();
     private final List<QueuedRequest> pendingRequests = new ArrayList<>();
     private ScheduledTask flushTask = null;
+
     public GeoService(VelocityTranslator velocityTranslator, ProxyServer proxyServer, OmniConnectionService connectionManager) {
         this.velocityTranslator = velocityTranslator;
         this.proxyServer = proxyServer;

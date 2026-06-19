@@ -1,13 +1,13 @@
 package org.pytenix.backend;
 
 import com.velocitypowered.api.scheduler.ScheduledTask;
-import org.pytenix.TranslatorService;
 import org.pytenix.VelocityTranslator;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.event.EventService;
 import org.pytenix.event.register.ConfigUpdateEvent;
 import org.pytenix.pluginmessage.ProxyTransport;
 import org.pytenix.proto.generated.NetworkPackets;
+import org.pytenix.translation.TranslatorService;
 import org.pytenix.util.UuidUtil;
 
 import java.util.ArrayList;
@@ -29,6 +29,8 @@ public class RestfulService {
     private final ConcurrentHashMap<UUID, CompletableFuture<String>> queue = new ConcurrentHashMap<>();
     private final List<QueuedRequest> pendingRequests = new ArrayList<>();
     private ScheduledTask flushTask = null;
+
+
     public RestfulService(VelocityTranslator velocityTranslator, OmniConnectionService connectionManager) {
         this.velocityTranslator = velocityTranslator;
         this.connectionManager = connectionManager;

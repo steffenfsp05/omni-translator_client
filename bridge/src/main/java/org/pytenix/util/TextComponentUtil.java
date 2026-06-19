@@ -7,7 +7,7 @@ import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.pytenix.TranslatorService;
+import org.pytenix.translation.TranslatorService;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;

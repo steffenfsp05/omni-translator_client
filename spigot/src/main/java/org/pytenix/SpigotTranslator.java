@@ -7,22 +7,22 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.pytenix.pluginmessage.SpigotTransport;
+import org.pytenix.cache.impl.CaffeineCacheProvider;
 import org.pytenix.config.ConfigService;
 import org.pytenix.config.ConfigurationFile;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.listener.JoinQuitListener;
 import org.pytenix.listener.LocaleChangeEvent;
 import org.pytenix.module.ModuleService;
+import org.pytenix.pluginmessage.SpigotTransport;
 import org.pytenix.pluginmessage.VelocitySecretReader;
-import org.pytenix.util.CaffeineCache;
+import org.pytenix.translation.TranslatorService;
+import org.pytenix.translation.impl.DefaultTranslationService;
 import org.pytenix.util.TaskScheduler;
 import org.pytenix.util.TextComponentUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 
 @Getter
@@ -31,7 +31,7 @@ public class SpigotTranslator extends JavaPlugin {
     public String pluginMessagingChannel;
     @Getter
     TextComponentUtil textComponentUtil;
-    CaffeineCache caffeineCache;
+    CaffeineCacheProvider caffeineCache;
     LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.builder()
             .character('§')
             .extractUrls()
@@ -53,10 +53,9 @@ public class SpigotTranslator extends JavaPlugin {
 
         this.pluginMessagingChannel = "translator:main";
 
-        this.caffeineCache = new CaffeineCache();
+        this.caffeineCache = new CaffeineCacheProvider();
 
         this.configService = new ConfigService();
-
 
 
         if (!configService.exists("config.json")) {
@@ -71,24 +70,14 @@ public class SpigotTranslator extends JavaPlugin {
         this.configFile = new File(getDataFolder(), "proxy_sync_config.json");
 
 
-
-
-
-        this.translatorService = new TranslatorService() {
-            @Override
-            protected CompletableFuture<String> process(UUID id, String text, String targetLang, String module) {
-                return getSpigotTransport().translate(id, text, targetLang, module);
-            }
-        };
-
-
+        this.translatorService = new DefaultTranslationService((id, text, targetLang, module) ->
+                getSpigotTransport().translate(id, text, targetLang, module));
 
 
         final VelocitySecretReader secretReader = new VelocitySecretReader();
         final String secret = secretReader.loadVelocitySecret();
 
-        if(secret == null || secret.equals(""))
-        {
+        if (secret == null || secret.equals("")) {
             System.out.println("Cant read Velocity secret from Paper/Spigot config!");
             Bukkit.getPluginManager().disablePlugin(this);
             return;

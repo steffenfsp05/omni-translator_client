@@ -1,6 +1,7 @@
 package org.pytenix.pluginmessage;
 
 import org.bukkit.configuration.file.YamlConfiguration;
+
 import java.io.File;
 
 public class VelocitySecretReader {

@@ -15,10 +15,10 @@ The project is built as a multi-module Maven project, featuring native integrati
 
 * **Real-Time Translation:** Dynamically translates content for each player based on their individual locale settings.
 * **Comprehensive Module Coverage (Spigot):**
-    *  **Live Chat:** Intercepts and translates player chat and plugin-broadcasted messages.
-    *  **Signs:** Provides dynamic translation for text written on signs.
-    *  **Holograms:** Compatible with popular hologram systems via packet interception.
-    *  **Inventories/GUIs:** Translates item names and descriptions within server-side GUIs.
+    * **Live Chat:** Intercepts and translates player chat and plugin-broadcasted messages.
+    * **Signs:** Provides dynamic translation for text written on signs.
+    * **Holograms:** Compatible with popular hologram systems via packet interception.
+    * **Inventories/GUIs:** Translates item names and descriptions within server-side GUIs.
 * **High Performance:** Utilizes efficient caching via `CaffeineCache` and asynchronous task execution to maintain
   server TPS.
 * **Secure Communication:** Uses Protocol Buffers (`packets.proto`) for standardized data exchange and AES
@@ -73,6 +73,5 @@ mvn clean install
 * **Google Protocol Buffers (Protobuf):** Used for defining (`packets.proto`) and exchanging network packets
   like `TranslationRequest` and `ConfigRequestPacket`.
 * **Caffeine:** A high-performance caching library used to reduce redundant translation API calls.
-
 
 *This project (GroupId: `org.example`, ArtifactId: `Omni`) is currently under development in version `1.0-SNAPSHOT`.*

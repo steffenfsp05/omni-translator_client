@@ -3,8 +3,8 @@ package org.pytenix.module;
 import lombok.Getter;
 import org.pytenix.PlayerLocaleService;
 import org.pytenix.SpigotTranslator;
-import org.pytenix.TranslatorService;
 import org.pytenix.entity.ServerConfiguration;
+import org.pytenix.translation.TranslatorService;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -48,10 +48,15 @@ public abstract class TranslatorModule {
     }
 
 
+    private String generateKey(String text, String lang) {
+        return text + ":" + lang;
+    }
+
+
     public CompletableFuture<String> translate(String text, String locale) {
 
 
-        String cached = spigotTranslator.getCaffeineCache().get(text, locale);
+        String cached = spigotTranslator.getCaffeineCache().get(generateKey(text, locale));
 
         if (cached != null)
             return CompletableFuture.completedFuture(cached);
@@ -59,7 +64,7 @@ public abstract class TranslatorModule {
         return translatorService.translate(text, locale, this.moduleName).whenComplete((result, throwable) -> {
 
             if (throwable == null && result != null) {
-                spigotTranslator.getCaffeineCache().set(text, locale, result);
+                spigotTranslator.getCaffeineCache().set(generateKey(text, locale), result);
             }
 
         });

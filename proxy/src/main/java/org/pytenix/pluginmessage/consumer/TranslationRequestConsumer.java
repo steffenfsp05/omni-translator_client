@@ -2,7 +2,7 @@ package org.pytenix.pluginmessage.consumer;
 
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import org.pytenix.VelocityTranslator;
-import org.pytenix.packets.Packets;
+import org.pytenix.packets.PacketRegistry;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.UuidUtil;
 import org.transport.service.PacketContext;
@@ -22,6 +22,10 @@ public class TranslationRequestConsumer implements PacketReceiveConsumer<Registe
     }
 
 
+    private String generateKey(String text, String lang) {
+        return text + ":" + lang;
+    }
+
     @Override
     public void accept(PacketContext<RegisteredServer> context, NetworkPackets.TranslationRequest translationRequest) {
 
@@ -30,11 +34,12 @@ public class TranslationRequestConsumer implements PacketReceiveConsumer<Registe
         String text = translationRequest.getText();
         String lang = translationRequest.getTargetLang();
 
+        String cacheKey = generateKey(text, lang);
 
-        String cached = velocityTranslator.getCaffeineCache().get(text, lang);
+        String cached = velocityTranslator.getCaffeineCache().get(cacheKey);
 
         if (cached != null) {
-            context.reply(Packets.TRANSLATION_RESULT,
+            context.reply(PacketRegistry.TRANSLATION_RESULT,
                     NetworkPackets.TranslationResult.newBuilder()
                             .setRequestId(translationRequest.getRequestId())
                             .setResult(cached)
@@ -45,12 +50,12 @@ public class TranslationRequestConsumer implements PacketReceiveConsumer<Registe
                     .thenAcceptAsync(translatedText -> {
                         String finalString = (isSuccessfull(translatedText) && !translatedText.equals(text)) ? translatedText : text;
 
-                        context.reply(Packets.TRANSLATION_RESULT,
+                        context.reply(PacketRegistry.TRANSLATION_RESULT,
                                 NetworkPackets.TranslationResult.newBuilder()
                                         .setRequestId(translationRequest.getRequestId())
                                         .setResult(finalString)
                                         .build());
-                        velocityTranslator.getCaffeineCache().set(text, lang, finalString);
+                        velocityTranslator.getCaffeineCache().set(cacheKey, finalString);
 
                     }, executor);
         }
