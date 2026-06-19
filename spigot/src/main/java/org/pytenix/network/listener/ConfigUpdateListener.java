@@ -1,9 +1,9 @@
-package org.pytenix.pluginmessage.listener;
+package org.pytenix.network.listener;
 
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.event.annotation.OmniSubscribe;
 import org.pytenix.event.register.ConfigUpdateEvent;
-import org.pytenix.pluginmessage.SpigotTransport;
+import org.pytenix.network.SpigotTransport;
 
 import java.io.IOException;
 

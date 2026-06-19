@@ -1,4 +1,4 @@
-package org.pytenix.pluginmessage;
+package org.pytenix.network;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -12,8 +12,8 @@ import org.bukkit.event.player.PlayerRegisterChannelEvent;
 import org.bukkit.event.player.PlayerUnregisterChannelEvent;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.packets.PacketRegistry;
-import org.pytenix.pluginmessage.consumer.ConfigUpdateConsumer;
-import org.pytenix.pluginmessage.listener.ConfigUpdateListener;
+import org.pytenix.network.consumer.ConfigUpdateConsumer;
+import org.pytenix.network.listener.ConfigUpdateListener;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.UuidUtil;
 import org.transport.TransportOptions;

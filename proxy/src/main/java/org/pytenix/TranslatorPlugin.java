@@ -17,7 +17,7 @@ import org.pytenix.config.ConfigService;
 import org.pytenix.config.ConfigurationFile;
 import org.pytenix.listener.PlayerConnectionChangeListener;
 import org.pytenix.listener.ProxyPingListener;
-import org.pytenix.pluginmessage.ProxyTransport;
+import org.pytenix.network.ProxyTransport;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.impl.DefaultTranslationService;
 import org.slf4j.Logger;

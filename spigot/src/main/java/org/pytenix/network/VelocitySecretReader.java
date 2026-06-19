@@ -1,4 +1,4 @@
-package org.pytenix.pluginmessage;
+package org.pytenix.network;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 

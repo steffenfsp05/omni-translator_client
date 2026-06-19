@@ -5,7 +5,7 @@ import org.pytenix.TranslatorPlugin;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.event.EventService;
 import org.pytenix.event.register.ConfigUpdateEvent;
-import org.pytenix.pluginmessage.ProxyTransport;
+import org.pytenix.network.ProxyTransport;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.util.UuidUtil;

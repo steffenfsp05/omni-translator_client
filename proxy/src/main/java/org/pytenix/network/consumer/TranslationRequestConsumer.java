@@ -1,4 +1,4 @@
-package org.pytenix.pluginmessage.consumer;
+package org.pytenix.network.consumer;
 
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import org.pytenix.TranslatorPlugin;

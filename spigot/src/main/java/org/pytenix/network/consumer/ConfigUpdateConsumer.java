@@ -1,4 +1,4 @@
-package org.pytenix.pluginmessage.consumer;
+package org.pytenix.network.consumer;
 
 import lombok.AllArgsConstructor;
 import org.pytenix.TranslatorPlugin;

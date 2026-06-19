@@ -1,4 +1,4 @@
-package org.pytenix.pluginmessage;
+package org.pytenix.network;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
@@ -8,8 +8,8 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.packets.PacketRegistry;
-import org.pytenix.pluginmessage.consumer.ConfigRequestConsumer;
-import org.pytenix.pluginmessage.consumer.TranslationRequestConsumer;
+import org.pytenix.network.consumer.ConfigRequestConsumer;
+import org.pytenix.network.consumer.TranslationRequestConsumer;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.transport.TransportOptions;
 import org.transport.TransportService;
