@@ -31,5 +31,17 @@ public class PacketRegistry {
                     NetworkPackets.TranslationResult.parser()
             );
 
+    public static final PacketDefinition<NetworkPackets.GeoResultPacket> GEO_RESULT =
+            new PacketDefinition<>(
+                    5,
+                    NetworkPackets.GeoResultPacket.parser()
+            );
+
+    public static final PacketDefinition<NetworkPackets.GeoRequestPacket> GEO_REQUEST =
+            new PacketDefinition<>(
+                    6,
+                    NetworkPackets.GeoRequestPacket.parser()
+            );
+
 
 }

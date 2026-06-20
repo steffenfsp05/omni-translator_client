@@ -13,18 +13,6 @@ message ServerConfiguration {
   repeated string words = 4;
 }
 
-message GeoBatchRequest {
-  repeated GeoRequestPacket requests = 1;
-}
-
-message GeoBatchResult {
-  repeated GeoResultPacket results = 1;
-}
-
-
-
-
-
 message GeoRequestPacket
 {
   bytes request_id = 1;
@@ -36,7 +24,6 @@ message GeoResultPacket
   bytes request_id = 1;
   string language = 2;
 }
-
 
 
 message ConfigRequestPacket {
@@ -51,23 +38,10 @@ message TranslationRequest {
 }
 
 
-message TranslationBatchRequest {
-  string origin_server = 1;
-  repeated TranslationRequest requests = 2;
-}
-
-
-
-message TranslationBatchResult {
-  string origin_server = 1;
-  repeated TranslationResult results = 2;
-}
-
 message TranslationResult {
   bytes request_id = 1;
   string result = 2;
 }
-
 
 
 message Chunk {
@@ -80,12 +54,13 @@ message Chunk {
 
 message PacketWrapper {
   oneof payload {
-    TranslationBatchRequest batch_request = 1;
-    TranslationBatchResult batch_result = 2;
-    Chunk chunk = 3;
-    ServerConfiguration config = 4;
-    ConfigRequestPacket config_request = 5;
-    GeoBatchRequest geo_batch_request = 7;
-    GeoBatchResult geo_batch_result = 8;
+    ServerConfiguration config = 1;
+    ConfigRequestPacket config_request = 2;
+    GeoRequestPacket geo_request = 3;
+    GeoResultPacket geo_result = 4;
+    TranslationRequest translation_request = 5;
+    TranslationResult translation_result = 6;
+    Chunk chunk = 7;
+
   }
 }

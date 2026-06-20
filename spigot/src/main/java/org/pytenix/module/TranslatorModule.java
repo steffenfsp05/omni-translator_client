@@ -1,8 +1,9 @@
-package org.pytenix.service;
+package org.pytenix.module;
 
 import lombok.Getter;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.entity.ServerConfiguration;
+import org.pytenix.service.PlayerLocaleService;
 import org.pytenix.translation.TranslatorService;
 
 import java.util.UUID;

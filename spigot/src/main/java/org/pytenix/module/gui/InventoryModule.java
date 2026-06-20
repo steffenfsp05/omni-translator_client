@@ -8,7 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.service.TranslatorModule;
+import org.pytenix.module.TranslatorModule;
 import org.pytenix.module.gui.listener.PacketListener;
 
 import java.util.ArrayList;

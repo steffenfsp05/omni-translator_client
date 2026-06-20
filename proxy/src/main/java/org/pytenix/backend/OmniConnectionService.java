@@ -1,20 +1,27 @@
 package org.pytenix.backend;
 
+import com.google.protobuf.MessageLite;
+import com.google.protobuf.Parser;
 import com.velocitypowered.api.proxy.ProxyServer;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.entity.ServerConfiguration;
+import org.pytenix.packets.PacketRegistry;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.FastByteArrayOutputStream;
+import org.transport.TransportOptions;
+import org.transport.TransportService;
+import org.transport.service.impl.DefaultPacketService;
+import org.transport.service.impl.PacketDefinition;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -27,32 +34,63 @@ public class OmniConnectionService {
     private final String apiKey;
 
     private final HttpClient httpClient;
-    private final ExecutorService parsingExecutor;
+    private WebSocket webSocket;
 
     private final AtomicInteger reconnectAttempts = new AtomicInteger(0);
     private final ProxyServer proxyServer;
     private final TranslatorPlugin translatorPlugin;
-    private WebSocket webSocket;
+
     private RestfulService restfulService;
     private GeoService geoService;
+
+    private final TransportService<WebSocket> transportService;
 
     public OmniConnectionService(TranslatorPlugin translatorPlugin, String apiKey, ProxyServer proxyServer) {
         this.translatorPlugin = translatorPlugin;
         this.proxyServer = proxyServer;
         this.apiKey = apiKey;
-
         this.url = "ws://" + translatorPlugin.getRemoteAddress() + "/ws/omni";
 
         this.httpClient = HttpClient.newBuilder()
                 .executor(Executors.newCachedThreadPool())
                 .build();
 
-        this.parsingExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+        this.transportService = TransportService.<WebSocket>builder()
+                .packetService(new DefaultPacketService<>())
+                .options(TransportOptions.builder().build())
+                .encryptionEnabled(false)
+                .networkSender(this::sendToWebSocket)
+                .build();
     }
 
     public void setServices(RestfulService restfulService, GeoService geoService) {
         this.restfulService = restfulService;
         this.geoService = geoService;
+        registerPackets();
+    }
+
+    private void registerPackets() {
+
+        // Config Update registrieren
+        transportService.registerPacket(PacketRegistry.SERVER_CONFIG, (ctx, protoConfig) -> {
+            if (restfulService != null) {
+
+                ServerConfiguration config =        translatorPlugin.getTranslatorService().convertConfigToNormal(protoConfig);
+                restfulService.handleConfigUpdate(config);
+            }
+        });
+
+        transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT, (ctx, packet) -> {
+            if (restfulService != null) restfulService.handleTranslationResult(packet);
+        });
+
+        transportService.registerPacket(PacketRegistry.GEO_RESULT, (ctx, packet) -> {
+            if (geoService != null) geoService.handleGeoResult(packet);
+        });
+
+
+        transportService.registerPacket(PacketRegistry.GEO_REQUEST,(webSocketPacketContext, geoRequestPacket) -> {});
+        transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST,(webSocketPacketContext, translationRequest) -> {});
     }
 
     public void connect() {
@@ -70,18 +108,30 @@ public class OmniConnectionService {
                 });
     }
 
-    public CompletableFuture<WebSocket> sendPacket(NetworkPackets.PacketWrapper wrapper) {
-        if (webSocket != null && isConnected.get() && !webSocket.isOutputClosed()) {
-            return webSocket.sendBinary(ByteBuffer.wrap(wrapper.toByteArray()), true);
+    // Wrapper-Methode, damit die Services Pakete senden können
+    public <A extends MessageLite> void sendPacket(PacketDefinition<A> packetDefinition, MessageLite packet) {
+        if (webSocket != null && isConnected.get()) {
+            transportService.send(webSocket, packetDefinition.id(), packet);
         }
-        return CompletableFuture.failedFuture(new IllegalStateException("WebSocket not connected"));
+    }
+
+    private void sendToWebSocket(WebSocket ws, ByteBuf nettyBuf) {
+        if (ws != null && isConnected.get() && !ws.isOutputClosed()) {
+            try {
+                ByteBuffer nioBuffer = nettyBuf.nioBuffer();
+                ws.sendBinary(nioBuffer, true);
+            } finally {
+                nettyBuf.release();
+            }
+        } else {
+            nettyBuf.release();
+        }
     }
 
     private void handleConnectionError(Throwable ex) {
         this.isConnected.set(false);
         String errorMsg = ex.toString();
 
-        ex.printStackTrace();
         if (errorMsg.contains("401") || errorMsg.contains("Unauthorized") || errorMsg.contains("WebSocketHandshakeException")) {
             System.err.println("============================================");
             System.err.println("[OmniTranslator] ❌ ERROR: Invalid License!");
@@ -103,13 +153,19 @@ public class OmniConnectionService {
                 .schedule();
     }
 
+    public void shutdown() {
+        if (transportService != null) transportService.close();
+    }
+
     private class WebSocketListener implements WebSocket.Listener {
         private final FastByteArrayOutputStream buffer = new FastByteArrayOutputStream();
 
         @Override
         public void onOpen(WebSocket webSocket) {
             isConnected.set(true);
-            // Initiale Test-Nachricht
+            transportService.connect(webSocket);
+            transportService.ready(webSocket);
+
             if (restfulService != null) {
                 restfulService.sendTranslationRequest(java.util.UUID.randomUUID(), "This is a Test!", "de_de", "live_chat");
             }
@@ -118,57 +174,29 @@ public class OmniConnectionService {
 
         @Override
         public java.util.concurrent.CompletionStage<?> onBinary(WebSocket webSocket, ByteBuffer data, boolean last) {
-            buffer.write(data);
+            byte[] chunk = new byte[data.remaining()];
+            data.get(chunk);
+            try {
+                buffer.write(chunk);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            data.position(data.limit());
+
             if (last) {
-                try {
-                    InputStream inputStream = buffer.toInputStream();
-                    NetworkPackets.PacketWrapper wrapper = NetworkPackets.PacketWrapper.parseFrom(inputStream);
-                    buffer.reset();
-                    parsingExecutor.submit(() -> processPacket(wrapper));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    buffer.reset();
-                }
+                byte[] fullPayload = buffer.toByteArray();
+                buffer.reset();
+                ByteBuf nettyBuf = Unpooled.wrappedBuffer(fullPayload);
+                transportService.onReceiveRaw(webSocket, nettyBuf);
             }
             webSocket.request(1);
             return null;
         }
 
-        private void processPacket(NetworkPackets.PacketWrapper wrapper) {
-            try {
-                switch (wrapper.getPayloadCase()) {
-                    case BATCH_RESULT:
-                        if (restfulService != null) restfulService.handleTranslationResult(wrapper.getBatchResult());
-                        break;
-
-                    case GEO_BATCH_RESULT:
-                        if (geoService != null) geoService.handleGeoResult(wrapper.getGeoBatchResult());
-                        break;
-
-                    case CONFIG:
-                    case CONFIG_REQUEST:
-                        if (restfulService != null) {
-                            NetworkPackets.ServerConfiguration protoConfig = wrapper.getConfig();
-                            ServerConfiguration config = new ServerConfiguration();
-                            config.setModules(new HashMap<>(protoConfig.getModulesMap()));
-                            config.setLicenseKey(protoConfig.getLicenseKey());
-                            config.setDefaultLanguage(protoConfig.getDefaultLanguage());
-                            config.setBlacklistedWords(new HashSet<>(protoConfig.getWordsList()));
-                            restfulService.handleConfigUpdate(config);
-                        }
-                        break;
-
-                    default:
-                        break;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
         @Override
         public java.util.concurrent.CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
             isConnected.set(false);
+            transportService.disconnect(webSocket);
             if (statusCode == 1008) {
                 System.err.println("[OmniTranslator] FATAL: Verbindung wegen Lizenzfehlern geschlossen. Kein Reconnect.");
                 return null;
@@ -180,6 +208,7 @@ public class OmniConnectionService {
         @Override
         public void onError(WebSocket webSocket, Throwable error) {
             isConnected.set(false);
+            transportService.disconnect(webSocket);
         }
     }
 }

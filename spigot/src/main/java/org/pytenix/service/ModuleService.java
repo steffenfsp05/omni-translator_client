@@ -1,6 +1,7 @@
 package org.pytenix.service;
 
 import org.pytenix.TranslatorPlugin;
+import org.pytenix.module.TranslatorModule;
 import org.pytenix.module.chat.PluginChatModule;
 import org.pytenix.module.gui.InventoryModule;
 import org.pytenix.module.hologram.HologramModule;

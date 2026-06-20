@@ -6,12 +6,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.hologram.listener.EntityPacketListener;
-import org.pytenix.service.TranslatorModule;
+import org.pytenix.module.TranslatorModule;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Getter

@@ -115,7 +115,8 @@ public class TranslatorPlugin {
                 this,
                 connectionService
         );
-        this.geoService = new GeoService(this, proxyServer, connectionService);
+
+        this.geoService = new GeoService(connectionService);
 
         connectionService.setServices(restfulService, geoService);
         connectionService.connect();
@@ -131,6 +132,7 @@ public class TranslatorPlugin {
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) {
         proxyTransport.shutdown();
+        connectionService.shutdown();
     }
 
     private String loadForwardingSecret() {

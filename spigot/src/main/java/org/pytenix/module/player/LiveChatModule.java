@@ -6,7 +6,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.player.listener.AsyncPlayerChatListener;
-import org.pytenix.service.TranslatorModule;
+import org.pytenix.module.TranslatorModule;
 
 public class LiveChatModule extends TranslatorModule {
 

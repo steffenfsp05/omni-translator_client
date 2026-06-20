@@ -39,7 +39,6 @@ public class ProxyTransport {
 
         translatorPlugin.getProxyServer().getChannelRegistrar().register(identifier);
 
-        //TODO IMPLEMENT VELOCITY SECRET FROM CFG!
         this.transportService = TransportService.<RegisteredServer>builder()
                 .packetService(new DefaultPacketService<>())
                 .secret(secret)
@@ -70,8 +69,7 @@ public class ProxyTransport {
             }
         });
 
-        this.transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT, (stringPacketContext, translationResult) -> {
-        });
+        this.transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT, (stringPacketContext, translationResult) -> {});
 
         this.transportService.registerPacket(PacketRegistry.CONFIG_REQUEST, new ConfigRequestConsumer(translatorPlugin.getTranslatorService()));
         this.transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST, new TranslationRequestConsumer(translatorPlugin, apiExecutor));
