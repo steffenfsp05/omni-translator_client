@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import org.pytenix.entity.ServerConfiguration;
+import org.pytenix.entity.mapper.ServerConfigMapper;
 import org.pytenix.event.EventService;
 import org.pytenix.event.impl.DefaultEventService;
 import org.pytenix.placeholder.GradientService;
@@ -24,31 +25,58 @@ import java.util.concurrent.TimeUnit;
 public class DefaultTranslationService implements TranslatorService {
 
 
-    final GradientService gradientService;
+    final TranslationProcessor translationProcessor;
     final PlaceholderService placeholderService;
+    final GradientService gradientService;
+    final EventService eventService;
+    final ServerConfigMapper serverConfigMapper;
+
 
     private final Cache<UUID, List<UUID>> cachedReferences = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .build();
 
 
-    private final EventService eventService;
-    private final TranslationProcessor translationProcessor;
     @Setter
     private org.pytenix.entity.ServerConfiguration translationConfiguration;
 
-    public DefaultTranslationService(TranslationProcessor translationProcessor) {
+    public DefaultTranslationService(
+            TranslationProcessor translationProcessor,
+            PlaceholderService placeholderService,
+            GradientService gradientService,
+            EventService eventService,
+            ServerConfigMapper serverConfigMapper) {
 
         this.translationProcessor = translationProcessor;
+        this.serverConfigMapper = serverConfigMapper;
+        this.placeholderService = placeholderService;
+        this.gradientService = gradientService;
 
-        this.placeholderService = new DefaultPlaceholderService(this);
-        this.gradientService = new DefaultGradientService();
-
-        this.eventService = new DefaultEventService();
+        this.eventService = eventService;
 
         eventService.register(new ConfigUpdateListener(placeholderService));
 
 
+    }
+
+
+
+    public CompletableFuture<String> translate(String text, String lang, String module) {
+        if (text == null || text.isBlank()) return CompletableFuture.completedFuture(text);
+
+        UUID batchId = UUID.randomUUID();
+
+        String prepared = preparePayload(batchId, text);
+        return processAndRestore(batchId, prepared, lang, module);
+    }
+
+    public String handleGradient(UUID uuid, String text) {
+        GradientService.ExtractionResult extractionResult = gradientService.stripAndAnalyze(text);
+        if (extractionResult.gradients() != null) {
+            gradientService.cacheGradient(uuid, extractionResult.gradients());
+            return extractionResult.cleanText();
+        }
+        return text;
     }
 
 
@@ -57,7 +85,7 @@ public class DefaultTranslationService implements TranslatorService {
     }
 
 
-    public String preparePayload(UUID batchId, String text) {
+    private String preparePayload(UUID batchId, String text) {
         List<String> processedLines = new ArrayList<>();
         String[] lines = text.split("\n", -1);
         List<UUID> lineUuids = new ArrayList<>();
@@ -74,52 +102,14 @@ public class DefaultTranslationService implements TranslatorService {
         return String.join("\n", processedLines);
     }
 
-    public CompletableFuture<String> processAndRestore(UUID batchId, String payload, String lang, String module, long started) {
+    public CompletableFuture<String> processAndRestore(UUID batchId, String payload, String lang, String module) {
         return process(batchId, payload, lang, module)
-                .thenApplyAsync(s -> {
-                    return handlePlaceholders(batchId, s); // Gradients & Farben zurück!
-                });
-    }
-
-    public CompletableFuture<String> translate(String text, String lang, String module) {
-        if (text == null || text.isBlank()) return CompletableFuture.completedFuture(text);
-
-        long started = System.currentTimeMillis();
-        UUID batchId = UUID.randomUUID();
-
-        String prepared = preparePayload(batchId, text);
-        return processAndRestore(batchId, prepared, lang, module, started);
-    }
-
-    public String handleGradient(UUID uuid, String text) {
-        GradientService.ExtractionResult extractionResult = gradientService.stripAndAnalyze(text);
-        if (extractionResult.gradients() != null) {
-            gradientService.cacheGradient(uuid, extractionResult.gradients());
-            return extractionResult.cleanText();
-        }
-        return text;
+                .thenApplyAsync(s -> handlePlaceholders(batchId, s));
     }
 
 
-    public NetworkPackets.ServerConfiguration convertConfigToProtobuf(ServerConfiguration javaConfig) {
-        NetworkPackets.ServerConfiguration.Builder builder = NetworkPackets.ServerConfiguration.newBuilder();
-        if (javaConfig.getModules() != null) builder.putAllModules(javaConfig.getModules());
-        if (javaConfig.getBlacklistedWords() != null) builder.addAllWords(javaConfig.getBlacklistedWords());
-        if (javaConfig.getDefaultLanguage() != null) builder.setDefaultLanguage(javaConfig.getDefaultLanguage());
-        return builder.build();
-    }
 
-    public ServerConfiguration convertConfigToNormal(NetworkPackets.ServerConfiguration serverConfiguration) {
-        org.pytenix.entity.ServerConfiguration update = new org.pytenix.entity.ServerConfiguration();
-
-        update.setModules(new HashMap<>(serverConfiguration.getModulesMap()));
-        update.setBlacklistedWords(new HashSet<>(serverConfiguration.getWordsList()));
-        update.setDefaultLanguage(serverConfiguration.getDefaultLanguage());
-
-        return update;
-    }
-
-    public String handlePlaceholders(UUID uuid, String result) {
+    private String handlePlaceholders(UUID uuid, String result) {
 
         List<UUID> lineIds = cachedReferences.getIfPresent(uuid);
         if (lineIds == null || lineIds.isEmpty())

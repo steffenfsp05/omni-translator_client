@@ -23,10 +23,12 @@ public class ConfigRequestConsumer implements PacketReceiveConsumer<RegisteredSe
             System.out.println("CONFIG REGUEST ABORTED");
             return;
         }
-        ;
 
         System.out.println("REPLYING WITH: " + PacketRegistry.SERVER_CONFIG.id() + " " + context.getConnection().getServerInfo().getName());
-        System.out.println("RESULT:: " + context.reply(PacketRegistry.SERVER_CONFIG, translatorService.convertConfigToProtobuf(translatorService.getTranslationConfiguration())));
+        System.out.println("RESULT:: " + context.reply(PacketRegistry.SERVER_CONFIG,
+                translatorService.getServerConfigMapper().to(translatorService.getTranslationConfiguration())
+                )
+        );
     }
 
 

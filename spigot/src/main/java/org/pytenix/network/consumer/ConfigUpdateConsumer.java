@@ -21,7 +21,7 @@ public class ConfigUpdateConsumer implements PacketReceiveConsumer<String, Netwo
     @Override
     public void accept(PacketContext<String> stringPacketContext, NetworkPackets.ServerConfiguration serverConfiguration) {
 
-        ServerConfiguration config = translatorService.convertConfigToNormal(serverConfiguration);
+        ServerConfiguration config = translatorService.getServerConfigMapper().from(serverConfiguration);
 
         translatorPlugin.getTranslatorService().setTranslationConfiguration(config);
 

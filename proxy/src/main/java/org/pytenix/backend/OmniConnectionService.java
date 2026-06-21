@@ -57,7 +57,14 @@ public class OmniConnectionService {
 
         this.transportService = TransportService.<WebSocket>builder()
                 .packetService(new DefaultPacketService<>())
-                .options(TransportOptions.builder().build())
+                .options(
+                        TransportOptions.builder()
+                                .batchingEnabled(true)
+                                .maxBatchSize(100)
+                                .batchingIntervalMs(5)
+                                .maxPayloadSize(20000)
+                                .build()
+                )
                 .encryptionEnabled(false)
                 .networkSender(this::sendToWebSocket)
                 .build();
@@ -75,7 +82,7 @@ public class OmniConnectionService {
         transportService.registerPacket(PacketRegistry.SERVER_CONFIG, (ctx, protoConfig) -> {
             if (restfulService != null) {
 
-                ServerConfiguration config =        translatorPlugin.getTranslatorService().convertConfigToNormal(protoConfig);
+                ServerConfiguration config = translatorPlugin.getTranslatorService().getServerConfigMapper().from(protoConfig);
                 restfulService.handleConfigUpdate(config);
             }
         });
@@ -108,7 +115,6 @@ public class OmniConnectionService {
                 });
     }
 
-    // Wrapper-Methode, damit die Services Pakete senden können
     public <A extends MessageLite> void sendPacket(PacketDefinition<A> packetDefinition, MessageLite packet) {
         if (webSocket != null && isConnected.get()) {
             transportService.send(webSocket, packetDefinition.id(), packet);

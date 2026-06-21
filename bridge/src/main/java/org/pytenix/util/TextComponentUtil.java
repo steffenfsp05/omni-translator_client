@@ -48,25 +48,28 @@ public class TextComponentUtil {
     }
 
     private CompletableFuture<Component> doTranslateComplexMessage(Component originalComponent, String lang, String module) {
-        long started = System.currentTimeMillis();
+
         TranslationContext ctx = new TranslationContext();
 
         Component taggedComponent = injectTags(originalComponent, ctx);
         String mainPayload = legacySerializer.serialize(taggedComponent);
 
-        UUID mainBatchId = UUID.randomUUID();
         Map<Integer, CompletableFuture<String>> hoverFutures = new HashMap<>();
 
+        // Hover-Elemente debuggen
         for (Map.Entry<Integer, Component> entry : ctx.hovers.entrySet()) {
             int id = entry.getKey();
-            UUID hoverBatchId = UUID.randomUUID();
             String legacyHover = legacySerializer.serialize(entry.getValue());
-            String preparedHover = translatorService.preparePayload(hoverBatchId, legacyHover);
-            hoverFutures.put(id, translatorService.processAndRestore(hoverBatchId, preparedHover, lang, module, started));
+
+            hoverFutures.put(id, translatorService.translate( legacyHover, lang, module).exceptionally(ex -> {
+                System.err.println("Translation failed for ID " + id + ": " + ex.getMessage());
+                return "";
+            }));
         }
 
-        String preparedMain = translatorService.preparePayload(mainBatchId, mainPayload);
-        CompletableFuture<String> mainFuture = translatorService.processAndRestore(mainBatchId, preparedMain, lang, module, started);
+
+        CompletableFuture<String> mainFuture = translatorService.translate( mainPayload, lang, module);
+
         return mainFuture.thenCombineAsync(
                 CompletableFuture.allOf(hoverFutures.values().toArray(new CompletableFuture[0])),
                 (translatedMainText, v) -> {
@@ -75,10 +78,8 @@ public class TextComponentUtil {
                     List<Map.Entry<String, Component>> replacements = new ArrayList<>();
                     boolean found;
 
-                    // Iteratively extract the INNERMOST tags first, handling infinite nesting!
                     do {
                         found = false;
-                        // Matches <A> or <H> that do NOT contain another <A> or <H> inside them
                         Matcher m = PATTERN.matcher(cleanMainText);
                         StringBuffer sb = new StringBuffer();
 

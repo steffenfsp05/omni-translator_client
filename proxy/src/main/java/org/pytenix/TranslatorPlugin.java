@@ -15,9 +15,18 @@ import org.pytenix.cache.CacheProvider;
 import org.pytenix.cache.impl.CaffeineCacheProvider;
 import org.pytenix.config.ConfigService;
 import org.pytenix.config.ConfigurationFile;
+import org.pytenix.entity.mapper.ServerConfigMapper;
+import org.pytenix.entity.mapper.impl.DefaultServerConfigMapper;
+import org.pytenix.event.EventService;
+import org.pytenix.event.impl.DefaultEventService;
 import org.pytenix.listener.PlayerConnectionChangeListener;
 import org.pytenix.listener.ProxyPingListener;
 import org.pytenix.network.ProxyTransport;
+import org.pytenix.placeholder.GradientService;
+import org.pytenix.placeholder.PlaceholderService;
+import org.pytenix.placeholder.impl.DefaultGradientService;
+import org.pytenix.placeholder.impl.DefaultPlaceholderService;
+import org.pytenix.translation.TranslationProcessor;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.impl.DefaultTranslationService;
 import org.slf4j.Logger;
@@ -33,29 +42,31 @@ import java.util.List;
         name = "TranslatorProxy",
         version = "1.0-SNAPSHOT",
         authors = {"PytenixOG"}
-)
+) @Getter
 public class TranslatorPlugin {
 
     final ConfigService configService;
     final ConfigurationFile configurationFile;
-    private final ProxyServer server;
-    private final Logger logger;
-    @Getter
-    private final CacheProvider<String, String> caffeineCache;
-    @Getter
-    private final ProxyServer proxyServer;
-    @Getter
+
+    final ProxyServer server;
+    final Logger logger;
+    final CacheProvider<String, String> caffeineCache;
+    final ProxyServer proxyServer;
+
+    RestfulService restfulService;
     OmniConnectionService connectionService;
-    @Getter
     GeoService geoService;
-    @Getter
+
     String remoteAddress = "192.168.178.121:8083";
-    @Getter
-    TranslatorService translatorService;
-    @Getter
+
     ProxyTransport proxyTransport;
-    @Getter
-    private RestfulService restfulService;
+
+    TranslatorService translatorService;
+    TranslationProcessor translationProcessor;
+    PlaceholderService placeholderService;
+    GradientService gradientService;
+    EventService eventService;
+    ServerConfigMapper serverConfigMapper;
 
     @Inject
     public TranslatorPlugin(ProxyServer server, Logger logger) {
@@ -81,8 +92,15 @@ public class TranslatorPlugin {
     public void onProxyInitialization(ProxyInitializeEvent event) {
 
 
-        this.translatorService = new DefaultTranslationService((id, text, targetLang, module) ->
-                restfulService.sendTranslationRequest(id, text, targetLang, module));
+
+        this.translationProcessor = (id, text, targetLang, module) -> restfulService.sendTranslationRequest(id, text, targetLang, module);
+        this.placeholderService = new DefaultPlaceholderService();
+        this.gradientService = new DefaultGradientService();
+        this.eventService = new DefaultEventService();
+        this.serverConfigMapper = new DefaultServerConfigMapper();
+
+
+        this.translatorService = new DefaultTranslationService(translationProcessor,placeholderService,gradientService,eventService,serverConfigMapper);
 
         final String secret = loadForwardingSecret();
 
@@ -102,7 +120,9 @@ public class TranslatorPlugin {
         }
 
 
-        this.proxyTransport = new ProxyTransport(this, "ABC");
+        System.out.println("READING SECRET: " + secret);
+
+        this.proxyTransport = new ProxyTransport(this, secret);
 
 
         this.connectionService = new OmniConnectionService(

@@ -140,9 +140,6 @@ public class MessageSequencer implements Listener {
         try {
             ignoreNextMessage(uuid, comp);
 
-            String rawJson2 = net.kyori.adventure.text.serializer.gson.GsonComponentSerializer.gson().serialize(comp);
-            System.out.println("SENDING PACKET TO PLAYER: " + rawJson2);
-
             player.sendMessage(comp);
 
             return true;

@@ -27,10 +27,7 @@ public class DefaultPlaceholderService implements PlaceholderService {
     public static final Pattern COLOR_PATTERN = Pattern.compile("(?i)§x(?:§[0-9a-f]){6}|§#[0-9a-f]{6}|§[0-9a-fk-or]");
 
 
-    final TranslatorService translatorService;
     final PlaceholderNormalizer placeholderNormalizer;
-
-
     final PlayerNameProtector playerNameProtector;
     final WordProtector wordProtector;
 
@@ -47,10 +44,9 @@ public class DefaultPlaceholderService implements PlaceholderService {
     private Pattern atomicPattern;
     private List<ExtendedPlaceholder> indexedPlaceholders;
 
-    public DefaultPlaceholderService(TranslatorService translatorService) {
+    public DefaultPlaceholderService() {
 
 
-        this.translatorService = translatorService;
 
         this.placeholderNormalizer = new DefaultPlaceholderNormalizer();
         this.wordProtector = new DefaultWordProtector();
@@ -59,11 +55,11 @@ public class DefaultPlaceholderService implements PlaceholderService {
 
         this.playerNameProtector = new DefaultPlayerNameProtector();
 
-        if (translatorService.getTranslationConfiguration() != null) {
-            ServerConfiguration serverConfiguration = translatorService.getTranslationConfiguration();
-            updateProtectedWords(serverConfiguration != null ? serverConfiguration.getBlacklistedWords() : new HashSet<>());
+       // if (translatorService.getTranslationConfiguration() != null) {
+       //     ServerConfiguration serverConfiguration = translatorService.getTranslationConfiguration();
+       //     updateProtectedWords(serverConfiguration != null ? serverConfiguration.getBlacklistedWords() : new HashSet<>());
 
-        }
+      //  }
 
         registerPlaceholder(0, new ExtendedPlaceholder("SKIP", () -> SYSTEM_PROTECTION_PATTERN));
         registerPlaceholder(1, new ExtendedPlaceholder("C", () -> COLOR_PATTERN));

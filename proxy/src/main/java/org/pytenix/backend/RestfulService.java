@@ -38,7 +38,7 @@ public class RestfulService {
         System.out.println("[OmniTranslator] New Config received!");
         translatorService.setTranslationConfiguration(config);
         eventService.callEvent(new ConfigUpdateEvent(config));
-        proxyTransport.broadcastConfigurationUpdate(translatorService.convertConfigToProtobuf(config));
+        proxyTransport.broadcastConfigurationUpdate(translatorService.getServerConfigMapper().to(config));
     }
 
     public void handleTranslationResult(NetworkPackets.TranslationResult translationResult) {
