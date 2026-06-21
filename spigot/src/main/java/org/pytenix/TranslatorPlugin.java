@@ -12,8 +12,6 @@ import org.pytenix.cache.impl.CaffeineCacheProvider;
 import org.pytenix.config.ConfigService;
 import org.pytenix.config.ConfigurationFile;
 import org.pytenix.entity.ServerConfiguration;
-import org.pytenix.entity.mapper.ServerConfigMapper;
-import org.pytenix.entity.mapper.impl.DefaultServerConfigMapper;
 import org.pytenix.event.EventService;
 import org.pytenix.event.impl.DefaultEventService;
 import org.pytenix.listener.PlayerJoinQuitListener;
@@ -22,7 +20,6 @@ import org.pytenix.placeholder.GradientService;
 import org.pytenix.placeholder.PlaceholderService;
 import org.pytenix.placeholder.impl.DefaultGradientService;
 import org.pytenix.placeholder.impl.DefaultPlaceholderService;
-import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.service.ModuleService;
 import org.pytenix.network.SpigotTransport;
 import org.pytenix.network.VelocitySecretReader;
@@ -34,8 +31,6 @@ import org.pytenix.util.TextComponentUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 
 @Getter
@@ -71,7 +66,6 @@ public class TranslatorPlugin extends JavaPlugin {
     private PlaceholderService placeholderService;
     private GradientService gradientService;
     private EventService eventService;
-    private ServerConfigMapper serverConfigMapper;
 
     @Override
     public void onEnable() {
@@ -98,9 +92,8 @@ public class TranslatorPlugin extends JavaPlugin {
         this.placeholderService = new DefaultPlaceholderService();
         this.gradientService = new DefaultGradientService();
         this.eventService = new DefaultEventService();
-        this.serverConfigMapper = new DefaultServerConfigMapper();
 
-        this.translatorService = new DefaultTranslationService(translationProcessor, placeholderService,gradientService,eventService,serverConfigMapper);
+        this.translatorService = new DefaultTranslationService(translationProcessor, placeholderService,gradientService,eventService);
 
 
         final VelocitySecretReader secretReader = new VelocitySecretReader();

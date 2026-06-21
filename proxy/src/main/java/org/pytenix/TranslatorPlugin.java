@@ -15,8 +15,6 @@ import org.pytenix.cache.CacheProvider;
 import org.pytenix.cache.impl.CaffeineCacheProvider;
 import org.pytenix.config.ConfigService;
 import org.pytenix.config.ConfigurationFile;
-import org.pytenix.entity.mapper.ServerConfigMapper;
-import org.pytenix.entity.mapper.impl.DefaultServerConfigMapper;
 import org.pytenix.event.EventService;
 import org.pytenix.event.impl.DefaultEventService;
 import org.pytenix.listener.PlayerConnectionChangeListener;
@@ -61,12 +59,12 @@ public class TranslatorPlugin {
 
     ProxyTransport proxyTransport;
 
+
     TranslatorService translatorService;
     TranslationProcessor translationProcessor;
     PlaceholderService placeholderService;
     GradientService gradientService;
     EventService eventService;
-    ServerConfigMapper serverConfigMapper;
 
     @Inject
     public TranslatorPlugin(ProxyServer server, Logger logger) {
@@ -97,10 +95,9 @@ public class TranslatorPlugin {
         this.placeholderService = new DefaultPlaceholderService();
         this.gradientService = new DefaultGradientService();
         this.eventService = new DefaultEventService();
-        this.serverConfigMapper = new DefaultServerConfigMapper();
 
 
-        this.translatorService = new DefaultTranslationService(translationProcessor,placeholderService,gradientService,eventService,serverConfigMapper);
+        this.translatorService = new DefaultTranslationService(translationProcessor,placeholderService,gradientService,eventService);
 
         final String secret = loadForwardingSecret();
 

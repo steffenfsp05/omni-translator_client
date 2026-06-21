@@ -1,12 +1,10 @@
 package org.pytenix.translation;
 
 import org.pytenix.entity.ServerConfiguration;
-import org.pytenix.entity.mapper.ServerConfigMapper;
+import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.event.EventService;
 import org.pytenix.placeholder.PlaceholderService;
-import org.pytenix.proto.generated.NetworkPackets;
 
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface TranslatorService {
@@ -22,6 +20,5 @@ public interface TranslatorService {
     EventService getEventService();
 
     PlaceholderService getPlaceholderService();
-    ServerConfigMapper getServerConfigMapper();
 
 }

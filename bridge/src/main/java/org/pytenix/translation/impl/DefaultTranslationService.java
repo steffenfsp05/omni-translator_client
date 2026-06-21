@@ -4,16 +4,11 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import lombok.Setter;
-import org.pytenix.entity.ServerConfiguration;
-import org.pytenix.entity.mapper.ServerConfigMapper;
+import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.event.EventService;
-import org.pytenix.event.impl.DefaultEventService;
 import org.pytenix.placeholder.GradientService;
 import org.pytenix.placeholder.PlaceholderService;
-import org.pytenix.placeholder.impl.DefaultGradientService;
-import org.pytenix.placeholder.impl.DefaultPlaceholderService;
 import org.pytenix.placeholder.listener.ConfigUpdateListener;
-import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.translation.TranslationProcessor;
 import org.pytenix.translation.TranslatorService;
 
@@ -29,7 +24,6 @@ public class DefaultTranslationService implements TranslatorService {
     final PlaceholderService placeholderService;
     final GradientService gradientService;
     final EventService eventService;
-    final ServerConfigMapper serverConfigMapper;
 
 
     private final Cache<UUID, List<UUID>> cachedReferences = CacheBuilder.newBuilder()
@@ -44,11 +38,9 @@ public class DefaultTranslationService implements TranslatorService {
             TranslationProcessor translationProcessor,
             PlaceholderService placeholderService,
             GradientService gradientService,
-            EventService eventService,
-            ServerConfigMapper serverConfigMapper) {
+            EventService eventService) {
 
         this.translationProcessor = translationProcessor;
-        this.serverConfigMapper = serverConfigMapper;
         this.placeholderService = placeholderService;
         this.gradientService = gradientService;
 

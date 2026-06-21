@@ -2,7 +2,11 @@ package org.pytenix.backend;
 
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.pytenix.TranslatorPlugin;
+import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.packets.PacketRegistry;
+import org.pytenix.packets.impl.GeoRequestMapper;
+import org.pytenix.packets.impl.GeoResultMapper;
+import org.pytenix.packets.impl.TranslationRequestMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.UuidUtil;
 
@@ -20,24 +24,24 @@ public class GeoService {
         this.connectionManager = connectionManager;
     }
 
-    public void handleGeoResult(NetworkPackets.GeoResultPacket geoResult) {
-        UUID id = UuidUtil.fromByteString(geoResult.getRequestId());
-        CompletableFuture<String> future = queue.remove(id);
-        if (future != null) future.complete(geoResult.getLanguage());
+    public void handleGeoResult(GeoResultMapper.ResultData resultData) {
+
+        CompletableFuture<String> future = queue.remove(resultData.requestId());
+        if (future != null) future.complete(resultData.language());
     }
 
     public CompletableFuture<String> sendGeoRequest(UUID id, String ipAddress) {
         CompletableFuture<String> future = new CompletableFuture<>();
         if (ipAddress == null || ipAddress.isBlank()) return CompletableFuture.completedFuture("en_en");
 
-        NetworkPackets.GeoRequestPacket request = NetworkPackets.GeoRequestPacket.newBuilder()
-                .setRequestId(UuidUtil.toByteString(id))
-                .setIpAddress(ipAddress)
-                .build();
-
         queue.put(id, future);
 
-        connectionManager.sendPacket(PacketRegistry.GEO_REQUEST, request);
+        connectionManager.sendPacket(PacketRegistry.GEO_REQUEST, PacketMapperRegistry.toProto(
+                new GeoRequestMapper.RequestData(
+                        id,
+                        ipAddress
+                )
+        ));
 
         return future.orTimeout(60, TimeUnit.SECONDS).exceptionally(ex -> {
             queue.remove(id);

@@ -2,7 +2,10 @@ package org.pytenix.network;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.pytenix.entity.ServerConfiguration;
+import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.packets.PacketRegistry;
+import org.pytenix.packets.impl.TranslationRequestMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.UuidUtil;
 
@@ -49,14 +52,15 @@ public class TranslationRequestService {
         pendingRequests.get(masterId, k -> new CopyOnWriteArrayList<>()).add(future);
 
         if (masterId.equals(id)) {
-            NetworkPackets.TranslationRequest req = NetworkPackets.TranslationRequest.newBuilder()
-                    .setRequestId(UuidUtil.toByteString(masterId))
-                    .setText(text)
-                    .setTargetLang(targetLang)
-                    .setModule(module)
-                    .build();
 
-            transport.getTransportService().send(channel, PacketRegistry.TRANSLATION_REQUEST, req);
+
+            transport.getTransportService().send(channel, PacketRegistry.TRANSLATION_REQUEST,
+                    PacketMapperRegistry.toProto(new TranslationRequestMapper.RequestData(
+                            masterId,
+                            text,
+                            targetLang,
+                            ServerConfiguration.Module.valueOf(module)
+                    )));
         }
 
         return future;

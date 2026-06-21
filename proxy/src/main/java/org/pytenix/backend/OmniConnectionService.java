@@ -7,11 +7,15 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.entity.ServerConfiguration;
+import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.packets.PacketRegistry;
+import org.pytenix.packets.impl.GeoResultMapper;
+import org.pytenix.packets.impl.TranslationResultMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.FastByteArrayOutputStream;
 import org.transport.TransportOptions;
 import org.transport.TransportService;
+import org.transport.service.PacketContext;
 import org.transport.service.impl.DefaultPacketService;
 import org.transport.service.impl.PacketDefinition;
 
@@ -49,6 +53,8 @@ public class OmniConnectionService {
         this.translatorPlugin = translatorPlugin;
         this.proxyServer = proxyServer;
         this.apiKey = apiKey;
+
+        //CHANGE TO WSS IN PROD!!
         this.url = "ws://" + translatorPlugin.getRemoteAddress() + "/ws/omni";
 
         this.httpClient = HttpClient.newBuilder()
@@ -79,21 +85,26 @@ public class OmniConnectionService {
     private void registerPackets() {
 
         // Config Update registrieren
-        transportService.registerPacket(PacketRegistry.SERVER_CONFIG, (ctx, protoConfig) -> {
-            if (restfulService != null) {
 
-                ServerConfiguration config = translatorPlugin.getTranslatorService().getServerConfigMapper().from(protoConfig);
-                restfulService.handleConfigUpdate(config);
-            }
+        transportService.registerPacket(PacketRegistry.SERVER_CONFIG,
+                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.ServerConfiguration, ServerConfiguration>)
+                        (context, config) ->
+                                restfulService.handleConfigUpdate(config));
+
+
+        transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT,
+                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.TranslationResult, TranslationResultMapper.ResultData>)
+                        (context, resultData) -> {
+                            if (restfulService != null) restfulService.handleTranslationResult(resultData);
+
         });
 
-        transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT, (ctx, packet) -> {
-            if (restfulService != null) restfulService.handleTranslationResult(packet);
-        });
+        transportService.registerPacket(PacketRegistry.GEO_RESULT,
+                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.GeoResultPacket, GeoResultMapper.ResultData>)
+                        (context, resultData) -> {
+                            if (geoService != null) geoService.handleGeoResult(resultData);
 
-        transportService.registerPacket(PacketRegistry.GEO_RESULT, (ctx, packet) -> {
-            if (geoService != null) geoService.handleGeoResult(packet);
-        });
+                        });
 
 
         transportService.registerPacket(PacketRegistry.GEO_REQUEST,(webSocketPacketContext, geoRequestPacket) -> {});

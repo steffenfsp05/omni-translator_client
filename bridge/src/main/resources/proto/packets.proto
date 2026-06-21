@@ -9,20 +9,22 @@ option java_outer_classname = "NetworkPackets";
 message ServerConfiguration {
   string license_key = 1;
   string default_language = 2;
-  map<string, bool> modules = 3;
+  repeated Module active_modules = 3; // Liste aller Module, die auf 'true' stehen
   repeated string words = 4;
 }
 
 message GeoRequestPacket
 {
-  bytes request_id = 1;
-  string ip_address = 2;
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+  string ip_address = 3;
 }
 
 message GeoResultPacket
 {
-  bytes request_id = 1;
-  string language = 2;
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+  string language = 3;
 }
 
 
@@ -31,26 +33,30 @@ message ConfigRequestPacket {
 }
 
 message TranslationRequest {
-  bytes request_id = 1;
-  string text = 2;
-  string target_lang = 3;
-  string module = 4;
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+  string text = 3;
+  string target_lang = 4;
+  Module module = 5;
 }
 
 
 message TranslationResult {
-  bytes request_id = 1;
-  string result = 2;
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+  string result = 3;
 }
 
 
-message Chunk {
-  string transmission_id = 1;
-  int32 part_index = 2;
-  int32 total_parts = 3;
-  bytes data = 4;
+enum Module {
+  MODULE_UNKNOWN = 0;
+  MODULE_LIVE_CHAT = 1;
+  MODULE_GUI = 2;
+  MODULE_HOLOGRAM = 3;
+  MODULE_PLUGIN_CHAT = 4;
+  MODULE_SIGNS = 5;
+  MODULE_MOTD = 6;
 }
-
 
 message PacketWrapper {
   oneof payload {
@@ -60,7 +66,6 @@ message PacketWrapper {
     GeoResultPacket geo_result = 4;
     TranslationRequest translation_request = 5;
     TranslationResult translation_result = 6;
-    Chunk chunk = 7;
 
   }
 }
