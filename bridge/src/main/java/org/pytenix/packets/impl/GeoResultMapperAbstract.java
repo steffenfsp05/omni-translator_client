@@ -1,13 +1,13 @@
 package org.pytenix.packets.impl;
 
-import org.pytenix.packets.PacketMapper;
+import org.pytenix.packets.AbstractPacketMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 
 import java.util.UUID;
 
-public class GeoResultMapper extends PacketMapper<NetworkPackets.GeoResultPacket, GeoResultMapper.ResultData> {
+public class GeoResultMapperAbstract extends AbstractPacketMapper<NetworkPackets.GeoResultPacket, GeoResultMapperAbstract.ResultData> {
 
-    public GeoResultMapper() {
+    public GeoResultMapperAbstract() {
         super(NetworkPackets.GeoResultPacket.class, ResultData.class);
     }
 

@@ -1,14 +1,9 @@
 package org.pytenix.backend;
 
-import com.velocitypowered.api.proxy.ProxyServer;
-import org.pytenix.TranslatorPlugin;
 import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.GeoRequestMapper;
-import org.pytenix.packets.impl.GeoResultMapper;
-import org.pytenix.packets.impl.TranslationRequestMapper;
-import org.pytenix.proto.generated.NetworkPackets;
-import org.pytenix.util.UuidUtil;
+import org.pytenix.packets.impl.GeoRequestMapperAbstract;
+import org.pytenix.packets.impl.GeoResultMapperAbstract;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -24,7 +19,7 @@ public class GeoService {
         this.connectionManager = connectionManager;
     }
 
-    public void handleGeoResult(GeoResultMapper.ResultData resultData) {
+    public void handleGeoResult(GeoResultMapperAbstract.ResultData resultData) {
 
         CompletableFuture<String> future = queue.remove(resultData.requestId());
         if (future != null) future.complete(resultData.language());
@@ -37,7 +32,7 @@ public class GeoService {
         queue.put(id, future);
 
         connectionManager.sendPacket(PacketRegistry.GEO_REQUEST, PacketMapperRegistry.toProto(
-                new GeoRequestMapper.RequestData(
+                new GeoRequestMapperAbstract.RequestData(
                         id,
                         ipAddress
                 )

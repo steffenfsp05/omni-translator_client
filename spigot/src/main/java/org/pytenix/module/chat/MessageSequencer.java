@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class MessageSequencer implements Listener {
 
-    final PluginChatModule pluginChatModule;
+    final PluginChatModuleAbstract pluginChatModule;
 
     private final Map<UUID, Queue<QueuedMessage>> userQueues = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -25,7 +25,7 @@ public class MessageSequencer implements Listener {
     private final com.google.common.cache.Cache<UUID, com.google.common.cache.Cache<String, java.util.concurrent.atomic.AtomicInteger>> ignoredMessagesCache =
             com.google.common.cache.CacheBuilder.newBuilder().expireAfterAccess(30, java.util.concurrent.TimeUnit.MINUTES).build();
 
-    public MessageSequencer(PluginChatModule pluginChatModule) {
+    public MessageSequencer(PluginChatModuleAbstract pluginChatModule) {
         this.textComponentUtil = pluginChatModule.getTranslatorPlugin().getTextComponentUtil();
         this.pluginChatModule = pluginChatModule;
         Bukkit.getPluginManager().registerEvents(this, pluginChatModule.getTranslatorPlugin());

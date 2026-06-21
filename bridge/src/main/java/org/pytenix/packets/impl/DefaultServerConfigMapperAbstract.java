@@ -1,7 +1,7 @@
 package org.pytenix.packets.impl;
 
 import org.pytenix.entity.ServerConfiguration;
-import org.pytenix.packets.PacketMapper;
+import org.pytenix.packets.AbstractPacketMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 
 import java.util.HashMap;
@@ -9,10 +9,10 @@ import java.util.HashSet;
 import java.util.Map;
 
 
-public class DefaultServerConfigMapper extends PacketMapper<NetworkPackets.ServerConfiguration, ServerConfiguration> {
+public class DefaultServerConfigMapperAbstract extends AbstractPacketMapper<NetworkPackets.ServerConfiguration, ServerConfiguration> {
 
 
-    public DefaultServerConfigMapper() {
+    public DefaultServerConfigMapperAbstract() {
         super(NetworkPackets.ServerConfiguration.class, ServerConfiguration.class);
     }
 

@@ -1,14 +1,14 @@
 package org.pytenix.packets.impl;
 
 import org.pytenix.entity.ServerConfiguration;
-import org.pytenix.packets.PacketMapper;
+import org.pytenix.packets.AbstractPacketMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class TranslationRequestMapper extends PacketMapper<NetworkPackets.TranslationRequest, TranslationRequestMapper.RequestData> {
+public class TranslationRequestMapperAbstract extends AbstractPacketMapper<NetworkPackets.TranslationRequest, TranslationRequestMapperAbstract.RequestData> {
 
     private static final Map<NetworkPackets.Module, ServerConfiguration.Module> MODULE_MAP = new EnumMap<>(NetworkPackets.Module.class);
 
@@ -25,7 +25,7 @@ public class TranslationRequestMapper extends PacketMapper<NetworkPackets.Transl
         }
     }
 
-    public TranslationRequestMapper() {
+    public TranslationRequestMapperAbstract() {
         super(NetworkPackets.TranslationRequest.class, RequestData.class);
     }
 

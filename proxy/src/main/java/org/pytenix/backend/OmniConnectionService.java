@@ -1,7 +1,6 @@
 package org.pytenix.backend;
 
 import com.google.protobuf.MessageLite;
-import com.google.protobuf.Parser;
 import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -9,13 +8,12 @@ import org.pytenix.TranslatorPlugin;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.GeoResultMapper;
-import org.pytenix.packets.impl.TranslationResultMapper;
+import org.pytenix.packets.impl.GeoResultMapperAbstract;
+import org.pytenix.packets.impl.TranslationResultMapperAbstract;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.FastByteArrayOutputStream;
 import org.transport.TransportOptions;
 import org.transport.TransportService;
-import org.transport.service.PacketContext;
 import org.transport.service.impl.DefaultPacketService;
 import org.transport.service.impl.PacketDefinition;
 
@@ -24,8 +22,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -93,14 +89,14 @@ public class OmniConnectionService {
 
 
         transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT,
-                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.TranslationResult, TranslationResultMapper.ResultData>)
+                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.TranslationResult, TranslationResultMapperAbstract.ResultData>)
                         (context, resultData) -> {
                             if (restfulService != null) restfulService.handleTranslationResult(resultData);
 
         });
 
         transportService.registerPacket(PacketRegistry.GEO_RESULT,
-                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.GeoResultPacket, GeoResultMapper.ResultData>)
+                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.GeoResultPacket, GeoResultMapperAbstract.ResultData>)
                         (context, resultData) -> {
                             if (geoService != null) geoService.handleGeoResult(resultData);
 

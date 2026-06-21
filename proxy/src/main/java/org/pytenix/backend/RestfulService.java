@@ -7,11 +7,9 @@ import org.pytenix.event.register.ConfigUpdateEvent;
 import org.pytenix.network.ProxyTransport;
 import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.TranslationRequestMapper;
-import org.pytenix.packets.impl.TranslationResultMapper;
-import org.pytenix.proto.generated.NetworkPackets;
+import org.pytenix.packets.impl.TranslationRequestMapperAbstract;
+import org.pytenix.packets.impl.TranslationResultMapperAbstract;
 import org.pytenix.translation.TranslatorService;
-import org.pytenix.util.UuidUtil;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -44,7 +42,7 @@ public class RestfulService {
         proxyTransport.broadcastConfigurationUpdate(PacketMapperRegistry.toProto(config));
     }
 
-    public void handleTranslationResult(TranslationResultMapper.ResultData resultData) {
+    public void handleTranslationResult(TranslationResultMapperAbstract.ResultData resultData) {
         UUID id = resultData.requestId();
         CompletableFuture<String> future = queue.remove(id);
         if (future != null) future.complete(resultData.result());
@@ -58,7 +56,7 @@ public class RestfulService {
         queue.put(id, future);
 
         connectionManager.sendPacket(PacketRegistry.TRANSLATION_REQUEST,
-                PacketMapperRegistry.toProto(new TranslationRequestMapper.RequestData(
+                PacketMapperRegistry.toProto(new TranslationRequestMapperAbstract.RequestData(
                         id,
                         text,
                         lang,

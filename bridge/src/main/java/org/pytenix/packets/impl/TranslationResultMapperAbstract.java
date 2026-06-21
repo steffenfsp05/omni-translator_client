@@ -1,15 +1,15 @@
 package org.pytenix.packets.impl;
 
-import org.pytenix.packets.PacketMapper;
+import org.pytenix.packets.AbstractPacketMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 
 import java.util.UUID;
 
-public class TranslationResultMapper extends PacketMapper<NetworkPackets.TranslationResult, TranslationResultMapper.ResultData> {
+public class TranslationResultMapperAbstract extends AbstractPacketMapper<NetworkPackets.TranslationResult, TranslationResultMapperAbstract.ResultData> {
 
 
-    public TranslationResultMapper() {
-        super(NetworkPackets.TranslationResult.class, TranslationResultMapper.ResultData.class);
+    public TranslationResultMapperAbstract() {
+        super(NetworkPackets.TranslationResult.class, TranslationResultMapperAbstract.ResultData.class);
     }
 
     @Override

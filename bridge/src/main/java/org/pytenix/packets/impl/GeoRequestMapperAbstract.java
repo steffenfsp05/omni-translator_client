@@ -1,15 +1,15 @@
 package org.pytenix.packets.impl;
 
-import org.pytenix.packets.PacketMapper;
+import org.pytenix.packets.AbstractPacketMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 
 import java.util.UUID;
 
 // Beispiel-Entity für GeoRequest
 
-public class GeoRequestMapper extends PacketMapper<NetworkPackets.GeoRequestPacket, GeoRequestMapper.RequestData> {
+public class GeoRequestMapperAbstract extends AbstractPacketMapper<NetworkPackets.GeoRequestPacket, GeoRequestMapperAbstract.RequestData> {
 
-    public GeoRequestMapper() {
+    public GeoRequestMapperAbstract() {
         super(
                 NetworkPackets.GeoRequestPacket.class,
                 RequestData.class

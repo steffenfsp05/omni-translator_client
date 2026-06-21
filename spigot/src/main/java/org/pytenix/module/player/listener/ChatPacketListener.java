@@ -7,7 +7,7 @@ import com.github.retrooper.packetevents.protocol.chat.message.*;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSystemChatMessage;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
-import org.pytenix.module.player.LiveChatModule;
+import org.pytenix.module.player.LiveChatModuleAbstract;
 
 import java.util.UUID;
 import java.util.function.Function;
@@ -15,9 +15,9 @@ import java.util.function.Function;
 public class ChatPacketListener implements PacketListener {
 
 
-    final LiveChatModule liveChatModule;
+    final LiveChatModuleAbstract liveChatModule;
 
-    public ChatPacketListener(LiveChatModule liveChatModule) {
+    public ChatPacketListener(LiveChatModuleAbstract liveChatModule) {
         this.liveChatModule = liveChatModule;
     }
 

@@ -9,20 +9,18 @@ import org.pytenix.translation.TranslatorService;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public abstract class TranslatorModule {
+@Getter
+public abstract class AbstractTranslatorModule {
 
 
-    @Getter
     final TranslatorPlugin translatorPlugin;
 
-    @Getter
     final String moduleName;
 
 
-    @Getter
     final TranslatorService translatorService;
 
-    public TranslatorModule(TranslatorPlugin translatorPlugin, String moduleName) {
+    public AbstractTranslatorModule(TranslatorPlugin translatorPlugin, String moduleName) {
 
         this.translatorPlugin = translatorPlugin;
         this.moduleName = moduleName;

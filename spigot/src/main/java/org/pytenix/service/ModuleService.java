@@ -1,12 +1,12 @@
 package org.pytenix.service;
 
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.module.TranslatorModule;
-import org.pytenix.module.chat.PluginChatModule;
-import org.pytenix.module.gui.InventoryModule;
-import org.pytenix.module.hologram.HologramModule;
-import org.pytenix.module.player.LiveChatModule;
-import org.pytenix.module.signs.SignsModule;
+import org.pytenix.module.AbstractTranslatorModule;
+import org.pytenix.module.chat.PluginChatModuleAbstract;
+import org.pytenix.module.gui.InventoryModuleAbstract;
+import org.pytenix.module.hologram.HologramModuleAbstract;
+import org.pytenix.module.player.LiveChatModuleAbstract;
+import org.pytenix.module.signs.SignsModuleAbstract;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,22 +16,22 @@ public class ModuleService {
 
     final TranslatorPlugin translatorPlugin;
 
-    final List<TranslatorModule> modules;
+    final List<AbstractTranslatorModule> modules;
 
     public ModuleService(TranslatorPlugin translatorPlugin) {
         this.translatorPlugin = translatorPlugin;
         this.modules = new ArrayList<>();
 
-        registerModule(new InventoryModule(translatorPlugin));
-        registerModule(new PluginChatModule(translatorPlugin));
-        registerModule(new LiveChatModule(translatorPlugin));
-        registerModule(new HologramModule(translatorPlugin));
-        registerModule(new SignsModule(translatorPlugin));
+        registerModule(new InventoryModuleAbstract(translatorPlugin));
+        registerModule(new PluginChatModuleAbstract(translatorPlugin));
+        registerModule(new LiveChatModuleAbstract(translatorPlugin));
+        registerModule(new HologramModuleAbstract(translatorPlugin));
+        registerModule(new SignsModuleAbstract(translatorPlugin));
     }
 
 
-    public void registerModule(TranslatorModule translatorModule) {
-        modules.add(translatorModule);
+    public void registerModule(AbstractTranslatorModule abstractTranslatorModule) {
+        modules.add(abstractTranslatorModule);
     }
 
 

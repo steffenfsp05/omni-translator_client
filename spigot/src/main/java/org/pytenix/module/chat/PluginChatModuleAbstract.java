@@ -5,14 +5,14 @@ import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import lombok.Getter;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.chat.listener.SystemPacketListener;
-import org.pytenix.module.TranslatorModule;
+import org.pytenix.module.AbstractTranslatorModule;
 
 @Getter
-public class PluginChatModule extends TranslatorModule {
+public class PluginChatModuleAbstract extends AbstractTranslatorModule {
 
     MessageSequencer messageSequencer;
 
-    public PluginChatModule(TranslatorPlugin translatorPlugin) {
+    public PluginChatModuleAbstract(TranslatorPlugin translatorPlugin) {
         super(translatorPlugin, "plugin_chat");
 
         this.messageSequencer = new MessageSequencer(this);

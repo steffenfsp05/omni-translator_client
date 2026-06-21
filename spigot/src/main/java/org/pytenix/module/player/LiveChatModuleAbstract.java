@@ -6,12 +6,12 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.player.listener.AsyncPlayerChatListener;
-import org.pytenix.module.TranslatorModule;
+import org.pytenix.module.AbstractTranslatorModule;
 
-public class LiveChatModule extends TranslatorModule {
+public class LiveChatModuleAbstract extends AbstractTranslatorModule {
 
 
-    public LiveChatModule(TranslatorPlugin translatorPlugin) {
+    public LiveChatModuleAbstract(TranslatorPlugin translatorPlugin) {
         super(translatorPlugin, "live_chat");
 
 

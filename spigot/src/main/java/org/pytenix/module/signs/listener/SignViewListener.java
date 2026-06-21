@@ -13,7 +13,7 @@ import io.github.retrooper.packetevents.adventure.serializer.gson.GsonComponentS
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.pytenix.service.PlayerLocaleService;
-import org.pytenix.module.signs.SignsModule;
+import org.pytenix.module.signs.SignsModuleAbstract;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +25,9 @@ public class SignViewListener implements PacketListener {
 
     private static final Pattern QUOTE_PATTERN = Pattern.compile("^[\"']+|[\"']+$");
 
-    private final SignsModule signsModule;
+    private final SignsModuleAbstract signsModule;
 
-    public SignViewListener(SignsModule signsModule) {
+    public SignViewListener(SignsModuleAbstract signsModule) {
         this.signsModule = signsModule;
     }
 

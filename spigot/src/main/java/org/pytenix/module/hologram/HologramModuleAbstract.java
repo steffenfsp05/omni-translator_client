@@ -8,19 +8,19 @@ import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.hologram.listener.EntityPacketListener;
-import org.pytenix.module.TranslatorModule;
+import org.pytenix.module.AbstractTranslatorModule;
 
 import java.util.concurrent.TimeUnit;
 
 @Getter
-public class HologramModule extends TranslatorModule {
+public class HologramModuleAbstract extends AbstractTranslatorModule {
 
     public final Cache<String, Cache<Component, Component>> playerTranslationCache = CacheBuilder.newBuilder()
             .expireAfterAccess(30, TimeUnit.MINUTES)
             .build();
 
 
-    public HologramModule(TranslatorPlugin translatorPlugin) {
+    public HologramModuleAbstract(TranslatorPlugin translatorPlugin) {
         super(translatorPlugin, "hologram");
 
 

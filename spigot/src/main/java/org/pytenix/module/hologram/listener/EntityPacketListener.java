@@ -15,7 +15,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.pytenix.service.PlayerLocaleService;
-import org.pytenix.module.hologram.HologramModule;
+import org.pytenix.module.hologram.HologramModuleAbstract;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +27,10 @@ import java.util.concurrent.TimeUnit;
 public class EntityPacketListener implements PacketListener, Listener {
 
 
-    final HologramModule hologramModule;
+    final HologramModuleAbstract hologramModule;
 
 
-    public EntityPacketListener(HologramModule hologramModule) {
+    public EntityPacketListener(HologramModuleAbstract hologramModule) {
         this.hologramModule = hologramModule;
 
 

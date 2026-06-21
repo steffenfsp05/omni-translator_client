@@ -8,7 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.module.TranslatorModule;
+import org.pytenix.module.AbstractTranslatorModule;
 import org.pytenix.module.gui.listener.PacketListener;
 
 import java.util.ArrayList;
@@ -17,14 +17,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class InventoryModule extends TranslatorModule {
+public class InventoryModuleAbstract extends AbstractTranslatorModule {
 
 
     private static final Pattern COLOR_PATTERN = Pattern.compile("^§[0-9a-fk-or]+$");
     LegacyComponentSerializer legacyComponentSerializer;
 
 
-    public InventoryModule(TranslatorPlugin translatorPlugin) {
+    public InventoryModuleAbstract(TranslatorPlugin translatorPlugin) {
         super(translatorPlugin, "gui");
 
         this.legacyComponentSerializer = this.getTranslatorPlugin().getLegacyComponentSerializer();
