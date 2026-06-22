@@ -3,9 +3,9 @@ package org.pytenix.packets.impl;
 import org.pytenix.packets.AbstractPacketMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 
-public class ConfigRequestMapperAbstract extends AbstractPacketMapper<NetworkPackets.ConfigRequestPacket, ConfigRequestMapperAbstract.RequestData> {
+public class ConfigRequestMapper extends AbstractPacketMapper<NetworkPackets.ConfigRequestPacket, ConfigRequestMapper.RequestData> {
 
-    public ConfigRequestMapperAbstract() {
+    public ConfigRequestMapper() {
         super(NetworkPackets.ConfigRequestPacket.class, RequestData.class);
     }
 

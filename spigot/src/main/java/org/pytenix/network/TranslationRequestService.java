@@ -5,7 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.TranslationRequestMapperAbstract;
+import org.pytenix.packets.impl.TranslationRequestMapper;
 
 import java.time.Duration;
 import java.util.List;
@@ -53,7 +53,7 @@ public class TranslationRequestService {
 
 
             transport.getTransportService().send(channel, PacketRegistry.TRANSLATION_REQUEST,
-                    PacketMapperRegistry.toProto(new TranslationRequestMapperAbstract.RequestData(
+                    PacketMapperRegistry.toProto(new TranslationRequestMapper.RequestData(
                             masterId,
                             text,
                             targetLang,

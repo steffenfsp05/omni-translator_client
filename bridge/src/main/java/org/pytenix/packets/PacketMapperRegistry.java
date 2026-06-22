@@ -13,12 +13,12 @@ public class PacketMapperRegistry {
 
 
     static {
-        register(new ConfigRequestMapperAbstract());
-        register(new DefaultServerConfigMapperAbstract());
-        register(new GeoRequestMapperAbstract());
-        register(new GeoResultMapperAbstract());
-        register(new TranslationRequestMapperAbstract());
-        register(new TranslationResultMapperAbstract());
+        register(new ConfigRequestMapper());
+        register(new DefaultServerConfigMapper());
+        register(new GeoRequestMapper());
+        register(new GeoResultMapper());
+        register(new TranslationRequestMapper());
+        register(new TranslationResultMapper());
     }
 
     public static <P, J> void register(AbstractPacketMapper<P, J> mapper) {

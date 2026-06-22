@@ -8,7 +8,7 @@ import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.packets.PacketRegistry;
 import org.pytenix.network.consumer.ConfigUpdateConsumer;
 import org.pytenix.network.listener.ConfigUpdateListener;
-import org.pytenix.packets.impl.TranslationResultMapperAbstract;
+import org.pytenix.packets.impl.TranslationResultMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.transport.TransportService;
 import org.transport.io.minecraft.PluginMessageReceiver;
@@ -60,7 +60,7 @@ public class SpigotTransport {
     private void registerPacketHandlers()
     {
         this.transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT,
-                (MappedPacketReceiveConsumer<String, NetworkPackets.TranslationResult, TranslationResultMapperAbstract.ResultData>)
+                (MappedPacketReceiveConsumer<String, NetworkPackets.TranslationResult, TranslationResultMapper.ResultData>)
                         (context, resultData) ->
                                 translationRequestService.completeRequest(
                                   resultData.requestId(),

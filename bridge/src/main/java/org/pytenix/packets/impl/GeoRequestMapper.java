@@ -7,9 +7,9 @@ import java.util.UUID;
 
 // Beispiel-Entity für GeoRequest
 
-public class GeoRequestMapperAbstract extends AbstractPacketMapper<NetworkPackets.GeoRequestPacket, GeoRequestMapperAbstract.RequestData> {
+public class GeoRequestMapper extends AbstractPacketMapper<NetworkPackets.GeoRequestPacket, GeoRequestMapper.RequestData> {
 
-    public GeoRequestMapperAbstract() {
+    public GeoRequestMapper() {
         super(
                 NetworkPackets.GeoRequestPacket.class,
                 RequestData.class

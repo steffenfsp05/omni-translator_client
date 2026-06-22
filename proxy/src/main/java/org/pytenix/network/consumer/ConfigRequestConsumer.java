@@ -4,12 +4,12 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.ConfigRequestMapperAbstract;
+import org.pytenix.packets.impl.ConfigRequestMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.translation.TranslatorService;
 import org.transport.service.PacketContext;
 
-public class ConfigRequestConsumer implements MappedPacketReceiveConsumer<RegisteredServer, NetworkPackets.ConfigRequestPacket, ConfigRequestMapperAbstract.RequestData> {
+public class ConfigRequestConsumer implements MappedPacketReceiveConsumer<RegisteredServer, NetworkPackets.ConfigRequestPacket, ConfigRequestMapper.RequestData> {
 
     final TranslatorService translatorService;
 
@@ -19,7 +19,7 @@ public class ConfigRequestConsumer implements MappedPacketReceiveConsumer<Regist
 
 
     @Override
-    public void handle(PacketContext<RegisteredServer> context, ConfigRequestMapperAbstract.RequestData requestData) {
+    public void handle(PacketContext<RegisteredServer> context, ConfigRequestMapper.RequestData requestData) {
         System.out.println("CONFIG REGUEST");
         if (translatorService.getTranslationConfiguration() == null) {
             System.out.println("CONFIG REGUEST ABORTED");

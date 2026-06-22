@@ -8,7 +8,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class TranslationRequestMapperAbstract extends AbstractPacketMapper<NetworkPackets.TranslationRequest, TranslationRequestMapperAbstract.RequestData> {
+public class TranslationRequestMapper extends AbstractPacketMapper<NetworkPackets.TranslationRequest, TranslationRequestMapper.RequestData> {
 
     private static final Map<NetworkPackets.Module, ServerConfiguration.Module> MODULE_MAP = new EnumMap<>(NetworkPackets.Module.class);
 
@@ -25,7 +25,7 @@ public class TranslationRequestMapperAbstract extends AbstractPacketMapper<Netwo
         }
     }
 
-    public TranslationRequestMapperAbstract() {
+    public TranslationRequestMapper() {
         super(NetworkPackets.TranslationRequest.class, RequestData.class);
     }
 

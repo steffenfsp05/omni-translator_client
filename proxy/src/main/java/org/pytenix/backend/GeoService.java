@@ -2,8 +2,8 @@ package org.pytenix.backend;
 
 import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.GeoRequestMapperAbstract;
-import org.pytenix.packets.impl.GeoResultMapperAbstract;
+import org.pytenix.packets.impl.GeoRequestMapper;
+import org.pytenix.packets.impl.GeoResultMapper;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -19,7 +19,7 @@ public class GeoService {
         this.connectionManager = connectionManager;
     }
 
-    public void handleGeoResult(GeoResultMapperAbstract.ResultData resultData) {
+    public void handleGeoResult(GeoResultMapper.ResultData resultData) {
 
         CompletableFuture<String> future = queue.remove(resultData.requestId());
         if (future != null) future.complete(resultData.language());
@@ -32,7 +32,7 @@ public class GeoService {
         queue.put(id, future);
 
         connectionManager.sendPacket(PacketRegistry.GEO_REQUEST, PacketMapperRegistry.toProto(
-                new GeoRequestMapperAbstract.RequestData(
+                new GeoRequestMapper.RequestData(
                         id,
                         ipAddress
                 )

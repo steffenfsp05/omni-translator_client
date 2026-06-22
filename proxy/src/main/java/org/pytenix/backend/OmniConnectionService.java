@@ -8,8 +8,8 @@ import org.pytenix.TranslatorPlugin;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.GeoResultMapperAbstract;
-import org.pytenix.packets.impl.TranslationResultMapperAbstract;
+import org.pytenix.packets.impl.GeoResultMapper;
+import org.pytenix.packets.impl.TranslationResultMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.FastByteArrayOutputStream;
 import org.transport.TransportOptions;
@@ -89,14 +89,14 @@ public class OmniConnectionService {
 
 
         transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT,
-                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.TranslationResult, TranslationResultMapperAbstract.ResultData>)
+                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.TranslationResult, TranslationResultMapper.ResultData>)
                         (context, resultData) -> {
                             if (restfulService != null) restfulService.handleTranslationResult(resultData);
 
         });
 
         transportService.registerPacket(PacketRegistry.GEO_RESULT,
-                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.GeoResultPacket, GeoResultMapperAbstract.ResultData>)
+                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.GeoResultPacket, GeoResultMapper.ResultData>)
                         (context, resultData) -> {
                             if (geoService != null) geoService.handleGeoResult(resultData);
 

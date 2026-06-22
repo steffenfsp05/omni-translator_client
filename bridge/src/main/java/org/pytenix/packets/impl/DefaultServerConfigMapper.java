@@ -9,10 +9,10 @@ import java.util.HashSet;
 import java.util.Map;
 
 
-public class DefaultServerConfigMapperAbstract extends AbstractPacketMapper<NetworkPackets.ServerConfiguration, ServerConfiguration> {
+public class DefaultServerConfigMapper extends AbstractPacketMapper<NetworkPackets.ServerConfiguration, ServerConfiguration> {
 
 
-    public DefaultServerConfigMapperAbstract() {
+    public DefaultServerConfigMapper() {
         super(NetworkPackets.ServerConfiguration.class, ServerConfiguration.class);
     }
 

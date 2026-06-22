@@ -5,9 +5,9 @@ import org.pytenix.proto.generated.NetworkPackets;
 
 import java.util.UUID;
 
-public class GeoResultMapperAbstract extends AbstractPacketMapper<NetworkPackets.GeoResultPacket, GeoResultMapperAbstract.ResultData> {
+public class GeoResultMapper extends AbstractPacketMapper<NetworkPackets.GeoResultPacket, GeoResultMapper.ResultData> {
 
-    public GeoResultMapperAbstract() {
+    public GeoResultMapper() {
         super(NetworkPackets.GeoResultPacket.class, ResultData.class);
     }
 

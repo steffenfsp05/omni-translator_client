@@ -5,15 +5,15 @@ import org.pytenix.TranslatorPlugin;
 import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.TranslationRequestMapperAbstract;
-import org.pytenix.packets.impl.TranslationResultMapperAbstract;
+import org.pytenix.packets.impl.TranslationRequestMapper;
+import org.pytenix.packets.impl.TranslationResultMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.transport.service.PacketContext;
 
 import java.util.UUID;
 import java.util.concurrent.Executor;
 
-public class TranslationRequestConsumer implements MappedPacketReceiveConsumer<RegisteredServer, NetworkPackets.TranslationRequest, TranslationRequestMapperAbstract.RequestData> {
+public class TranslationRequestConsumer implements MappedPacketReceiveConsumer<RegisteredServer, NetworkPackets.TranslationRequest, TranslationRequestMapper.RequestData> {
 
     final TranslatorPlugin translatorPlugin;
     final Executor executor;
@@ -29,7 +29,7 @@ public class TranslationRequestConsumer implements MappedPacketReceiveConsumer<R
     }
 
     @Override
-    public void handle(PacketContext<RegisteredServer> context, TranslationRequestMapperAbstract.RequestData requestData) {
+    public void handle(PacketContext<RegisteredServer> context, TranslationRequestMapper.RequestData requestData) {
 
 
         UUID id = requestData.requestId();
@@ -42,7 +42,7 @@ public class TranslationRequestConsumer implements MappedPacketReceiveConsumer<R
 
         if (cached != null) {
             context.reply(PacketRegistry.TRANSLATION_RESULT,
-                    PacketMapperRegistry.toProto(new TranslationResultMapperAbstract.ResultData(
+                    PacketMapperRegistry.toProto(new TranslationResultMapper.ResultData(
                             id,
                             cached
                     )));
@@ -53,7 +53,7 @@ public class TranslationRequestConsumer implements MappedPacketReceiveConsumer<R
                         String finalString = (isSuccessfull(translatedText) && !translatedText.equals(text)) ? translatedText : text;
 
                         context.reply(PacketRegistry.TRANSLATION_RESULT,
-                                PacketMapperRegistry.toProto(new TranslationResultMapperAbstract.ResultData(
+                                PacketMapperRegistry.toProto(new TranslationResultMapper.ResultData(
                                         id,
                                         finalString
                                 )));
