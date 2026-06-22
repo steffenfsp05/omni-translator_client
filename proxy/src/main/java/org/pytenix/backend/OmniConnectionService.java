@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -115,7 +116,16 @@ public class OmniConnectionService {
                     if (ex == null) {
                         this.webSocket = ws;
                         this.reconnectAttempts.set(0);
-                        System.out.println("[OmniTranslator] ✅ Erfolgreich mit dem Dispatcher verbunden!");
+                        System.out.println("[OmniTranslator]  Erfolgreich mit dem Dispatcher verbunden!");
+                        System.out.println("Sende Test Nachricht");
+                        restfulService.sendTranslationRequest(UUID.randomUUID(), "Hallo wer bist du? ", "en-en", "live_chat").whenCompleteAsync((s, throwable) ->
+                        {
+                            if(throwable != null)
+                                throwable.printStackTrace();
+
+                            System.out.println("Result: " + s);
+                        });
+
                     } else {
                         handleConnectionError(ex);
                     }
@@ -179,10 +189,13 @@ public class OmniConnectionService {
             transportService.connect(webSocket);
             transportService.ready(webSocket);
 
+            WebSocket.Listener.super.onOpen(webSocket);
+
             if (restfulService != null) {
+                System.out.println("Sending: This is a Test!");
                 restfulService.sendTranslationRequest(java.util.UUID.randomUUID(), "This is a Test!", "de_de", "live_chat");
             }
-            WebSocket.Listener.super.onOpen(webSocket);
+
         }
 
         @Override
