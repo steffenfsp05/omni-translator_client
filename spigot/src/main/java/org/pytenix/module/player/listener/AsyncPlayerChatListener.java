@@ -42,8 +42,7 @@ public class AsyncPlayerChatListener implements Listener {
 
         String rawJson = net.kyori.adventure.text.serializer.gson.GsonComponentSerializer.gson().serialize(event.originalMessage());
         String rawJson2 = net.kyori.adventure.text.serializer.gson.GsonComponentSerializer.gson().serialize(event.message());
-        System.out.println("ORIGINAL MESSAGE: " + rawJson);
-        System.out.println("MESSAGE: " + rawJson2);
+
 
         String senderLang = PlayerLocaleService.getPlayerLocale(sender.getUniqueId()).split("_")[0].toLowerCase();
 

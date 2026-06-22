@@ -24,9 +24,15 @@ public class TransportFactory {
                         .maxPayloadSize(20000)
                         .build())
                 .networkSender((PluginMessageSender<String>)
-                        (s, bytes) -> carrierManager.getRandomCarrier().ifPresent(carrier ->
-                                plugin.getTaskScheduler().runForEntity(carrier, () ->
-                                        carrier.sendPluginMessage(plugin, s, bytes))))
+                        (s, bytes) -> {
+
+                            carrierManager.getRandomCarrier().ifPresent(carrier ->
+                            {
+                               plugin.getTaskScheduler().runForEntity(carrier, () ->
+                                        carrier.sendPluginMessage(plugin, channel, bytes));
+
+                            });
+                        })
                 .build();
     }
 }

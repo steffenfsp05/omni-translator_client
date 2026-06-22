@@ -65,8 +65,6 @@ public class TranslationRequestService {
     }
 
     public void completeRequest(UUID id, String result) {
-      //  UUID id = UuidUtil.fromByteString(translationResult.getRequestId());
-     //   String result = translationResult.getResult();
 
         List<CompletableFuture<String>> futures = pendingRequests.getIfPresent(id);
         if (futures != null) {

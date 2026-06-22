@@ -42,8 +42,10 @@ public class SpigotTransport {
 
 
 
-        this.channelCarrierService = new ChannelCarrierService(pluginMessagingChannel);
+
         this.translationRequestService = new TranslationRequestService(this, pluginMessagingChannel);
+        this.channelCarrierService = new ChannelCarrierService(pluginMessagingChannel, this);
+
         this.transportService = TransportFactory.createSpigotTransport(secret, pluginMessagingChannel, plugin, channelCarrierService);
 
         registerEvents();

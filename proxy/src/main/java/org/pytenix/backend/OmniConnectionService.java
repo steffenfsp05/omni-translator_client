@@ -179,8 +179,7 @@ public class OmniConnectionService {
 
         @Override
         public void onOpen(WebSocket webSocket) {
-            System.out.println("ABABB!");
-            OmniConnectionService.this.webSocket = webSocket;
+             OmniConnectionService.this.webSocket = webSocket;
 
             isConnected.set(true);
             transportService.connect(webSocket);

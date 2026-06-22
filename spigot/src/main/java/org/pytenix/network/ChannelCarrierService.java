@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRegisterChannelEvent;
 import org.bukkit.event.player.PlayerUnregisterChannelEvent;
+import org.transport.TransportService;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -16,10 +17,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChannelCarrierService implements Listener {
 
     private final String channel;
+    private final SpigotTransport spigotTransport;
     private final Set<UUID> availableCarriers = ConcurrentHashMap.newKeySet();
 
-    public ChannelCarrierService(String channel) {
+    public ChannelCarrierService(String channel, SpigotTransport spigotTransport) {
         this.channel = channel;
+        this.spigotTransport = spigotTransport;
     }
 
     public Optional<Player> getRandomCarrier() {
@@ -33,6 +36,8 @@ public class ChannelCarrierService implements Listener {
     public void onChannelRegister(PlayerRegisterChannelEvent event) {
         if (event.getChannel().equalsIgnoreCase(channel)) {
             availableCarriers.add(event.getPlayer().getUniqueId());
+
+            spigotTransport.getTransportService().ready(channel);
         }
     }
 
@@ -40,6 +45,11 @@ public class ChannelCarrierService implements Listener {
     public void onChannelUnregister(PlayerUnregisterChannelEvent event) {
         if (event.getChannel().equalsIgnoreCase(channel)) {
             availableCarriers.remove(event.getPlayer().getUniqueId());
+
+            if(isEmpty()) {
+                spigotTransport.getTransportService().disconnect(channel);
+                spigotTransport.getTransportService().connect(channel);
+            }
         }
     }
 
