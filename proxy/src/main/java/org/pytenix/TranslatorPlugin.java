@@ -17,6 +17,7 @@ import org.pytenix.config.ConfigService;
 import org.pytenix.config.ConfigurationFile;
 import org.pytenix.event.EventService;
 import org.pytenix.event.impl.DefaultEventService;
+import org.pytenix.limbo.LimboService;
 import org.pytenix.listener.PlayerConnectionChangeListener;
 import org.pytenix.listener.ProxyPingListener;
 import org.pytenix.network.ProxyTransport;
@@ -66,6 +67,8 @@ public class TranslatorPlugin {
     GradientService gradientService;
     EventService eventService;
 
+    LimboService limboService;
+
     @Inject
     public TranslatorPlugin(ProxyServer server, Logger logger) {
         this.server = server;
@@ -91,6 +94,7 @@ public class TranslatorPlugin {
 
 
 
+
         this.translationProcessor = (id, text, targetLang, module) -> restfulService.sendTranslationRequest(id, text, targetLang, module);
         this.placeholderService = new DefaultPlaceholderService();
         this.gradientService = new DefaultGradientService();
@@ -100,6 +104,7 @@ public class TranslatorPlugin {
         this.translatorService = new DefaultTranslationService(translationProcessor,placeholderService,gradientService,eventService);
 
         final String secret = loadForwardingSecret();
+
 
         if (secret == null || secret.isEmpty()) {
             logger.error(" ");
@@ -115,6 +120,9 @@ public class TranslatorPlugin {
 
             return;
         }
+
+
+        this.limboService = new LimboService(this, proxyServer, 25588, secret);
 
 
         System.out.println("READING SECRET: " + secret);
@@ -150,6 +158,7 @@ public class TranslatorPlugin {
     public void onProxyShutdown(ProxyShutdownEvent event) {
         proxyTransport.shutdown();
         connectionService.shutdown();
+        limboService.shutdown();
     }
 
     private String loadForwardingSecret() {
