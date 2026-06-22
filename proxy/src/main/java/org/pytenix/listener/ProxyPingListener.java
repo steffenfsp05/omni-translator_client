@@ -82,24 +82,22 @@ public class ProxyPingListener {
             return null;
         }
 
-        //COLORCODE FIXXEN
-        //TODO
 
-        if (!configuration.getModules().getOrDefault(ServerConfiguration.Module.MOTD.getModuleName(), true)) {
+        if (!configuration.getModules().getOrDefault(ServerConfiguration.Module.MOTD.getModuleName(), true))
             return null;
-        }
 
-        String ipAddress = event.getConnection().getRemoteAddress().getAddress().getHostAddress();
+
+        String ipAddress = anonymizeAddress(event.getConnection().getRemoteAddress().getAddress().getHostAddress());
 
         final UUID uuid = UUID.randomUUID();
 
 
-        String finalIpAddress = getTestIps().get(new Random().nextInt(getTestIps().size()));
+        //String finalIpAddress = getTestIps().get(new Random().nextInt(getTestIps().size()));
         return EventTask.async(() -> {
 
             CompletableFuture<String> localeFuture = geoService.sendGeoRequest(
                     uuid,
-                    finalIpAddress
+                    ipAddress
             );
 
             try {
@@ -124,5 +122,24 @@ public class ProxyPingListener {
                 System.out.println("MOTD Translation failed: " + e.getMessage());
             }
         });
+    }
+
+
+    private String anonymizeAddress(String ipAddress)
+    {
+        String anonymizedIp;
+        if (ipAddress.contains(".")) {
+            anonymizedIp = ipAddress.substring(0, ipAddress.lastIndexOf('.')) + ".0";
+        } else if (ipAddress.contains(":")) {
+            String[] parts = ipAddress.split(":");
+            if (parts.length >= 4) {
+                anonymizedIp = parts[0] + ":" + parts[1] + ":" + parts[2] + ":" + parts[3] + "::";
+            } else {
+                anonymizedIp = ipAddress;
+            }
+        } else {
+            anonymizedIp = ipAddress;
+        }
+        return anonymizedIp;
     }
 }
