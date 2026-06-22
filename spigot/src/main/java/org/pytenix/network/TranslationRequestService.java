@@ -57,7 +57,7 @@ public class TranslationRequestService {
                             masterId,
                             text,
                             targetLang,
-                            ServerConfiguration.Module.valueOf(module)
+                            ServerConfiguration.Module.getModule(module)
                     )));
         }
 

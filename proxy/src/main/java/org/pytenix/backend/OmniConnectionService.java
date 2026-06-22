@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -114,17 +115,10 @@ public class OmniConnectionService {
                 .buildAsync(URI.create(url), new WebSocketListener())
                 .whenCompleteAsync((ws, ex) -> {
                     if (ex == null) {
-                        this.webSocket = ws;
                         this.reconnectAttempts.set(0);
                         System.out.println("[OmniTranslator]  Erfolgreich mit dem Dispatcher verbunden!");
                         System.out.println("Sende Test Nachricht");
-                        restfulService.sendTranslationRequest(UUID.randomUUID(), "Hallo wer bist du? ", "en-en", "live_chat").whenCompleteAsync((s, throwable) ->
-                        {
-                            if(throwable != null)
-                                throwable.printStackTrace();
 
-                            System.out.println("Result: " + s);
-                        });
 
                     } else {
                         handleConnectionError(ex);
@@ -185,6 +179,9 @@ public class OmniConnectionService {
 
         @Override
         public void onOpen(WebSocket webSocket) {
+            System.out.println("ABABB!");
+            OmniConnectionService.this.webSocket = webSocket;
+
             isConnected.set(true);
             transportService.connect(webSocket);
             transportService.ready(webSocket);

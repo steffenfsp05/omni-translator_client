@@ -60,7 +60,7 @@ public class RestfulService {
                         id,
                         text,
                         lang,
-                        ServerConfiguration.Module.valueOf(module)
+                        ServerConfiguration.Module.getModule(module)
                 )));
 
         return future.orTimeout(60, TimeUnit.SECONDS).exceptionally(ex -> {

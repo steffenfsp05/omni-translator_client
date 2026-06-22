@@ -18,7 +18,7 @@ public class TranslationRequestMapper extends AbstractPacketMapper<NetworkPacket
 
             String javaName = protoMod.name().replace("MODULE_", "");
             try {
-                MODULE_MAP.put(protoMod, ServerConfiguration.Module.valueOf(javaName));
+                MODULE_MAP.put(protoMod, ServerConfiguration.Module.getModule(javaName));
             } catch (IllegalArgumentException e) {
                 System.err.println("Modul gefunden, aber nicht in Java definiert: " + javaName);
             }
