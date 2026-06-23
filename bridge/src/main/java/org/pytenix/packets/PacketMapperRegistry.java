@@ -19,6 +19,7 @@ public class PacketMapperRegistry {
         register(new GeoResultMapper());
         register(new TranslationRequestMapper());
         register(new TranslationResultMapper());
+        register(new ProfileMapper());
     }
 
     public static <P, J> void register(AbstractPacketMapper<P, J> mapper) {

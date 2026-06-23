@@ -17,6 +17,7 @@ public class ServerConfiguration {
     String licenseKey;
     HashMap<String, Boolean> modules;
     String defaultLanguage;
+    ConsentMode consentMode = ConsentMode.STRICT;
     Set<String> blacklistedWords;
     private String type = "CONFIG_UPDATE";
 
@@ -35,6 +36,7 @@ public class ServerConfiguration {
             hash.put(value.getModuleName(), true);
         }
 
+        serverConfiguration.setConsentMode(ConsentMode.STRICT);
         serverConfiguration.setModules(hash);
         serverConfiguration.setDefaultLanguage("NOT_SET");
         serverConfiguration.setLicenseKey(licenseKey);
@@ -43,6 +45,17 @@ public class ServerConfiguration {
         return serverConfiguration;
     }
 
+
+    public enum ConsentMode {
+        STRICT,
+        EXTERNAL,
+        AUTO_OPT;
+
+        public static ConsentMode getConsentMode(String name) {
+            return valueOf(name.toUpperCase());
+        }
+
+    }
 
     @Getter
     @AllArgsConstructor

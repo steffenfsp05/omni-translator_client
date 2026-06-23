@@ -9,8 +9,9 @@ option java_outer_classname = "NetworkPackets";
 message ServerConfiguration {
   string license_key = 1;
   string default_language = 2;
-  repeated Module active_modules = 3; // Liste aller Module, die auf 'true' stehen
-  repeated string words = 4;
+  ConsentMode consentMode = 3;
+  repeated Module active_modules = 4; // Liste aller Module, die auf 'true' stehen
+  repeated string words = 5;
 }
 
 message GeoRequestPacket
@@ -40,11 +41,43 @@ message TranslationRequest {
   Module module = 5;
 }
 
+message ProfilePacket {
+  enum Action {
+    FETCH = 0;   // Proxy/Spigot fragt Profil an (Backend soll lesen)
+    UPDATE = 1;  // Proxy/Spigot sendet Änderung (Backend soll speichern)
+    RESPONSE = 2;// Backend antwortet mit den Daten an den Proxy/Spigot
+  }
+
+  enum ConsentType
+  {
+    UNKNOWN = 0;
+    EXPLICIT = 1;
+    AUTO = 2;
+    DECLINED = 3;
+  }
+
+  Action action = 1;
+  fixed64 request_id_most_sig = 2;
+  fixed64 request_id_least_sig = 3;
+
+  fixed64 user_id_most_sig = 4;
+  fixed64 user_id_least_sig = 5;
+
+  ConsentType consentType = 6;
+}
+
 
 message TranslationResult {
   fixed64 request_id_most_sig = 1;
   fixed64 request_id_least_sig = 2;
   string result = 3;
+}
+
+enum ConsentMode {
+  CONSENT_UNKNOWN = 0;
+  CONSENT_STRICT = 1;
+  CONSENT_EXTERNAL = 2;
+  CONSENT_AUTO_OPT = 3;
 }
 
 
