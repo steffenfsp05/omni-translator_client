@@ -6,6 +6,7 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import lombok.Getter;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.network.consumer.ProfileConsumer;
 import org.pytenix.packets.PacketRegistry;
@@ -17,6 +18,7 @@ import org.transport.TransportService;
 import org.transport.io.minecraft.PluginMessageReceiver;
 import org.transport.io.minecraft.PluginMessageSender;
 import org.transport.service.impl.DefaultPacketService;
+import org.transport.service.impl.PacketDefinition;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,6 +26,8 @@ import java.util.concurrent.Executors;
 public class ProxyTransport {
 
     final TranslatorPlugin translatorPlugin;
+
+    @Getter
     final TransportService<RegisteredServer> transportService;
     private final ChannelIdentifier identifier = MinecraftChannelIdentifier.from("translator:main");
     private final ExecutorService apiExecutor = Executors.newFixedThreadPool(4, runnable -> {
@@ -75,6 +79,7 @@ public class ProxyTransport {
         this.transportService.registerPacket(PacketRegistry.CONFIG_REQUEST, new ConfigRequestConsumer(translatorPlugin.getTranslatorService()));
         this.transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST, new TranslationRequestConsumer(translatorPlugin, apiExecutor));
         this.transportService.registerPacket(PacketRegistry.PROFILE, new ProfileConsumer());
+        this.transportService.registerPacket(PacketRegistry.CONSENT_REFRESH, (registeredServerPacketContext, consentRefreshRequest) -> {});
 
     }
 

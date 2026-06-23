@@ -1,21 +1,14 @@
 package org.pytenix.limbo;
 
-import com.mojang.brigadier.tree.CommandNode;
-import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandMeta;
-import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.limbo.command.OptInCommand;
+import org.pytenix.limbo.command.TranslateCommand;
 import org.pytenix.limbo.listener.ServerPreConnectListener;
-import org.pytenix.listener.ProxyPingListener;
 
 import java.io.File;
 import java.net.InetSocketAddress;
-import java.util.Collection;
-import java.util.List;
 
 public class LimboService {
 
@@ -26,11 +19,11 @@ public class LimboService {
 
         proxyServer.getEventManager().register(plugin, new ServerPreConnectListener(plugin));
 
-        CommandMeta meta = proxyServer.getCommandManager().metaBuilder("optin")
+        CommandMeta meta = proxyServer.getCommandManager().metaBuilder("translate")
                 .plugin(plugin)
                 .build();
 
-        proxyServer.getCommandManager().register(meta, new OptInCommand(plugin));
+        proxyServer.getCommandManager().register(meta, new TranslateCommand(plugin));
 
         final String limboDir = "plugins/nanolimbo";
         LimboDownloadService.checkAndDownload(limboDir);

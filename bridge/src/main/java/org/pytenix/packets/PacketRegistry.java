@@ -49,5 +49,10 @@ public class PacketRegistry {
                     NetworkPackets.ProfilePacket.parser()
             );
 
+    public static final PacketDefinition<NetworkPackets.ConsentRefreshRequest> CONSENT_REFRESH =
+            new PacketDefinition<>(
+                    8,
+                    NetworkPackets.ConsentRefreshRequest.parser()
+            );
 
 }

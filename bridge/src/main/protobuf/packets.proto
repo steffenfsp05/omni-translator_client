@@ -41,6 +41,17 @@ message TranslationRequest {
   Module module = 5;
 }
 
+message ConsentRefreshRequest
+{
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+
+  fixed64 user_id_most_sig = 3;
+  fixed64 user_id_least_sig = 4;
+
+  ProfilePacket.ConsentType consentType = 5;
+}
+
 message ProfilePacket {
   enum Action {
     FETCH = 0;   // Proxy/Spigot fragt Profil an (Backend soll lesen)
@@ -100,6 +111,8 @@ message PacketWrapper {
     GeoResultPacket geo_result = 4;
     TranslationRequest translation_request = 5;
     TranslationResult translation_result = 6;
+    ProfilePacket profile_packet = 7;
+    ConsentRefreshRequest consentrefresh_request = 8;
 
   }
 }

@@ -20,6 +20,7 @@ public class PacketMapperRegistry {
         register(new TranslationRequestMapper());
         register(new TranslationResultMapper());
         register(new ProfileMapper());
+        register(new ConsentRefreshRequestMapper());
     }
 
     public static <P, J> void register(AbstractPacketMapper<P, J> mapper) {

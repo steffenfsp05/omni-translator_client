@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.pytenix.TranslatorPlugin;
+import org.pytenix.network.consumer.ConsentRefreshConsumer;
+import org.pytenix.network.listener.ConsentUpdateListener;
 import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.packets.PacketRegistry;
 import org.pytenix.network.consumer.ConfigUpdateConsumer;
@@ -77,11 +79,13 @@ public class SpigotTransport {
 
         this.transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST,(stringPacketContext, translationRequest) -> {});
         this.transportService.registerPacket(PacketRegistry.CONFIG_REQUEST,(stringPacketContext, translationRequest) -> {});
+        this.transportService.registerPacket(PacketRegistry.CONSENT_REFRESH, new ConsentRefreshConsumer(plugin, plugin.getTranslatorService()));
     }
 
     private void registerEvents()
     {
         plugin.getTranslatorService().getEventService().register(new ConfigUpdateListener(plugin));
+        plugin.getTranslatorService().getEventService().register(new ConsentUpdateListener(plugin));
 
         Bukkit.getPluginManager().registerEvents(channelCarrierService, plugin);
     }
