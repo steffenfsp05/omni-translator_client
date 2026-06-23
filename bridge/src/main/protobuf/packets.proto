@@ -56,14 +56,15 @@ message ProfilePacket {
     DECLINED = 3;
   }
 
-  Action action = 1;
-  fixed64 request_id_most_sig = 2;
-  fixed64 request_id_least_sig = 3;
+  string license = 1;
+  Action action = 2;
+  fixed64 request_id_most_sig = 3;
+  fixed64 request_id_least_sig = 4;
 
-  fixed64 user_id_most_sig = 4;
-  fixed64 user_id_least_sig = 5;
+  fixed64 user_id_most_sig = 5;
+  fixed64 user_id_least_sig = 6;
 
-  ConsentType consentType = 6;
+  ConsentType consentType = 7;
 }
 
 

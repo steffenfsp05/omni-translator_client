@@ -43,5 +43,11 @@ public class PacketRegistry {
                     NetworkPackets.GeoRequestPacket.parser()
             );
 
+    public static final PacketDefinition<NetworkPackets.ProfilePacket> PROFILE =
+            new PacketDefinition<>(
+                    7,
+                    NetworkPackets.ProfilePacket.parser()
+            );
+
 
 }

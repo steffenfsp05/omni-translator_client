@@ -4,16 +4,19 @@ import com.google.protobuf.MessageLite;
 import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import lombok.Getter;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.packets.PacketRegistry;
 import org.pytenix.packets.impl.GeoResultMapper;
+import org.pytenix.packets.impl.ProfileMapper;
 import org.pytenix.packets.impl.TranslationResultMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.FastByteArrayOutputStream;
 import org.transport.TransportOptions;
 import org.transport.TransportService;
+import org.transport.service.PacketContext;
 import org.transport.service.impl.DefaultPacketService;
 import org.transport.service.impl.PacketDefinition;
 
@@ -33,7 +36,9 @@ public class OmniConnectionService {
 
     public final AtomicBoolean isConnected = new AtomicBoolean(false);
     private final String url;
-    private final String apiKey;
+
+    @Getter
+    final String apiKey;
 
     private final HttpClient httpClient;
     private WebSocket webSocket;
@@ -44,6 +49,7 @@ public class OmniConnectionService {
 
     private RestfulService restfulService;
     private GeoService geoService;
+    private ProfileService profileService;
 
     private final TransportService<WebSocket> transportService;
 
@@ -74,9 +80,10 @@ public class OmniConnectionService {
                 .build();
     }
 
-    public void setServices(RestfulService restfulService, GeoService geoService) {
+    public void setServices(RestfulService restfulService, GeoService geoService, ProfileService profileService) {
         this.restfulService = restfulService;
         this.geoService = geoService;
+        this.profileService = profileService;
         registerPackets();
     }
 
@@ -103,6 +110,14 @@ public class OmniConnectionService {
                             if (geoService != null) geoService.handleGeoResult(resultData);
 
                         });
+
+        transportService.registerPacket(PacketRegistry.PROFILE,
+                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.ProfilePacket, ProfileMapper.ProfileData>)
+                        (context, javaPacket) -> {
+            System.out.println("INCOMING: " + javaPacket);
+                            if(profileService != null) profileService.handleProfileResult(javaPacket);
+
+        });
 
 
         transportService.registerPacket(PacketRegistry.GEO_REQUEST,(webSocketPacketContext, geoRequestPacket) -> {});

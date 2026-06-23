@@ -18,7 +18,7 @@ public class ConsentMessageFactory {
             <gray>Do you agree to anonymous text processing?</gray>
             <dark_gray><i>(You can change this anytime with /translate toggle)</i></dark_gray>
             
-            <click:run_command:'/translate accept'><hover:show_text:'<green>Click to accept translation</green>'><green><b>[ ✔ Accept ]</b></green></hover></click> <dark_gray>|</dark_gray> <click:run_command:'/translate decline'><hover:show_text:'<red>Click to decline translation</red>'><red><b>[ ✖ Decline ]</b></red></hover></click>
+            <click:run_command:'/optin'><hover:show_text:'<green>Click to accept translation</green>'><green><b>[ ✔ Accept ]</b></green></hover></click> <dark_gray>|</dark_gray> <click:run_command:'/translate decline'><hover:show_text:'<red>Click to decline translation</red>'><red><b>[ ✖ Decline ]</b></red></hover></click>
             
             """;
 

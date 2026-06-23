@@ -10,6 +10,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.Getter;
 import org.pytenix.backend.GeoService;
 import org.pytenix.backend.OmniConnectionService;
+import org.pytenix.backend.ProfileService;
 import org.pytenix.backend.RestfulService;
 import org.pytenix.cache.CacheProvider;
 import org.pytenix.cache.impl.CaffeineCacheProvider;
@@ -55,6 +56,7 @@ public class TranslatorPlugin {
     RestfulService restfulService;
     OmniConnectionService connectionService;
     GeoService geoService;
+    ProfileService profileService;
 
     String remoteAddress = "192.168.178.121:8083";
 
@@ -142,8 +144,9 @@ public class TranslatorPlugin {
         );
 
         this.geoService = new GeoService(connectionService);
+        this.profileService = new ProfileService(connectionService);
 
-        connectionService.setServices(restfulService, geoService);
+        connectionService.setServices(restfulService, geoService, profileService);
         connectionService.connect();
 
 

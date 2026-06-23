@@ -7,6 +7,7 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.limbo.command.OptInCommand;
 import org.pytenix.limbo.listener.ServerPreConnectListener;
 import org.pytenix.listener.ProxyPingListener;
@@ -20,16 +21,16 @@ public class LimboService {
 
     private Process nanoLimboProcess;
 
-    public LimboService(Object plugin,ProxyServer proxyServer , int port, String secret)
+    public LimboService(TranslatorPlugin plugin, ProxyServer proxyServer , int port, String secret)
     {
 
-        proxyServer.getEventManager().register(plugin, new ServerPreConnectListener(proxyServer));
+        proxyServer.getEventManager().register(plugin, new ServerPreConnectListener(plugin));
 
         CommandMeta meta = proxyServer.getCommandManager().metaBuilder("optin")
                 .plugin(plugin)
                 .build();
 
-        proxyServer.getCommandManager().register(meta, new OptInCommand(proxyServer));
+        proxyServer.getCommandManager().register(meta, new OptInCommand(plugin));
 
         final String limboDir = "plugins/nanolimbo";
         LimboDownloadService.checkAndDownload(limboDir);

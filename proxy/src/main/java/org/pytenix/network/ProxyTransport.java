@@ -7,6 +7,7 @@ import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import org.pytenix.TranslatorPlugin;
+import org.pytenix.network.consumer.ProfileConsumer;
 import org.pytenix.packets.PacketRegistry;
 import org.pytenix.network.consumer.ConfigRequestConsumer;
 import org.pytenix.network.consumer.TranslationRequestConsumer;
@@ -73,6 +74,7 @@ public class ProxyTransport {
 
         this.transportService.registerPacket(PacketRegistry.CONFIG_REQUEST, new ConfigRequestConsumer(translatorPlugin.getTranslatorService()));
         this.transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST, new TranslationRequestConsumer(translatorPlugin, apiExecutor));
+        this.transportService.registerPacket(PacketRegistry.PROFILE, new ProfileConsumer());
 
     }
 
