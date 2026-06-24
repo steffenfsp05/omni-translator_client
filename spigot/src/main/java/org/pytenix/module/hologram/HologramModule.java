@@ -13,14 +13,14 @@ import org.pytenix.module.AbstractTranslatorModule;
 import java.util.concurrent.TimeUnit;
 
 @Getter
-public class HologramModuleAbstract extends AbstractTranslatorModule {
+public class HologramModule extends AbstractTranslatorModule {
 
     public final Cache<String, Cache<Component, Component>> playerTranslationCache = CacheBuilder.newBuilder()
             .expireAfterAccess(30, TimeUnit.MINUTES)
             .build();
 
 
-    public HologramModuleAbstract(TranslatorPlugin translatorPlugin) {
+    public HologramModule(TranslatorPlugin translatorPlugin) {
         super(translatorPlugin, "hologram");
 
 

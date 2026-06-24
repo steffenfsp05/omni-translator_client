@@ -8,11 +8,11 @@ import org.pytenix.module.chat.listener.SystemPacketListener;
 import org.pytenix.module.AbstractTranslatorModule;
 
 @Getter
-public class PluginChatModuleAbstract extends AbstractTranslatorModule {
+public class PluginChatModule extends AbstractTranslatorModule {
 
     MessageSequencer messageSequencer;
 
-    public PluginChatModuleAbstract(TranslatorPlugin translatorPlugin) {
+    public PluginChatModule(TranslatorPlugin translatorPlugin) {
         super(translatorPlugin, "plugin_chat");
 
         this.messageSequencer = new MessageSequencer(this);

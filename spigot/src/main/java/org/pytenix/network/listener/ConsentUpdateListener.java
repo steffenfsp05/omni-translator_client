@@ -29,11 +29,13 @@ public class ConsentUpdateListener {
         translatorPlugin.getTaskScheduler().runForEntity(player, () -> {
 
         Location refreshLocation = originalLocation.clone().add(0, 0, 200);
+        double hearts = player.getHealth();
         player.teleport(refreshLocation);
 
         translatorPlugin.getTaskScheduler().runSyncLater(() -> {
 
             player.teleport(originalLocation);
+            player.setHealth(hearts);
             player.sendMessage("§a[Omni] §7Consent updated!");
 
         }, 3);

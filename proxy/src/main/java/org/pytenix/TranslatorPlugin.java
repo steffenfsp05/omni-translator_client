@@ -29,6 +29,7 @@ import org.pytenix.placeholder.impl.DefaultPlaceholderService;
 import org.pytenix.translation.TranslationProcessor;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.impl.DefaultTranslationService;
+import org.pytenix.util.TextComponentUtil;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -69,6 +70,8 @@ public class TranslatorPlugin {
     GradientService gradientService;
     EventService eventService;
 
+    TextComponentUtil textComponentUtil;
+
     LimboService limboService;
 
     @Inject
@@ -104,6 +107,8 @@ public class TranslatorPlugin {
 
 
         this.translatorService = new DefaultTranslationService(translationProcessor,placeholderService,gradientService,eventService);
+
+        this.textComponentUtil = new TextComponentUtil(translatorService);
 
         final String secret = loadForwardingSecret();
 
@@ -152,6 +157,8 @@ public class TranslatorPlugin {
 
         server.getEventManager().register(this, new ProxyPingListener(this));
         server.getEventManager().register(this, new PlayerConnectionChangeListener(this));
+
+
 
         logger.info("Translator Proxy erfolgreich gestartet!");
     }

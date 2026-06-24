@@ -9,7 +9,7 @@ import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.pytenix.service.PlayerLocaleService;
-import org.pytenix.module.gui.InventoryModuleAbstract;
+import org.pytenix.module.gui.InventoryModule;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
 
 public class PacketListener implements com.github.retrooper.packetevents.event.PacketListener {
 
-    private final InventoryModuleAbstract inventoryModule;
+    private final InventoryModule inventoryModule;
 
     private final Set<String> activeTranslations = ConcurrentHashMap.newKeySet();
     private final Map<UUID, Integer> latestStateIdMap = new ConcurrentHashMap<>();
 
-    public PacketListener(InventoryModuleAbstract inventoryModule) {
+    public PacketListener(InventoryModule inventoryModule) {
         this.inventoryModule = inventoryModule;
     }
 

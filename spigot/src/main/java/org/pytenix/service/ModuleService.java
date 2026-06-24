@@ -2,11 +2,11 @@ package org.pytenix.service;
 
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.AbstractTranslatorModule;
-import org.pytenix.module.chat.PluginChatModuleAbstract;
-import org.pytenix.module.gui.InventoryModuleAbstract;
-import org.pytenix.module.hologram.HologramModuleAbstract;
-import org.pytenix.module.player.LiveChatModuleAbstract;
-import org.pytenix.module.signs.SignsModuleAbstract;
+import org.pytenix.module.chat.PluginChatModule;
+import org.pytenix.module.gui.InventoryModule;
+import org.pytenix.module.hologram.HologramModule;
+import org.pytenix.module.player.LiveChatModule;
+import org.pytenix.module.signs.SignsModule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,11 +22,11 @@ public class ModuleService {
         this.translatorPlugin = translatorPlugin;
         this.modules = new ArrayList<>();
 
-        registerModule(new InventoryModuleAbstract(translatorPlugin));
-        registerModule(new PluginChatModuleAbstract(translatorPlugin));
-        registerModule(new LiveChatModuleAbstract(translatorPlugin));
-        registerModule(new HologramModuleAbstract(translatorPlugin));
-        registerModule(new SignsModuleAbstract(translatorPlugin));
+        registerModule(new InventoryModule(translatorPlugin));
+        registerModule(new PluginChatModule(translatorPlugin));
+        registerModule(new LiveChatModule(translatorPlugin));
+        registerModule(new HologramModule(translatorPlugin));
+        registerModule(new SignsModule(translatorPlugin));
     }
 
 

@@ -10,7 +10,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.pytenix.service.PlayerLocaleService;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.module.player.LiveChatModuleAbstract;
+import org.pytenix.module.player.LiveChatModule;
 import org.pytenix.service.TaskScheduler;
 
 import java.util.ArrayList;
@@ -22,11 +22,11 @@ import java.util.concurrent.TimeUnit;
 public class AsyncPlayerChatListener implements Listener {
 
 
-    final LiveChatModuleAbstract liveChatModule;
+    final LiveChatModule liveChatModule;
     final TranslatorPlugin translatorPlugin;
     final TaskScheduler taskScheduler;
 
-    public AsyncPlayerChatListener(LiveChatModuleAbstract liveChatModule) {
+    public AsyncPlayerChatListener(LiveChatModule liveChatModule) {
         this.liveChatModule = liveChatModule;
         this.translatorPlugin = liveChatModule.getTranslatorPlugin();
         this.taskScheduler = translatorPlugin.getTaskScheduler();

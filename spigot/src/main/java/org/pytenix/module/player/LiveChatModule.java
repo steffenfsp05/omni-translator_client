@@ -8,10 +8,10 @@ import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.player.listener.AsyncPlayerChatListener;
 import org.pytenix.module.AbstractTranslatorModule;
 
-public class LiveChatModuleAbstract extends AbstractTranslatorModule {
+public class LiveChatModule extends AbstractTranslatorModule {
 
 
-    public LiveChatModuleAbstract(TranslatorPlugin translatorPlugin) {
+    public LiveChatModule(TranslatorPlugin translatorPlugin) {
         super(translatorPlugin, "live_chat");
 
 

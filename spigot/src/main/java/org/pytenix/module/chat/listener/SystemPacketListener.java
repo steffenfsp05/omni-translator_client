@@ -9,7 +9,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 import org.pytenix.service.PlayerLocaleService;
 import org.pytenix.module.chat.MessageSequencer;
-import org.pytenix.module.chat.PluginChatModuleAbstract;
+import org.pytenix.module.chat.PluginChatModule;
 import org.pytenix.util.TextComponentUtil;
 
 import java.util.UUID;
@@ -17,12 +17,12 @@ import java.util.UUID;
 public class SystemPacketListener implements PacketListener {
 
 
-    final PluginChatModuleAbstract pluginChatModule;
+    final PluginChatModule pluginChatModule;
     final MessageSequencer messageSequencer;
 
     final TextComponentUtil textComponentUtil;
 
-    public SystemPacketListener(PluginChatModuleAbstract pluginChatModule) {
+    public SystemPacketListener(PluginChatModule pluginChatModule) {
         this.pluginChatModule = pluginChatModule;
         this.messageSequencer = pluginChatModule.getMessageSequencer();
         this.textComponentUtil = new TextComponentUtil(pluginChatModule.getTranslatorService());

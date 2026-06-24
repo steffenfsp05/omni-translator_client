@@ -17,14 +17,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class InventoryModuleAbstract extends AbstractTranslatorModule {
+public class InventoryModule extends AbstractTranslatorModule {
 
 
     private static final Pattern COLOR_PATTERN = Pattern.compile("^§[0-9a-fk-or]+$");
     LegacyComponentSerializer legacyComponentSerializer;
 
 
-    public InventoryModuleAbstract(TranslatorPlugin translatorPlugin) {
+    public InventoryModule(TranslatorPlugin translatorPlugin) {
         super(translatorPlugin, "gui");
 
         this.legacyComponentSerializer = this.getTranslatorPlugin().getLegacyComponentSerializer();

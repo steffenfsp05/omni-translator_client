@@ -1,6 +1,9 @@
 package org.pytenix.module.chat;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -9,25 +12,30 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.pytenix.util.TextComponentUtil;
 
+import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class MessageSequencer implements Listener {
 
-    final PluginChatModuleAbstract pluginChatModule;
-
-    private final Map<UUID, Queue<QueuedMessage>> userQueues = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final PluginChatModule pluginChatModule;
     private final TextComponentUtil textComponentUtil;
-    private final com.google.common.cache.Cache<UUID, com.google.common.cache.Cache<String, java.util.concurrent.atomic.AtomicInteger>> ignoredMessagesCache =
-            com.google.common.cache.CacheBuilder.newBuilder().expireAfterAccess(30, java.util.concurrent.TimeUnit.MINUTES).build();
 
-    public MessageSequencer(PluginChatModuleAbstract pluginChatModule) {
-        this.textComponentUtil = pluginChatModule.getTranslatorPlugin().getTextComponentUtil();
+    private final Map<UUID, UserQueue> userQueues = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
+    private final Cache<IgnoreKey, AtomicInteger> ignoredMessagesCache = Caffeine.newBuilder()
+            .expireAfterWrite(10, TimeUnit.SECONDS)
+            .build();
+
+    public MessageSequencer(PluginChatModule pluginChatModule) {
         this.pluginChatModule = pluginChatModule;
+        this.textComponentUtil = pluginChatModule.getTranslatorPlugin().getTextComponentUtil();
         Bukkit.getPluginManager().registerEvents(this, pluginChatModule.getTranslatorPlugin());
     }
 
@@ -37,24 +45,30 @@ public class MessageSequencer implements Listener {
     }
 
     public void translateWithOrder(UUID uuid, Component component, String realMessage, String locale, boolean isOverlay) {
-        Queue<QueuedMessage> queue = userQueues.computeIfAbsent(uuid, k -> new ConcurrentLinkedQueue<>());
-
+        UserQueue uq = userQueues.computeIfAbsent(uuid, k -> new UserQueue());
         QueuedMessage msg = new QueuedMessage(component, isOverlay);
-        queue.add(msg);
+
+        uq.lock.lock();
+        try {
+            uq.queue.add(msg);
+        } finally {
+            uq.lock.unlock();
+        }
 
         ScheduledFuture<?> timeoutTask = scheduler.schedule(() -> {
             if (msg.translatedComponent.compareAndSet(null, component)) {
-                System.out.println("[Sequencer] ⏳ API Hard-Timeout (6s)! Sende Original: " + LegacyComponentSerializer.legacySection().serialize(component));
+                System.out.println("[Sequencer] API Hard-Timeout (4s)! Sende Original: " +
+                        LegacyComponentSerializer.legacySection().serialize(component));
                 processQueue(uuid);
             }
-        }, 15, TimeUnit.SECONDS);
+        }, 4, TimeUnit.SECONDS);
 
         textComponentUtil.translateComplexMessage(component, locale, pluginChatModule.getModuleName())
                 .whenComplete((translatedComponent, throwable) -> {
                     timeoutTask.cancel(false);
 
                     if (throwable != null) {
-                        System.err.println("[Sequencer] ❌ Interner Fehler bei der Übersetzung! Stau wird verhindert.");
+                        System.err.println("[Sequencer] Interner Fehler bei der Übersetzung! Stau wird verhindert.");
                         throwable.printStackTrace();
                         completeMessage(uuid, msg, component);
                     } else {
@@ -65,41 +79,30 @@ public class MessageSequencer implements Listener {
 
     public void ignoreNextMessage(UUID uuid, Component component) {
         try {
-            String json = net.kyori.adventure.text.serializer.gson.GsonComponentSerializer.gson().serialize(component);
+            String json = GsonComponentSerializer.gson().serialize(component);
+            IgnoreKey key = new IgnoreKey(uuid, json);
 
-            com.google.common.cache.Cache<String, java.util.concurrent.atomic.AtomicInteger> playerCache =
-                    ignoredMessagesCache.get(uuid, () -> com.google.common.cache.CacheBuilder.newBuilder().expireAfterWrite(10, java.util.concurrent.TimeUnit.SECONDS).build());
-
-            java.util.concurrent.atomic.AtomicInteger count = playerCache.get(json, () -> new java.util.concurrent.atomic.AtomicInteger(0));
-            count.incrementAndGet();
-
+            ignoredMessagesCache.get(key, k -> new AtomicInteger(0)).incrementAndGet();
         } catch (Exception ignored) {
         }
     }
 
     public boolean isIgnored(UUID uuid, Component component) {
         try {
-            String json = net.kyori.adventure.text.serializer.gson.GsonComponentSerializer.gson().serialize(component);
+            String json = GsonComponentSerializer.gson().serialize(component);
+            IgnoreKey key = new IgnoreKey(uuid, json);
 
-            com.google.common.cache.Cache<String, java.util.concurrent.atomic.AtomicInteger> playerCache = ignoredMessagesCache.getIfPresent(uuid);
-            if (playerCache != null) {
-                java.util.concurrent.atomic.AtomicInteger count = playerCache.getIfPresent(json);
-
-                if (count != null && count.get() > 0) {
-                    int remaining = count.decrementAndGet();
-
-                    if (remaining <= 0) {
-                        playerCache.invalidate(json);
-                    }
-                    return true;
+            AtomicInteger count = ignoredMessagesCache.getIfPresent(key);
+            if (count != null && count.get() > 0) {
+                if (count.decrementAndGet() <= 0) {
+                    ignoredMessagesCache.invalidate(key);
                 }
+                return true;
             }
         } catch (Exception ignored) {
         }
-
         return false;
     }
-
 
     private void completeMessage(UUID uuid, QueuedMessage msg, Component translatedComponent) {
         if (msg.translatedComponent.compareAndSet(null, translatedComponent)) {
@@ -108,19 +111,18 @@ public class MessageSequencer implements Listener {
     }
 
     private void processQueue(UUID uuid) {
-        Queue<QueuedMessage> queue = userQueues.get(uuid);
-        if (queue == null) return;
+        UserQueue uq = userQueues.get(uuid);
+        if (uq == null) return;
 
-        synchronized (queue) {
-            while (!queue.isEmpty()) {
-                QueuedMessage head = queue.peek();
+        uq.lock.lock();
+        try {
+            while (!uq.queue.isEmpty()) {
+                QueuedMessage head = uq.queue.peek();
                 Component compToSend = head.translatedComponent.get();
 
                 if (compToSend != null) {
-                    boolean success = sendPacket(uuid, compToSend, head.isOverlay);
-
-                    if (success) {
-                        queue.poll();
+                    if (sendPacket(uuid, compToSend, head.isOverlay)) {
+                        uq.queue.poll();
                     } else {
                         scheduler.schedule(() -> processQueue(uuid), 500, TimeUnit.MILLISECONDS);
                         break;
@@ -129,9 +131,10 @@ public class MessageSequencer implements Listener {
                     break;
                 }
             }
+        } finally {
+            uq.lock.unlock();
         }
     }
-
 
     private boolean sendPacket(UUID uuid, Component comp, boolean isOverlay) {
         Player player = Bukkit.getPlayer(uuid);
@@ -140,8 +143,11 @@ public class MessageSequencer implements Listener {
         try {
             ignoreNextMessage(uuid, comp);
 
-            player.sendMessage(comp);
-
+            if (isOverlay) {
+                player.sendActionBar(comp);
+            } else {
+                player.sendMessage(comp);
+            }
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -153,6 +159,10 @@ public class MessageSequencer implements Listener {
         userQueues.remove(uuid);
     }
 
+    private static class UserQueue {
+        final Queue<QueuedMessage> queue = new ArrayDeque<>();
+        final ReentrantLock lock = new ReentrantLock();
+    }
 
     private static class QueuedMessage {
         final Component originalComponent;
@@ -164,4 +174,6 @@ public class MessageSequencer implements Listener {
             this.isOverlay = isOverlay;
         }
     }
+
+    private record IgnoreKey(UUID uuid, String json) {}
 }
