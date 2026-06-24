@@ -10,11 +10,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-public class ProfileService {
+public class ProfileSocketEndpoint {
     private final OmniConnectionService connectionManager;
     private final ConcurrentHashMap<UUID, CompletableFuture<ProfileMapper.ProfileData>> queue = new ConcurrentHashMap<>();
 
-    public ProfileService(OmniConnectionService connectionManager) {
+    public ProfileSocketEndpoint(OmniConnectionService connectionManager) {
         this.connectionManager = connectionManager;
     }
 

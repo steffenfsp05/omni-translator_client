@@ -44,6 +44,7 @@ public class MessageSequencer {
         UserQueue uq = userQueues.computeIfAbsent(uuid, k -> new UserQueue());
         QueuedMessage msg = new QueuedMessage(component, isOverlay);
 
+        final long startTime = System.nanoTime();
         uq.lock.lock();
         try {
             uq.queue.add(msg);
@@ -55,7 +56,7 @@ public class MessageSequencer {
             if (msg.translatedComponent.compareAndSet(null, component)) {
                 System.out.println("[Sequencer] API Hard-Timeout (4s)! Sende Original: " +
                         LegacyComponentSerializer.legacySection().serialize(component));
-                processQueue(uuid);
+                processQueue(uuid,startTime);
             }
         }, 4, TimeUnit.SECONDS);
 
@@ -66,9 +67,9 @@ public class MessageSequencer {
                     if (throwable != null) {
                         System.err.println("[Sequencer] Interner Fehler bei der Übersetzung! Stau wird verhindert.");
                         throwable.printStackTrace();
-                        completeMessage(uuid, msg, component);
+                        completeMessage(startTime,uuid, msg, component);
                     } else {
-                        completeMessage(uuid, msg, translatedComponent);
+                        completeMessage(startTime,uuid, msg, translatedComponent);
                     }
                 });
     }
@@ -100,13 +101,14 @@ public class MessageSequencer {
         return false;
     }
 
-    private void completeMessage(UUID uuid, QueuedMessage msg, Component translatedComponent) {
+    private void completeMessage(final long startTime, UUID uuid, QueuedMessage msg, Component translatedComponent) {
         if (msg.translatedComponent.compareAndSet(null, translatedComponent)) {
-            processQueue(uuid);
+            processQueue(uuid,startTime);
         }
     }
 
-    private void processQueue(UUID uuid) {
+
+    private void processQueue(UUID uuid, long startTime) {
         UserQueue uq = userQueues.get(uuid);
         if (uq == null) return;
 
@@ -118,9 +120,10 @@ public class MessageSequencer {
 
                 if (compToSend != null) {
                     if (sendPacket(uuid, compToSend, head.isOverlay)) {
+                        System.out.println("MessageSequencer took " + ((System.nanoTime() - startTime) / 1000000) + " ms for " + compToSend.toString().substring(0, Math.min(compToSend.toString().length(), 15)));
                         uq.queue.poll();
                     } else {
-                        scheduler.schedule(() -> processQueue(uuid), 500, TimeUnit.MILLISECONDS);
+                        scheduler.schedule(() -> processQueue(uuid,startTime), 500, TimeUnit.MILLISECONDS);
                         break;
                     }
                 } else {

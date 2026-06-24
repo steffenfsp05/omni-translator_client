@@ -47,7 +47,7 @@ public class TranslationRequestConsumer implements MappedPacketReceiveConsumer<R
                             cached
                     )));
         } else {
-            translatorPlugin.getRestfulService()
+            translatorPlugin.getTranslationSocketEndpoint()
                     .sendTranslationRequest(id, text, lang, requestData.module().name())
                     .thenAcceptAsync(translatedText -> {
                         String finalString = (isSuccessfull(translatedText) && !translatedText.equals(text)) ? translatedText : text;

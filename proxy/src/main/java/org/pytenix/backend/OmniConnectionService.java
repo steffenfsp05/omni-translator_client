@@ -41,9 +41,9 @@ public class OmniConnectionService {
     private final TranslatorPlugin translatorPlugin;
     private final TransportService<WebSocket> transportService;
     private WebSocket webSocket;
-    private RestfulService restfulService;
-    private GeoService geoService;
-    private ProfileService profileService;
+    private TranslationSocketEndpoint translationSocketEndpoint;
+    private GeoSocketEndpoint geoSocketEndpoint;
+    private ProfileSocketEndpoint profileSocketEndpoint;
 
     public OmniConnectionService(TranslatorPlugin translatorPlugin, String apiKey, ProxyServer proxyServer) {
         this.translatorPlugin = translatorPlugin;
@@ -72,10 +72,10 @@ public class OmniConnectionService {
                 .build();
     }
 
-    public void setServices(RestfulService restfulService, GeoService geoService, ProfileService profileService) {
-        this.restfulService = restfulService;
-        this.geoService = geoService;
-        this.profileService = profileService;
+    public void setServices(TranslationSocketEndpoint translationSocketEndpoint, GeoSocketEndpoint geoSocketEndpoint, ProfileSocketEndpoint profileSocketEndpoint) {
+        this.translationSocketEndpoint = translationSocketEndpoint;
+        this.geoSocketEndpoint = geoSocketEndpoint;
+        this.profileSocketEndpoint = profileSocketEndpoint;
         registerPackets();
     }
 
@@ -86,20 +86,20 @@ public class OmniConnectionService {
         transportService.registerPacket(PacketRegistry.SERVER_CONFIG,
                 (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.ServerConfiguration, ServerConfiguration>)
                         (context, config) ->
-                                restfulService.handleConfigUpdate(config));
+                                translationSocketEndpoint.handleConfigUpdate(config));
 
 
         transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT,
                 (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.TranslationResult, TranslationResultMapper.ResultData>)
                         (context, resultData) -> {
-                            if (restfulService != null) restfulService.handleTranslationResult(resultData);
+                            if (translationSocketEndpoint != null) translationSocketEndpoint.handleTranslationResult(resultData);
 
                         });
 
         transportService.registerPacket(PacketRegistry.GEO_RESULT,
                 (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.GeoResultPacket, GeoResultMapper.ResultData>)
                         (context, resultData) -> {
-                            if (geoService != null) geoService.handleGeoResult(resultData);
+                            if (geoSocketEndpoint != null) geoSocketEndpoint.handleGeoResult(resultData);
 
                         });
 
@@ -107,7 +107,7 @@ public class OmniConnectionService {
                 (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.ProfilePacket, ProfileMapper.ProfileData>)
                         (context, javaPacket) -> {
                             System.out.println("INCOMING: " + javaPacket);
-                            if (profileService != null) profileService.handleProfileResult(javaPacket);
+                            if (profileSocketEndpoint != null) profileSocketEndpoint.handleProfileResult(javaPacket);
 
                         });
 
@@ -196,9 +196,9 @@ public class OmniConnectionService {
 
             WebSocket.Listener.super.onOpen(webSocket);
 
-            if (restfulService != null) {
+            if (translationSocketEndpoint != null) {
                 System.out.println("Sending: This is a Test!");
-                restfulService.sendTranslationRequest(java.util.UUID.randomUUID(), "This is a Test!", "de_de", "live_chat");
+                translationSocketEndpoint.sendTranslationRequest(java.util.UUID.randomUUID(), "This is a Test!", "de_de", "live_chat");
             }
 
         }

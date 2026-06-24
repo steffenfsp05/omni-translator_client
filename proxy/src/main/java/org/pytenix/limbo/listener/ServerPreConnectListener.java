@@ -25,7 +25,7 @@ public class ServerPreConnectListener {
         final long nano = System.nanoTime();
 
         return EventTask.resumeWhenComplete(
-                translatorPlugin.getProfileService().getProfile(event.getPlayer().getUniqueId())
+                translatorPlugin.getProfileSocketEndpoint().getProfile(event.getPlayer().getUniqueId())
                         .thenAccept(profileData -> {
                             System.out.println("TOOK " + ((System.nanoTime() - nano) / 1000000) + " ms PRECONNECT: " + profileData);
 

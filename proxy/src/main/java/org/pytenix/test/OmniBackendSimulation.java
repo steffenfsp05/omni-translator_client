@@ -37,7 +37,7 @@ public class OmniBackendSimulation /*extends Simulation
     HttpProtocolBuilder httpProtocol = http
             .baseUrl("http://178.105.71.66:8083") // Deine Backend-IP
             .wsBaseUrl("ws://178.105.71.66:8083")
-            .header("X-API-KEY", "DEIN-TEST-KEY"); // Authentifizierung wie in RestfulService
+            .header("X-API-KEY", "DEIN-TEST-KEY"); // Authentifizierung wie in TranslationSocketEndpoint
 
     // 2. Das vorbereitete Platzhalter-Dataset laden (zufällig ziehen)
     FeederBuilder<String> chatFeeder = csv("chat_data.csv").random();
@@ -67,7 +67,7 @@ public class OmniBackendSimulation /*extends Simulation
                                 String lang = "en_us";
                                 String module = session.getString("module");
 
-                                // Baue genau das gleiche Protobuf auf wie in RestfulService.java
+                                // Baue genau das gleiche Protobuf auf wie in TranslationSocketEndpoint.java
 
                                 NetworkPackets.TranslationBatchRequest.Builder batch = NetworkPackets.TranslationBatchRequest.newBuilder();
 

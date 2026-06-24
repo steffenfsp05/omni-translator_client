@@ -28,7 +28,7 @@ public class ConsentUpdateListener {
         translatorPlugin.getTaskScheduler().runForEntity(player, () -> {
 
             Location refreshLocation = originalLocation.clone().add(0, 0, 200);
-            double hearts = player.getHealth();
+            final double hearts = player.getHealth();
             player.teleport(refreshLocation);
 
             translatorPlugin.getTaskScheduler().runSyncLater(() -> {

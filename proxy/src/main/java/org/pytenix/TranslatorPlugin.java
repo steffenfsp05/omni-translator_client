@@ -8,10 +8,10 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.Getter;
-import org.pytenix.backend.GeoService;
+import org.pytenix.backend.GeoSocketEndpoint;
 import org.pytenix.backend.OmniConnectionService;
-import org.pytenix.backend.ProfileService;
-import org.pytenix.backend.RestfulService;
+import org.pytenix.backend.ProfileSocketEndpoint;
+import org.pytenix.backend.TranslationSocketEndpoint;
 import org.pytenix.cache.CacheProvider;
 import org.pytenix.cache.impl.CaffeineCacheProvider;
 import org.pytenix.chat.MessageSequencer;
@@ -57,10 +57,10 @@ public class TranslatorPlugin {
     final CacheProvider<String, String> caffeineCache;
     final ProxyServer proxyServer;
 
-    RestfulService restfulService;
+    TranslationSocketEndpoint translationSocketEndpoint;
     OmniConnectionService connectionService;
-    GeoService geoService;
-    ProfileService profileService;
+    GeoSocketEndpoint geoSocketEndpoint;
+    ProfileSocketEndpoint profileSocketEndpoint;
 
     String remoteAddress = "192.168.178.121:8083";
 
@@ -103,7 +103,7 @@ public class TranslatorPlugin {
     public void onProxyInitialization(ProxyInitializeEvent event) {
 
 
-        this.translationProcessor = (id, text, targetLang, module) -> restfulService.sendTranslationRequest(id, text, targetLang, module);
+        this.translationProcessor = (id, text, targetLang, module) -> translationSocketEndpoint.sendTranslationRequest(id, text, targetLang, module);
         this.placeholderService = new DefaultPlaceholderService();
         this.gradientService = new DefaultGradientService();
         this.eventService = new DefaultEventService();
@@ -157,15 +157,15 @@ public class TranslatorPlugin {
                 proxyServer
         );
 
-        this.restfulService = new RestfulService(
+        this.translationSocketEndpoint = new TranslationSocketEndpoint(
                 this,
                 connectionService
         );
 
-        this.geoService = new GeoService(connectionService);
-        this.profileService = new ProfileService(connectionService);
+        this.geoSocketEndpoint = new GeoSocketEndpoint(connectionService);
+        this.profileSocketEndpoint = new ProfileSocketEndpoint(connectionService);
 
-        connectionService.setServices(restfulService, geoService, profileService);
+        connectionService.setServices(translationSocketEndpoint, geoSocketEndpoint, profileSocketEndpoint);
         connectionService.connect();
 
 

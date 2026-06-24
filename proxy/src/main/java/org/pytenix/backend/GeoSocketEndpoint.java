@@ -10,12 +10,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-public class GeoService {
+public class GeoSocketEndpoint {
 
     private final OmniConnectionService connectionManager;
     private final ConcurrentHashMap<UUID, CompletableFuture<String>> queue = new ConcurrentHashMap<>();
 
-    public GeoService(OmniConnectionService connectionManager) {
+    public GeoSocketEndpoint(OmniConnectionService connectionManager) {
         this.connectionManager = connectionManager;
     }
 

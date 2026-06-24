@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-public class RestfulService {
+public class TranslationSocketEndpoint {
 
     private final TranslatorPlugin translatorPlugin;
     private final OmniConnectionService connectionManager;
@@ -27,7 +27,7 @@ public class RestfulService {
 
     private final ConcurrentHashMap<UUID, CompletableFuture<String>> queue = new ConcurrentHashMap<>();
 
-    public RestfulService(TranslatorPlugin translatorPlugin, OmniConnectionService connectionManager) {
+    public TranslationSocketEndpoint(TranslatorPlugin translatorPlugin, OmniConnectionService connectionManager) {
         this.translatorPlugin = translatorPlugin;
         this.connectionManager = connectionManager;
         this.translatorService = translatorPlugin.getTranslatorService();

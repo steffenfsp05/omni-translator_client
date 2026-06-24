@@ -7,7 +7,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.backend.GeoService;
+import org.pytenix.backend.GeoSocketEndpoint;
 import org.pytenix.entity.ServerConfiguration;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class ProxyPingListener {
 
 
     final TranslatorPlugin translator;
-    final GeoService geoService;
+    final GeoSocketEndpoint geoSocketEndpoint;
 
 
     LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.builder()
@@ -34,7 +34,7 @@ public class ProxyPingListener {
 
     public ProxyPingListener(TranslatorPlugin translator) {
         this.translator = translator;
-        this.geoService = translator.getGeoService();
+        this.geoSocketEndpoint = translator.getGeoSocketEndpoint();
 
 
     }
@@ -98,7 +98,7 @@ public class ProxyPingListener {
         //String finalIpAddress = getTestIps().get(new Random().nextInt(getTestIps().size()));
         return EventTask.async(() -> {
 
-            CompletableFuture<String> localeFuture = geoService.sendGeoRequest(
+            CompletableFuture<String> localeFuture = geoSocketEndpoint.sendGeoRequest(
                     uuid,
                     ipAddress
             );
