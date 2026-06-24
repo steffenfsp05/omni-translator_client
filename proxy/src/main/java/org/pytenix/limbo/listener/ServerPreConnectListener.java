@@ -3,11 +3,9 @@ package org.pytenix.limbo.listener;
 import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
-import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.AllArgsConstructor;
 import net.kyori.adventure.text.Component;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.limbo.ConsentMessageFactory;
 import org.pytenix.proto.generated.NetworkPackets;
 
@@ -29,7 +27,7 @@ public class ServerPreConnectListener {
         return EventTask.resumeWhenComplete(
                 translatorPlugin.getProfileService().getProfile(event.getPlayer().getUniqueId())
                         .thenAccept(profileData -> {
-                            System.out.println("TOOK "+((System.nanoTime() - nano)/1000000)+" ms PRECONNECT: " + profileData);
+                            System.out.println("TOOK " + ((System.nanoTime() - nano) / 1000000) + " ms PRECONNECT: " + profileData);
 
                             if (profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.UNKNOWN)) {
                                 translatorPlugin.getProxyServer().getServer("dynamic-limbo").ifPresent(limboServer -> {

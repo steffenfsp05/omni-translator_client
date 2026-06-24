@@ -51,10 +51,10 @@ public abstract class AbstractTranslatorModule {
 
 
         //TODO: IMPLEMENT!!!
-      //  String cached = translatorPlugin.getCaffeineCache().get(generateKey(text, locale));
+        //  String cached = translatorPlugin.getCaffeineCache().get(generateKey(text, locale));
 
-      //  if (cached != null)
-      //      return CompletableFuture.completedFuture(cached);
+        //  if (cached != null)
+        //      return CompletableFuture.completedFuture(cached);
 
         return translatorService.translate(text, locale, this.moduleName).whenComplete((result, throwable) -> {
 

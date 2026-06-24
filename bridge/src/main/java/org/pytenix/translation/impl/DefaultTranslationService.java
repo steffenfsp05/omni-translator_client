@@ -4,7 +4,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import lombok.Setter;
-import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.event.EventService;
 import org.pytenix.placeholder.GradientService;
 import org.pytenix.placeholder.PlaceholderService;
@@ -12,7 +11,10 @@ import org.pytenix.placeholder.listener.ConfigUpdateListener;
 import org.pytenix.translation.TranslationProcessor;
 import org.pytenix.translation.TranslatorService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -50,7 +52,6 @@ public class DefaultTranslationService implements TranslatorService {
 
 
     }
-
 
 
     public CompletableFuture<String> translate(String text, String lang, String module) {
@@ -98,7 +99,6 @@ public class DefaultTranslationService implements TranslatorService {
         return process(batchId, payload, lang, module)
                 .thenApplyAsync(s -> handlePlaceholders(batchId, s));
     }
-
 
 
     private String handlePlaceholders(UUID uuid, String result) {

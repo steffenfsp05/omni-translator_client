@@ -1,12 +1,11 @@
 package org.pytenix.service;
 
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.translation.AbstractTranslatorModule;
-import org.pytenix.module.chat.PluginChatModule;
 import org.pytenix.module.gui.InventoryModule;
 import org.pytenix.module.hologram.HologramModule;
 import org.pytenix.module.player.LiveChatModule;
 import org.pytenix.module.signs.SignsModule;
+import org.pytenix.translation.AbstractTranslatorModule;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.locale.PlayerLocaleProcessor;
 
@@ -21,7 +20,7 @@ public class ModuleService {
 
     final List<AbstractTranslatorModule> modules;
 
-    public ModuleService(TranslatorPlugin translatorPlugin,TranslatorService translatorService, PlayerLocaleProcessor playerLocaleProcessor) {
+    public ModuleService(TranslatorPlugin translatorPlugin, TranslatorService translatorService, PlayerLocaleProcessor playerLocaleProcessor) {
         this.translatorService = translatorService;
         this.playerLocaleProcessor = playerLocaleProcessor;
         this.modules = new ArrayList<>();

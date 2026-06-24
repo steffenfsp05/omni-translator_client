@@ -31,14 +31,16 @@ public class PacketMapperRegistry {
     @SuppressWarnings("unchecked")
     public static <P, J> P toProto(J javaObject) {
         AbstractPacketMapper<P, J> mapper = (AbstractPacketMapper<P, J>) javaToProto.get(javaObject.getClass());
-        if (mapper == null) throw new IllegalArgumentException("Kein Mapper für " + javaObject.getClass().getSimpleName());
+        if (mapper == null)
+            throw new IllegalArgumentException("Kein Mapper für " + javaObject.getClass().getSimpleName());
         return mapper.to(javaObject);
     }
 
     @SuppressWarnings("unchecked")
     public static <P, J> J fromProto(P protoObject) {
         AbstractPacketMapper<P, J> mapper = (AbstractPacketMapper<P, J>) protoToJava.get(protoObject.getClass());
-        if (mapper == null) throw new IllegalArgumentException("Kein Mapper für " + protoObject.getClass().getSimpleName());
+        if (mapper == null)
+            throw new IllegalArgumentException("Kein Mapper für " + protoObject.getClass().getSimpleName());
         return mapper.from(protoObject);
     }
 }

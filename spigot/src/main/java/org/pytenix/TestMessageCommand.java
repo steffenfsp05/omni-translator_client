@@ -78,7 +78,7 @@ public class TestMessageCommand implements CommandExecutor {
                         .hoverEvent(HoverEvent.showText(Component.text("Steuersatz: 19.5%"))))
                 .append(Component.text(" | IP: "))
                 .append(Component.text("192.168.178.1").color(NamedTextColor.RED)
-                .clickEvent(ClickEvent.openUrl("https://admin.router.net/login?token=xyz123&user=%3Cadmin%3E&auth=true")))
+                        .clickEvent(ClickEvent.openUrl("https://admin.router.net/login?token=xyz123&user=%3Cadmin%3E&auth=true")))
                 .append(Component.text(" | Datum: "))
                 .append(Component.text("25.12.2026").color(NamedTextColor.AQUA)
                         .clickEvent(ClickEvent.runCommand("/calendar view 2026-12-25")));

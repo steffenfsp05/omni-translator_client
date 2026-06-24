@@ -3,14 +3,12 @@ package org.pytenix.placeholder.impl;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
-import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.placeholder.PlaceholderNormalizer;
 import org.pytenix.placeholder.PlaceholderService;
 import org.pytenix.placeholder.protect.PlayerNameProtector;
 import org.pytenix.placeholder.protect.WordProtector;
 import org.pytenix.placeholder.protect.impl.DefaultPlayerNameProtector;
 import org.pytenix.placeholder.protect.impl.DefaultWordProtector;
-import org.pytenix.translation.TranslatorService;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -47,7 +45,6 @@ public class DefaultPlaceholderService implements PlaceholderService {
     public DefaultPlaceholderService() {
 
 
-
         this.placeholderNormalizer = new DefaultPlaceholderNormalizer();
         this.wordProtector = new DefaultWordProtector();
 
@@ -55,11 +52,11 @@ public class DefaultPlaceholderService implements PlaceholderService {
 
         this.playerNameProtector = new DefaultPlayerNameProtector();
 
-       // if (translatorService.getTranslationConfiguration() != null) {
-       //     ServerConfiguration serverConfiguration = translatorService.getTranslationConfiguration();
-       //     updateProtectedWords(serverConfiguration != null ? serverConfiguration.getBlacklistedWords() : new HashSet<>());
+        // if (translatorService.getTranslationConfiguration() != null) {
+        //     ServerConfiguration serverConfiguration = translatorService.getTranslationConfiguration();
+        //     updateProtectedWords(serverConfiguration != null ? serverConfiguration.getBlacklistedWords() : new HashSet<>());
 
-      //  }
+        //  }
 
         registerPlaceholder(0, new ExtendedPlaceholder("SKIP", () -> SYSTEM_PROTECTION_PATTERN));
         registerPlaceholder(1, new ExtendedPlaceholder("C", () -> COLOR_PATTERN));

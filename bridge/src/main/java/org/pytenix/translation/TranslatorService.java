@@ -1,7 +1,6 @@
 package org.pytenix.translation;
 
 import org.pytenix.entity.ServerConfiguration;
-import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.event.EventService;
 import org.pytenix.placeholder.PlaceholderService;
 
@@ -14,6 +13,7 @@ public interface TranslatorService {
 
 
     ServerConfiguration getTranslationConfiguration();
+
     void setTranslationConfiguration(ServerConfiguration serverConfiguration);
 
 

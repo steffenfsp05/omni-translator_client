@@ -10,7 +10,10 @@ import org.pytenix.TranslatorPlugin;
 import org.pytenix.backend.GeoService;
 import org.pytenix.entity.ServerConfiguration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -125,8 +128,7 @@ public class ProxyPingListener {
     }
 
 
-    private String anonymizeAddress(String ipAddress)
-    {
+    private String anonymizeAddress(String ipAddress) {
         String anonymizedIp;
         if (ipAddress.contains(".")) {
             anonymizedIp = ipAddress.substring(0, ipAddress.lastIndexOf('.')) + ".0";

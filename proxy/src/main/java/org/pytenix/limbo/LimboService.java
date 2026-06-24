@@ -14,8 +14,7 @@ public class LimboService {
 
     private Process nanoLimboProcess;
 
-    public LimboService(TranslatorPlugin plugin, ProxyServer proxyServer , int port, String secret)
-    {
+    public LimboService(TranslatorPlugin plugin, ProxyServer proxyServer, int port, String secret) {
 
         proxyServer.getEventManager().register(plugin, new ServerPreConnectListener(plugin));
 
@@ -32,11 +31,10 @@ public class LimboService {
 
         try {
 
-            LimboConfigGenerator.generateMinimalConfig(configFile,"127.0.0.1", port, secret);
+            LimboConfigGenerator.generateMinimalConfig(configFile, "127.0.0.1", port, secret);
 
             ProcessBuilder pb = new ProcessBuilder("java", "-jar", LimboDownloadService.FILE_NAME);
             pb.directory(new File(limboDir));
-
 
 
             pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
@@ -46,7 +44,7 @@ public class LimboService {
             System.out.println("NanoLimbo wurde im Hintergrund gestartet!");
 
         } catch (Exception e) {
-            System.out.println("Konnte NanoLimbo nicht starten!" +  e.getMessage());
+            System.out.println("Konnte NanoLimbo nicht starten!" + e.getMessage());
             return;
         }
 
@@ -58,8 +56,7 @@ public class LimboService {
         System.out.println("Limbo-Server dynamisch in Velocity angebunden!");
     }
 
-    public void shutdown()
-    {
+    public void shutdown() {
         if (nanoLimboProcess != null && nanoLimboProcess.isAlive()) {
             nanoLimboProcess.destroy();
             System.out.println("NanoLimbo-Hintergrundprozess beendet.");

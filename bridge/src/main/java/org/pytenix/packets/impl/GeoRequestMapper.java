@@ -33,5 +33,6 @@ public class GeoRequestMapper extends AbstractPacketMapper<NetworkPackets.GeoReq
         );
     }
 
-    public record RequestData(UUID requestId, String ipAddress) {}
+    public record RequestData(UUID requestId, String ipAddress) {
+    }
 }

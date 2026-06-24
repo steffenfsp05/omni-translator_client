@@ -171,5 +171,6 @@ public class MessageSequencer {
         }
     }
 
-    private record IgnoreKey(UUID uuid, String json) {}
+    private record IgnoreKey(UUID uuid, String json) {
+    }
 }

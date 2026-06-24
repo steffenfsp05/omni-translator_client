@@ -8,7 +8,6 @@ import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.translation.TranslatorService;
 import org.transport.service.PacketContext;
-import org.transport.service.PacketReceiveConsumer;
 
 
 @AllArgsConstructor

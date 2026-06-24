@@ -1,14 +1,9 @@
 package org.pytenix.module.chat;
 
-import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import lombok.Getter;
-import org.pytenix.TranslatorPlugin;
-import org.pytenix.module.chat.listener.SystemPacketListener;
-import org.pytenix.translation.AbstractTranslatorModule;
 
 @Getter
-public class PluginChatModule  {
+public class PluginChatModule {
 
     /* WIRD ABGELÖST VOM PROXY
     MessageSequencer messageSequencer;

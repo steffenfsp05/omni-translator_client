@@ -8,8 +8,8 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWi
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.pytenix.service.PlayerLocaleService;
 import org.pytenix.module.gui.InventoryModule;
+import org.pytenix.service.PlayerLocaleService;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;

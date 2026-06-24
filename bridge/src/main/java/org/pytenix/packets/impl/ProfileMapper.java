@@ -1,7 +1,5 @@
 package org.pytenix.packets.impl;
 
-import lombok.Setter;
-import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.packets.AbstractPacketMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 
@@ -39,16 +37,23 @@ public class ProfileMapper extends AbstractPacketMapper<NetworkPackets.ProfilePa
     }
 
 
-
     public record ProfileData(
             String license,
             NetworkPackets.ProfilePacket.Action action,
             UUID playerId,
             UUID requestId,
             NetworkPackets.ProfilePacket.ConsentType consentType
-    )
+    ) {
+        public static ProfileData createDefault(String license, UUID playerId, UUID requestId) {
+            return new ProfileData(
+                    license,
+                    NetworkPackets.ProfilePacket.Action.RESPONSE,
+                    playerId,
+                    requestId,
+                    NetworkPackets.ProfilePacket.ConsentType.UNKNOWN
+            );
+        }
 
-    {
         public ProfileData withRequestId(UUID newRequestId) {
             return new ProfileData(
                     this.license,
@@ -58,6 +63,7 @@ public class ProfileMapper extends AbstractPacketMapper<NetworkPackets.ProfilePa
                     this.consentType
             );
         }
+
         public ProfileData withAction(NetworkPackets.ProfilePacket.Action newAction) {
             return new ProfileData(
                     this.license,
@@ -75,18 +81,6 @@ public class ProfileMapper extends AbstractPacketMapper<NetworkPackets.ProfilePa
                     this.playerId,
                     this.requestId,
                     newConsent
-            );
-        }
-
-
-        public static ProfileData createDefault(String license, UUID playerId, UUID requestId)
-        {
-            return new ProfileData(
-                    license,
-                    NetworkPackets.ProfilePacket.Action.RESPONSE,
-                    playerId,
-                    requestId,
-                    NetworkPackets.ProfilePacket.ConsentType.UNKNOWN
             );
         }
 

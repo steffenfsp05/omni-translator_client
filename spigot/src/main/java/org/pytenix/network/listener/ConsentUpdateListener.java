@@ -5,7 +5,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.event.annotation.OmniSubscribe;
-import org.pytenix.event.register.ConfigUpdateEvent;
 import org.pytenix.event.register.ConsentUpdateEvent;
 import org.pytenix.network.SpigotTransport;
 
@@ -28,17 +27,17 @@ public class ConsentUpdateListener {
 
         translatorPlugin.getTaskScheduler().runForEntity(player, () -> {
 
-        Location refreshLocation = originalLocation.clone().add(0, 0, 200);
-        double hearts = player.getHealth();
-        player.teleport(refreshLocation);
+            Location refreshLocation = originalLocation.clone().add(0, 0, 200);
+            double hearts = player.getHealth();
+            player.teleport(refreshLocation);
 
-        translatorPlugin.getTaskScheduler().runSyncLater(() -> {
+            translatorPlugin.getTaskScheduler().runSyncLater(() -> {
 
-            player.teleport(originalLocation);
-            player.setHealth(hearts);
-            player.sendMessage("§a[Omni] §7Consent updated!");
+                player.teleport(originalLocation);
+                player.setHealth(hearts);
+                player.sendMessage("§a[Omni] §7Consent updated!");
 
-        }, 3);
+            }, 3);
         });
     }
 

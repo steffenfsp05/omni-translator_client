@@ -1,24 +1,8 @@
 package org.pytenix.module.signs.listener;
 
 import com.github.retrooper.packetevents.event.PacketListener;
-import com.github.retrooper.packetevents.event.PacketSendEvent;
-import com.github.retrooper.packetevents.protocol.nbt.NBTCompound;
-import com.github.retrooper.packetevents.protocol.nbt.NBTList;
-import com.github.retrooper.packetevents.protocol.nbt.NBTString;
-import com.github.retrooper.packetevents.protocol.nbt.NBTType;
-import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.protocol.player.User;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockEntityData;
-import io.github.retrooper.packetevents.adventure.serializer.gson.GsonComponentSerializer;
-import net.kyori.adventure.text.Component;
-import org.bukkit.entity.Player;
-import org.pytenix.TranslatorPlugin;
-import org.pytenix.service.PlayerLocaleService;
 import org.pytenix.module.signs.SignsModule;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 public class SignViewListener implements PacketListener {

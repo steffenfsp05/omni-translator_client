@@ -25,5 +25,6 @@ public class GeoResultMapper extends AbstractPacketMapper<NetworkPackets.GeoResu
         return new ResultData(new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig()), packet.getLanguage());
     }
 
-    public record ResultData(UUID requestId, String language){}
+    public record ResultData(UUID requestId, String language) {
+    }
 }

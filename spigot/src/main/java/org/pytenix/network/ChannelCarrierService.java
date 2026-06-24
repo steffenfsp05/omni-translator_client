@@ -6,7 +6,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRegisterChannelEvent;
 import org.bukkit.event.player.PlayerUnregisterChannelEvent;
-import org.transport.TransportService;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -46,13 +45,15 @@ public class ChannelCarrierService implements Listener {
         if (event.getChannel().equalsIgnoreCase(channel)) {
             availableCarriers.remove(event.getPlayer().getUniqueId());
 
-            if(isEmpty()) {
+            if (isEmpty()) {
                 spigotTransport.getTransportService().disconnect(channel);
                 spigotTransport.getTransportService().connect(channel);
             }
         }
     }
 
-    public boolean isEmpty() { return availableCarriers.isEmpty(); }
+    public boolean isEmpty() {
+        return availableCarriers.isEmpty();
+    }
 
 }

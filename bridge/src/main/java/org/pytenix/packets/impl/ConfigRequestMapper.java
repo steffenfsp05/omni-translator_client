@@ -21,5 +21,6 @@ public class ConfigRequestMapper extends AbstractPacketMapper<NetworkPackets.Con
         return new RequestData(packet.getTimestamp());
     }
 
-    public record RequestData(long timestamp){}
+    public record RequestData(long timestamp) {
+    }
 }

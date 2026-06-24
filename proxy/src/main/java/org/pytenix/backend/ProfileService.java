@@ -2,8 +2,6 @@ package org.pytenix.backend;
 
 import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.GeoRequestMapper;
-import org.pytenix.packets.impl.GeoResultMapper;
 import org.pytenix.packets.impl.ProfileMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 
@@ -52,11 +50,11 @@ public class ProfileService {
         connectionManager.sendPacket(PacketRegistry.PROFILE,
                 PacketMapperRegistry.toProto(
                         profileData
-        ));
+                ));
 
         return future.orTimeout(60, TimeUnit.SECONDS).exceptionally(ex -> {
             queue.remove(uuid);
-            return new ProfileMapper.ProfileData("NULL",null,null,null,null);
+            return new ProfileMapper.ProfileData("NULL", null, null, null, null);
         });
     }
 

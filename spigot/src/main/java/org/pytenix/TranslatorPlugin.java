@@ -17,32 +17,25 @@ import org.pytenix.event.EventService;
 import org.pytenix.event.impl.DefaultEventService;
 import org.pytenix.listener.PlayerJoinQuitListener;
 import org.pytenix.listener.PlayerLocaleChangeListener;
+import org.pytenix.network.SpigotTransport;
+import org.pytenix.network.VelocitySecretReader;
 import org.pytenix.placeholder.GradientService;
 import org.pytenix.placeholder.PlaceholderService;
 import org.pytenix.placeholder.impl.DefaultGradientService;
 import org.pytenix.placeholder.impl.DefaultPlaceholderService;
 import org.pytenix.service.ModuleService;
-import org.pytenix.network.SpigotTransport;
-import org.pytenix.network.VelocitySecretReader;
+import org.pytenix.service.TaskScheduler;
 import org.pytenix.translation.TranslationProcessor;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.impl.DefaultTranslationService;
-import org.pytenix.service.TaskScheduler;
-import org.pytenix.translation.locale.PlayerLocaleProcessor;
 import org.pytenix.util.TextComponentUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
 
 @Getter
 public class TranslatorPlugin extends JavaPlugin {
-
-    public String pluginMessagingChannel;
-    @Getter
-    TextComponentUtil textComponentUtil;
-    CacheProvider<String,String> caffeineCache;
 
     @Getter
     public static LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.builder()
@@ -51,13 +44,15 @@ public class TranslatorPlugin extends JavaPlugin {
             .hexColors()
             .flattener(ComponentFlattener.basic())
             .build();
-
+    public String pluginMessagingChannel;
+    @Getter
+    TextComponentUtil textComponentUtil;
+    CacheProvider<String, String> caffeineCache;
     ConfigService configService;
     ConfigurationFile configurationFile;
 
     private String serverName;
     private TranslatorService translatorService;
-
 
 
     private ModuleService moduleService;
@@ -98,7 +93,7 @@ public class TranslatorPlugin extends JavaPlugin {
         this.gradientService = new DefaultGradientService();
         this.eventService = new DefaultEventService();
 
-        this.translatorService = new DefaultTranslationService(translationProcessor, placeholderService,gradientService,eventService);
+        this.translatorService = new DefaultTranslationService(translationProcessor, placeholderService, gradientService, eventService);
 
 
         final VelocitySecretReader secretReader = new VelocitySecretReader();
@@ -126,9 +121,9 @@ public class TranslatorPlugin extends JavaPlugin {
         moduleService = new ModuleService(this, translatorService, uuid -> {
 
             final Player player = Bukkit.getPlayer(uuid);
-            if(player == null)
+            if (player == null)
                 return "en-en";
-             else
+            else
                 return player.getLocale();
 
 

@@ -45,7 +45,8 @@ import java.util.List;
         name = "TranslatorProxy",
         version = "1.0-SNAPSHOT",
         authors = {"PytenixOG"}
-) @Getter
+)
+@Getter
 public class TranslatorPlugin {
 
     final ConfigService configService;
@@ -102,15 +103,13 @@ public class TranslatorPlugin {
     public void onProxyInitialization(ProxyInitializeEvent event) {
 
 
-
-
         this.translationProcessor = (id, text, targetLang, module) -> restfulService.sendTranslationRequest(id, text, targetLang, module);
         this.placeholderService = new DefaultPlaceholderService();
         this.gradientService = new DefaultGradientService();
         this.eventService = new DefaultEventService();
 
 
-        this.translatorService = new DefaultTranslationService(translationProcessor,placeholderService,gradientService,eventService);
+        this.translatorService = new DefaultTranslationService(translationProcessor, placeholderService, gradientService, eventService);
 
 
         this.textComponentUtil = new TextComponentUtil(translatorService);
@@ -172,7 +171,6 @@ public class TranslatorPlugin {
 
         server.getEventManager().register(this, new ProxyPingListener(this));
         server.getEventManager().register(this, new PlayerConnectionChangeListener(this));
-
 
 
         logger.info("Translator Proxy erfolgreich gestartet!");

@@ -15,9 +15,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class TranslationRequestService {
-    private final SpigotTransport transport;
-    private final String channel;
-
     public final com.github.benmanes.caffeine.cache.Cache<UUID, List<CompletableFuture<String>>> pendingRequests = Caffeine.newBuilder()
             .maximumSize(10_000)
             .expireAfterWrite(Duration.ofSeconds(20))
@@ -26,6 +23,8 @@ public class TranslationRequestService {
             .maximumSize(10_000)
             .expireAfterWrite(Duration.ofSeconds(20))
             .build();
+    private final SpigotTransport transport;
+    private final String channel;
 
     public TranslationRequestService(SpigotTransport transport, String channel) {
         this.transport = transport;
@@ -75,5 +74,6 @@ public class TranslationRequestService {
         }
     }
 
-    public record DeduplicationKey(String text, String lang, String module) { }
+    public record DeduplicationKey(String text, String lang, String module) {
+    }
 }

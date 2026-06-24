@@ -34,7 +34,7 @@ public class DefaultServerConfigMapper extends AbstractPacketMapper<NetworkPacke
             }
         }
 
-        builder.setConsentMode(NetworkPackets.ConsentMode.valueOf("CONSENT_"+javaConfig.getConsentMode()));
+        builder.setConsentMode(NetworkPackets.ConsentMode.valueOf("CONSENT_" + javaConfig.getConsentMode()));
 
         if (javaConfig.getBlacklistedWords() != null) {
             builder.addAllWords(javaConfig.getBlacklistedWords());
@@ -45,7 +45,7 @@ public class DefaultServerConfigMapper extends AbstractPacketMapper<NetworkPacke
         }
 
 
-         if (javaConfig.getLicenseKey() != null) builder.setLicenseKey(javaConfig.getLicenseKey());
+        if (javaConfig.getLicenseKey() != null) builder.setLicenseKey(javaConfig.getLicenseKey());
 
         return builder.build();
     }
@@ -67,7 +67,7 @@ public class DefaultServerConfigMapper extends AbstractPacketMapper<NetworkPacke
             }
         }
 
-        update.setConsentMode(ServerConfiguration.ConsentMode.getConsentMode(serverConfiguration.getConsentMode().name().replace("CONSENT_","")));
+        update.setConsentMode(ServerConfiguration.ConsentMode.getConsentMode(serverConfiguration.getConsentMode().name().replace("CONSENT_", "")));
         update.setModules(mappedModules);
         update.setBlacklistedWords(new HashSet<>(serverConfiguration.getWordsList()));
         update.setDefaultLanguage(serverConfiguration.getDefaultLanguage());

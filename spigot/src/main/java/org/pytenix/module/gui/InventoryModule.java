@@ -8,8 +8,8 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.translation.AbstractTranslatorModule;
 import org.pytenix.module.gui.listener.PacketListener;
+import org.pytenix.translation.AbstractTranslatorModule;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.locale.PlayerLocaleProcessor;
 

@@ -16,7 +16,6 @@ import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.FastByteArrayOutputStream;
 import org.transport.TransportOptions;
 import org.transport.TransportService;
-import org.transport.service.PacketContext;
 import org.transport.service.impl.DefaultPacketService;
 import org.transport.service.impl.PacketDefinition;
 
@@ -25,8 +24,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,23 +32,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class OmniConnectionService {
 
     public final AtomicBoolean isConnected = new AtomicBoolean(false);
-    private final String url;
-
     @Getter
     final String apiKey;
-
+    private final String url;
     private final HttpClient httpClient;
-    private WebSocket webSocket;
-
     private final AtomicInteger reconnectAttempts = new AtomicInteger(0);
     private final ProxyServer proxyServer;
     private final TranslatorPlugin translatorPlugin;
-
+    private final TransportService<WebSocket> transportService;
+    private WebSocket webSocket;
     private RestfulService restfulService;
     private GeoService geoService;
     private ProfileService profileService;
-
-    private final TransportService<WebSocket> transportService;
 
     public OmniConnectionService(TranslatorPlugin translatorPlugin, String apiKey, ProxyServer proxyServer) {
         this.translatorPlugin = translatorPlugin;
@@ -102,7 +94,7 @@ public class OmniConnectionService {
                         (context, resultData) -> {
                             if (restfulService != null) restfulService.handleTranslationResult(resultData);
 
-        });
+                        });
 
         transportService.registerPacket(PacketRegistry.GEO_RESULT,
                 (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.GeoResultPacket, GeoResultMapper.ResultData>)
@@ -114,14 +106,16 @@ public class OmniConnectionService {
         transportService.registerPacket(PacketRegistry.PROFILE,
                 (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.ProfilePacket, ProfileMapper.ProfileData>)
                         (context, javaPacket) -> {
-            System.out.println("INCOMING: " + javaPacket);
-                            if(profileService != null) profileService.handleProfileResult(javaPacket);
+                            System.out.println("INCOMING: " + javaPacket);
+                            if (profileService != null) profileService.handleProfileResult(javaPacket);
 
+                        });
+
+
+        transportService.registerPacket(PacketRegistry.GEO_REQUEST, (webSocketPacketContext, geoRequestPacket) -> {
         });
-
-
-        transportService.registerPacket(PacketRegistry.GEO_REQUEST,(webSocketPacketContext, geoRequestPacket) -> {});
-        transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST,(webSocketPacketContext, translationRequest) -> {});
+        transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST, (webSocketPacketContext, translationRequest) -> {
+        });
     }
 
     public void connect() {
@@ -194,7 +188,7 @@ public class OmniConnectionService {
 
         @Override
         public void onOpen(WebSocket webSocket) {
-             OmniConnectionService.this.webSocket = webSocket;
+            OmniConnectionService.this.webSocket = webSocket;
 
             isConnected.set(true);
             transportService.connect(webSocket);

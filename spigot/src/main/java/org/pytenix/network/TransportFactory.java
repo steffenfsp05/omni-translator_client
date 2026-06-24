@@ -28,7 +28,7 @@ public class TransportFactory {
 
                             carrierManager.getRandomCarrier().ifPresent(carrier ->
                             {
-                               plugin.getTaskScheduler().runForEntity(carrier, () ->
+                                plugin.getTaskScheduler().runForEntity(carrier, () ->
                                         carrier.sendPluginMessage(plugin, channel, bytes));
 
                             });

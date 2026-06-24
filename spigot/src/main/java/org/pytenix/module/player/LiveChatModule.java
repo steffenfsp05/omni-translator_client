@@ -22,7 +22,7 @@ public class LiveChatModule extends AbstractTranslatorModule {
         super(translatorService, "live_chat", playerLocaleProcessor);
 
 
-        Bukkit.getPluginManager().registerEvents( new AsyncPlayerChatListener(this, translatorPlugin), translatorPlugin);
+        Bukkit.getPluginManager().registerEvents(new AsyncPlayerChatListener(this, translatorPlugin), translatorPlugin);
 
         //   PacketEvents.getAPI().getEventManager().registerListener(new ChatPacketListener(this),
         //        PacketListenerPriority.HIGHEST);

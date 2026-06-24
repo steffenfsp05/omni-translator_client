@@ -14,7 +14,8 @@ public class TranslationRequestMapper extends AbstractPacketMapper<NetworkPacket
 
     static {
         for (NetworkPackets.Module protoMod : NetworkPackets.Module.values()) {
-            if (protoMod == NetworkPackets.Module.MODULE_UNKNOWN || protoMod == NetworkPackets.Module.UNRECOGNIZED) continue;
+            if (protoMod == NetworkPackets.Module.MODULE_UNKNOWN || protoMod == NetworkPackets.Module.UNRECOGNIZED)
+                continue;
 
             String javaName = protoMod.name().replace("MODULE_", "");
             try {
@@ -51,5 +52,6 @@ public class TranslationRequestMapper extends AbstractPacketMapper<NetworkPacket
         return new RequestData(requestId, packet.getText(), packet.getTargetLang(), javaModule);
     }
 
-    public record RequestData(UUID requestId, String text, String targetLanguage, ServerConfiguration.Module module) {}
+    public record RequestData(UUID requestId, String text, String targetLanguage, ServerConfiguration.Module module) {
+    }
 }

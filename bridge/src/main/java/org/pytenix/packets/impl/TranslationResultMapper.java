@@ -23,8 +23,9 @@ public class TranslationResultMapper extends AbstractPacketMapper<NetworkPackets
 
     @Override
     public ResultData from(NetworkPackets.TranslationResult packet) {
-        return new ResultData(new UUID(packet.getRequestIdMostSig(),packet.getRequestIdLeastSig()),packet.getResult());
+        return new ResultData(new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig()), packet.getResult());
     }
 
-    public record ResultData(UUID requestId, String result) { }
+    public record ResultData(UUID requestId, String result) {
+    }
 }

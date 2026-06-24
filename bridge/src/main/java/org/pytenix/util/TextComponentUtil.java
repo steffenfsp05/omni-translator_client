@@ -168,7 +168,8 @@ public class TextComponentUtil {
         return modified;
     }
 
-    private record TranslationKey(Component component, String lang, String module) {}
+    private record TranslationKey(Component component, String lang, String module) {
+    }
 
     private static class TranslationContext {
         final Map<Integer, ClickEvent> clicks = new HashMap<>();

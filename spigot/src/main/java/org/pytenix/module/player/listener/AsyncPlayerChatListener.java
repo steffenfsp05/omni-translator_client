@@ -3,14 +3,13 @@ package org.pytenix.module.player.listener;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.pytenix.service.PlayerLocaleService;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.player.LiveChatModule;
+import org.pytenix.service.PlayerLocaleService;
 import org.pytenix.service.TaskScheduler;
 
 import java.util.ArrayList;
@@ -38,7 +37,6 @@ public class AsyncPlayerChatListener implements Listener {
 
         Player sender = event.getPlayer();
         Component originalMessage = event.message();
-
 
 
         String senderLang = PlayerLocaleService.getPlayerLocale(sender.getUniqueId()).split("_")[0].toLowerCase();

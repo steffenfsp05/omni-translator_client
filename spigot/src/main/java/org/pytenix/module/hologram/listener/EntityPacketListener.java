@@ -15,8 +15,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.service.PlayerLocaleService;
 import org.pytenix.module.hologram.HologramModule;
+import org.pytenix.service.PlayerLocaleService;
 
 import java.util.ArrayList;
 import java.util.List;

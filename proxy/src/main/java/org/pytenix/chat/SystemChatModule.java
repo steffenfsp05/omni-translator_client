@@ -5,8 +5,8 @@ import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import lombok.Getter;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.chat.listener.PlayerDisconnectListener;
+import org.pytenix.chat.listener.SystemChatPacketListener;
 import org.pytenix.entity.ServerConfiguration;
-import org.pytenix.module.chat.listener.SystemChatPacketListener;
 import org.pytenix.translation.AbstractTranslatorModule;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.locale.PlayerLocaleProcessor;
@@ -37,8 +37,7 @@ public class SystemChatModule extends AbstractTranslatorModule {
     }
 
 
-    public void registerListener()
-    {
+    public void registerListener() {
         PacketEvents.getAPI().getEventManager().registerListener(
                 new SystemChatPacketListener(this, messageSequencer),
                 PacketListenerPriority.HIGHEST
@@ -47,8 +46,7 @@ public class SystemChatModule extends AbstractTranslatorModule {
     }
 
 
-    public boolean isModuleActive()
-    {
+    public boolean isModuleActive() {
         return translatorPlugin.getTranslatorService().getTranslationConfiguration().getModules().get(ServerConfiguration.Module.PLUGIN_CHAT
                 .getModuleName());
     }

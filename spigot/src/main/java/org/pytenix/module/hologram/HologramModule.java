@@ -6,7 +6,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
-import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.hologram.listener.EntityPacketListener;
 import org.pytenix.translation.AbstractTranslatorModule;
 import org.pytenix.translation.TranslatorService;

@@ -39,9 +39,7 @@ public class ConsentRefreshRequestMapper extends AbstractPacketMapper<NetworkPac
             UUID requestId,
             UUID playerId,
             NetworkPackets.ProfilePacket.ConsentType consentType
-    )
-
-    {
+    ) {
 
     }
 }

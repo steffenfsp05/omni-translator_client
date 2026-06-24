@@ -14,8 +14,7 @@ public class PlayerDisconnectListener {
 
 
     @Subscribe
-    public void onDisconnect(DisconnectEvent disconnectEvent)
-    {
+    public void onDisconnect(DisconnectEvent disconnectEvent) {
         final UUID uuid = disconnectEvent.getPlayer().getUniqueId();
         translatorPlugin.getSystemChatService().getMessageSequencer().cleanup(uuid);
     }

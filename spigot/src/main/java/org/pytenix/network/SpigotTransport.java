@@ -4,18 +4,20 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.pytenix.TranslatorPlugin;
+import org.pytenix.network.consumer.ConfigUpdateConsumer;
 import org.pytenix.network.consumer.ConsentRefreshConsumer;
+import org.pytenix.network.listener.ConfigUpdateListener;
 import org.pytenix.network.listener.ConsentUpdateListener;
 import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.packets.PacketRegistry;
-import org.pytenix.network.consumer.ConfigUpdateConsumer;
-import org.pytenix.network.listener.ConfigUpdateListener;
 import org.pytenix.packets.impl.TranslationResultMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.transport.TransportService;
 import org.transport.io.minecraft.PluginMessageReceiver;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class SpigotTransport {
@@ -43,8 +45,6 @@ public class SpigotTransport {
         this.availableCarriers = new HashSet<>();
 
 
-
-
         this.translationRequestService = new TranslationRequestService(this, pluginMessagingChannel);
         this.channelCarrierService = new ChannelCarrierService(pluginMessagingChannel, this);
 
@@ -61,15 +61,14 @@ public class SpigotTransport {
 
     }
 
-    private void registerPacketHandlers()
-    {
+    private void registerPacketHandlers() {
         this.transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT,
                 (MappedPacketReceiveConsumer<String, NetworkPackets.TranslationResult, TranslationResultMapper.ResultData>)
                         (context, resultData) ->
                                 translationRequestService.completeRequest(
-                                  resultData.requestId(),
-                                  resultData.result()
-                               ));
+                                        resultData.requestId(),
+                                        resultData.result()
+                                ));
 
         this.transportService.registerPacket(PacketRegistry.SERVER_CONFIG,
                 new ConfigUpdateConsumer(plugin, plugin.getTranslatorService()
@@ -77,21 +76,21 @@ public class SpigotTransport {
         );
 
 
-        this.transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST,(stringPacketContext, translationRequest) -> {});
-        this.transportService.registerPacket(PacketRegistry.CONFIG_REQUEST,(stringPacketContext, translationRequest) -> {});
+        this.transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST, (stringPacketContext, translationRequest) -> {
+        });
+        this.transportService.registerPacket(PacketRegistry.CONFIG_REQUEST, (stringPacketContext, translationRequest) -> {
+        });
         this.transportService.registerPacket(PacketRegistry.CONSENT_REFRESH, new ConsentRefreshConsumer(plugin, plugin.getTranslatorService()));
     }
 
-    private void registerEvents()
-    {
+    private void registerEvents() {
         plugin.getTranslatorService().getEventService().register(new ConfigUpdateListener(plugin));
         plugin.getTranslatorService().getEventService().register(new ConsentUpdateListener(plugin));
 
         Bukkit.getPluginManager().registerEvents(channelCarrierService, plugin);
     }
 
-    private void registerChannels()
-    {
+    private void registerChannels() {
         PluginMessageReceiver<String> receiver = PluginMessageReceiver.zeroCopyBridge(transportService);
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, pluginMessagingChannel);
@@ -106,9 +105,8 @@ public class SpigotTransport {
     }
 
     public CompletableFuture<String> translate(UUID id, String text, String targetLang, String module) {
-       return translationRequestService.translate(id, text, targetLang, module);
+        return translationRequestService.translate(id, text, targetLang, module);
     }
-
 
 
 }
