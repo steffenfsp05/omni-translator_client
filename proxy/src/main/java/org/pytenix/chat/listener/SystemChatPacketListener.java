@@ -1,4 +1,4 @@
-package org.pytenix.module.chat.listener;
+package org.pytenix.chat.listener;
 
 import com.github.retrooper.packetevents.event.PacketListener;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
@@ -8,10 +8,8 @@ import com.velocitypowered.api.proxy.Player;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.pytenix.TranslatorPlugin;
 import org.pytenix.chat.MessageSequencer;
 import org.pytenix.chat.SystemChatModule;
-import org.pytenix.util.TextComponentUtil;
 
 import java.util.UUID;
 
