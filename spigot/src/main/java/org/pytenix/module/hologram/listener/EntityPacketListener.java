@@ -14,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.service.PlayerLocaleService;
 import org.pytenix.module.hologram.HologramModule;
 
@@ -140,7 +141,7 @@ public class EntityPacketListener implements PacketListener, Listener {
                         originalComponent = (Component) value;
                     }
 
-                    String legacyText = hologramModule.getTranslatorPlugin().getLegacyComponentSerializer().serialize(originalComponent);
+                    String legacyText = TranslatorPlugin.getLegacyComponentSerializer().serialize(originalComponent);
 
                     if (!legacyText.trim().isEmpty()) {
                         final Component keyComponent = originalComponent;
@@ -174,9 +175,7 @@ public class EntityPacketListener implements PacketListener, Listener {
         String lang = PlayerLocaleService.getPlayerLocale(player.getUniqueId());
 
         return hologramModule.translate(text, lang)
-                .thenApply(translatedString -> {
-                    return hologramModule.getTranslatorPlugin().getLegacyComponentSerializer().deserialize(translatedString);
-                });
+                .thenApply(translatedString -> TranslatorPlugin.getLegacyComponentSerializer().deserialize(translatedString));
     }
 
     private void sendUpdatePacket(User user, int entityId, List<EntityData<?>> newData) {

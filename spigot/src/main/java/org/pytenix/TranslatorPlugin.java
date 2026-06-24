@@ -6,6 +6,7 @@ import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.pytenix.cache.CacheProvider;
 import org.pytenix.cache.impl.CaffeineCacheProvider;
@@ -27,10 +28,12 @@ import org.pytenix.translation.TranslationProcessor;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.impl.DefaultTranslationService;
 import org.pytenix.service.TaskScheduler;
+import org.pytenix.translation.locale.PlayerLocaleProcessor;
 import org.pytenix.util.TextComponentUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
 
 @Getter
@@ -41,12 +44,14 @@ public class TranslatorPlugin extends JavaPlugin {
     TextComponentUtil textComponentUtil;
     CacheProvider<String,String> caffeineCache;
 
-    LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.builder()
+    @Getter
+    public static LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.builder()
             .character('§')
             .extractUrls()
             .hexColors()
             .flattener(ComponentFlattener.basic())
             .build();
+
     ConfigService configService;
     ConfigurationFile configurationFile;
 
@@ -118,7 +123,16 @@ public class TranslatorPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerJoinQuitListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerLocaleChangeListener(this), this);
 
-        moduleService = new ModuleService(this);
+        moduleService = new ModuleService(this, translatorService, uuid -> {
+
+            final Player player = Bukkit.getPlayer(uuid);
+            if(player == null)
+                return "en-en";
+             else
+                return player.getLocale();
+
+
+        });
 
         getServer().getCommandMap().register("translator", new org.bukkit.command.Command("testmsg") {
 

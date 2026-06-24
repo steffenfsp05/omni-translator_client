@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public class SystemPacketListener implements PacketListener {
 
-
+/*
     final PluginChatModule pluginChatModule;
     final MessageSequencer messageSequencer;
 
@@ -48,13 +48,11 @@ public class SystemPacketListener implements PacketListener {
             Component messageComponent = packet.getMessage();
             String rawText = LegacyComponentSerializer.legacySection().serialize(messageComponent);
 
-            // 1. DER BODYGUARD IST ZURÜCK! (Blockt den ViaVersion Pufferfish Spam)
             if (rawText.contains("Can't deliver chat message") || rawText.contains("kann nicht zugestellt werden") || rawText.contains("multiplayer.message_not_delivered")) {
                 event.setCancelled(true);
                 return;
             }
 
-            // 2. Endlosschleifen-Schutz
             if (messageSequencer.isIgnored(uuid, messageComponent)) {
                 return;
             }
@@ -63,4 +61,5 @@ public class SystemPacketListener implements PacketListener {
             messageSequencer.translateWithOrder(uuid, messageComponent, rawText, PlayerLocaleService.getPlayerLocale(player.getUniqueId()), isOverlay);
         }
     }
+     */
 }

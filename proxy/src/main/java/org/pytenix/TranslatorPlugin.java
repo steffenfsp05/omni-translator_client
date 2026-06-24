@@ -14,6 +14,8 @@ import org.pytenix.backend.ProfileService;
 import org.pytenix.backend.RestfulService;
 import org.pytenix.cache.CacheProvider;
 import org.pytenix.cache.impl.CaffeineCacheProvider;
+import org.pytenix.chat.MessageSequencer;
+import org.pytenix.chat.SystemChatModule;
 import org.pytenix.config.ConfigService;
 import org.pytenix.config.ConfigurationFile;
 import org.pytenix.event.EventService;
@@ -70,7 +72,9 @@ public class TranslatorPlugin {
     GradientService gradientService;
     EventService eventService;
 
+    SystemChatModule systemChatService;
     TextComponentUtil textComponentUtil;
+    MessageSequencer messageSequencer;
 
     LimboService limboService;
 
@@ -108,7 +112,18 @@ public class TranslatorPlugin {
 
         this.translatorService = new DefaultTranslationService(translationProcessor,placeholderService,gradientService,eventService);
 
+
         this.textComponentUtil = new TextComponentUtil(translatorService);
+        this.messageSequencer = new MessageSequencer(this, textComponentUtil);
+
+
+        this.systemChatService = new SystemChatModule(
+                this,
+                translatorService,
+                textComponentUtil,
+                messageSequencer,
+                uuid -> this.getProxyServer().getPlayer(uuid).get().getEffectiveLocale().toString().toLowerCase()
+        );
 
         final String secret = loadForwardingSecret();
 

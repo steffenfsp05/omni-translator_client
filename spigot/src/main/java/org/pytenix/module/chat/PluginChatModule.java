@@ -5,11 +5,12 @@ import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import lombok.Getter;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.chat.listener.SystemPacketListener;
-import org.pytenix.module.AbstractTranslatorModule;
+import org.pytenix.translation.AbstractTranslatorModule;
 
 @Getter
-public class PluginChatModule extends AbstractTranslatorModule {
+public class PluginChatModule  {
 
+    /* WIRD ABGELÖST VOM PROXY
     MessageSequencer messageSequencer;
 
     public PluginChatModule(TranslatorPlugin translatorPlugin) {
@@ -22,5 +23,7 @@ public class PluginChatModule extends AbstractTranslatorModule {
 
     }
 
+
+     */
 
 }

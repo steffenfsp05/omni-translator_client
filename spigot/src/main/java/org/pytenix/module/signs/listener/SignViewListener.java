@@ -12,6 +12,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBl
 import io.github.retrooper.packetevents.adventure.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.service.PlayerLocaleService;
 import org.pytenix.module.signs.SignsModule;
 
@@ -31,12 +32,15 @@ public class SignViewListener implements PacketListener {
         this.signsModule = signsModule;
     }
 
+    //TODO DEBUG!!
+
+    /*
     @Override
     public void onPacketSend(PacketSendEvent event) {
 
         if (event.getConnectionState() != com.github.retrooper.packetevents.protocol.ConnectionState.PLAY) return;
 
-       /*
+
         String name = event.getPacketType().getName().toLowerCase();
         if (name.contains("keepalive") || name.contains("rotation") || name.contains("position")
                 || name.contains("sound_effect")|| name.contains("entity_velocity")
@@ -53,7 +57,7 @@ public class SignViewListener implements PacketListener {
 
         */
 
-
+/*
         // if(!signsModule.isActive())   return;
         if (event.getPacketType() != PacketType.Play.Server.BLOCK_ENTITY_DATA) return;
 
@@ -128,9 +132,9 @@ public class SignViewListener implements PacketListener {
                         component = GsonComponentSerializer.gson().deserialize(rawText);
                     } catch (Exception e) {
 
-                        component = signsModule.getTranslatorPlugin().getLegacyComponentSerializer().deserialize(rawText);
+                        component = TranslatorPlugin.getLegacyComponentSerializer().deserialize(rawText);
                     }
-                    plainMessage = signsModule.getTranslatorPlugin().getLegacyComponentSerializer().serialize(component);
+                    plainMessage = TranslatorPlugin.getLegacyComponentSerializer().serialize(component);
                 } catch (Exception ignored) {
                     plainMessage = rawText;
                 }
@@ -187,5 +191,7 @@ public class SignViewListener implements PacketListener {
         return text;
     }
 
+
+ */
 
 }

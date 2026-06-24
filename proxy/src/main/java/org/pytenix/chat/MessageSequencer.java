@@ -1,15 +1,13 @@
-package org.pytenix.module.chat;
+package org.pytenix.chat;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.pytenix.TranslatorPlugin;
+import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.util.TextComponentUtil;
 
 import java.util.ArrayDeque;
@@ -21,10 +19,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class MessageSequencer implements Listener {
+public class MessageSequencer {
 
-    /*
-    private final PluginChatModule pluginChatModule;
+    private final TranslatorPlugin translatorPlugin;
     private final TextComponentUtil textComponentUtil;
 
     private final Map<UUID, UserQueue> userQueues = new ConcurrentHashMap<>();
@@ -34,16 +31,14 @@ public class MessageSequencer implements Listener {
             .expireAfterWrite(10, TimeUnit.SECONDS)
             .build();
 
-    public MessageSequencer(PluginChatModule pluginChatModule) {
-        this.pluginChatModule = pluginChatModule;
-        this.textComponentUtil = pluginChatModule.getTranslatorPlugin().getTextComponentUtil();
-        Bukkit.getPluginManager().registerEvents(this, pluginChatModule.getTranslatorPlugin());
+    public MessageSequencer(
+            TranslatorPlugin translatorPlugin,
+            TextComponentUtil textComponentUtil
+    ) {
+        this.translatorPlugin = translatorPlugin;
+        this.textComponentUtil = textComponentUtil;
     }
 
-    @EventHandler
-    public void onQuit(PlayerQuitEvent event) {
-        cleanup(event.getPlayer().getUniqueId());
-    }
 
     public void translateWithOrder(UUID uuid, Component component, String realMessage, String locale, boolean isOverlay) {
         UserQueue uq = userQueues.computeIfAbsent(uuid, k -> new UserQueue());
@@ -64,7 +59,7 @@ public class MessageSequencer implements Listener {
             }
         }, 4, TimeUnit.SECONDS);
 
-        textComponentUtil.translateComplexMessage(component, locale, pluginChatModule.getModuleName())
+        textComponentUtil.translateComplexMessage(component, locale, ServerConfiguration.Module.PLUGIN_CHAT.getModuleName())
                 .whenComplete((translatedComponent, throwable) -> {
                     timeoutTask.cancel(false);
 
@@ -138,7 +133,7 @@ public class MessageSequencer implements Listener {
     }
 
     private boolean sendPacket(UUID uuid, Component comp, boolean isOverlay) {
-        Player player = Bukkit.getPlayer(uuid);
+        Player player = this.translatorPlugin.getProxyServer().getPlayer(uuid).orElse(null);
         if (player == null) return false;
 
         try {
@@ -177,6 +172,4 @@ public class MessageSequencer implements Listener {
     }
 
     private record IgnoreKey(UUID uuid, String json) {}
-
-     */
 }

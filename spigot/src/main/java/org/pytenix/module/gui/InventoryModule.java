@@ -8,8 +8,10 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.module.AbstractTranslatorModule;
+import org.pytenix.translation.AbstractTranslatorModule;
 import org.pytenix.module.gui.listener.PacketListener;
+import org.pytenix.translation.TranslatorService;
+import org.pytenix.translation.locale.PlayerLocaleProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +26,10 @@ public class InventoryModule extends AbstractTranslatorModule {
     LegacyComponentSerializer legacyComponentSerializer;
 
 
-    public InventoryModule(TranslatorPlugin translatorPlugin) {
-        super(translatorPlugin, "gui");
+    public InventoryModule(TranslatorService translatorService, PlayerLocaleProcessor playerLocaleProcessor) {
+        super(translatorService, "gui", playerLocaleProcessor);
 
-        this.legacyComponentSerializer = this.getTranslatorPlugin().getLegacyComponentSerializer();
+        this.legacyComponentSerializer = TranslatorPlugin.getLegacyComponentSerializer();
 
         PacketEvents.getAPI().getEventManager().registerListener(new PacketListener(this),
                 PacketListenerPriority.NORMAL);

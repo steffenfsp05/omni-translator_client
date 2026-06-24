@@ -35,13 +35,8 @@ public class ServerPreConnectListener {
                                 translatorPlugin.getProxyServer().getServer("dynamic-limbo").ifPresent(limboServer -> {
                                     event.setResult(ServerPreConnectEvent.ServerResult.allowed(limboServer));
 
-                                    String locale = event.getPlayer().getPlayerSettings().getLocale().toString();
 
-
-
-                                    translatorPlugin.getTextComponentUtil().translateComplexMessage(component,locale, ServerConfiguration.Module.PLUGIN_CHAT.getModuleName())
-                                                    .thenAcceptAsync(translatedComponent ->
-                                                            event.getPlayer().sendMessage(translatedComponent));
+                                    event.getPlayer().sendMessage(component);
 
 
                                 });

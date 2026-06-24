@@ -26,11 +26,10 @@ public class AsyncPlayerChatListener implements Listener {
     final TranslatorPlugin translatorPlugin;
     final TaskScheduler taskScheduler;
 
-    public AsyncPlayerChatListener(LiveChatModule liveChatModule) {
+    public AsyncPlayerChatListener(LiveChatModule liveChatModule, TranslatorPlugin translatorPlugin) {
         this.liveChatModule = liveChatModule;
-        this.translatorPlugin = liveChatModule.getTranslatorPlugin();
+        this.translatorPlugin = translatorPlugin;
         this.taskScheduler = translatorPlugin.getTaskScheduler();
-        Bukkit.getPluginManager().registerEvents(this, translatorPlugin);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -40,8 +39,6 @@ public class AsyncPlayerChatListener implements Listener {
         Player sender = event.getPlayer();
         Component originalMessage = event.message();
 
-        String rawJson = net.kyori.adventure.text.serializer.gson.GsonComponentSerializer.gson().serialize(event.originalMessage());
-        String rawJson2 = net.kyori.adventure.text.serializer.gson.GsonComponentSerializer.gson().serialize(event.message());
 
 
         String senderLang = PlayerLocaleService.getPlayerLocale(sender.getUniqueId()).split("_")[0].toLowerCase();
