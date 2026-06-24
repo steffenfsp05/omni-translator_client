@@ -13,25 +13,42 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+
+//TODO MERGE WITH SPIGOT SIDE;; MAKE ABSTRACT
 public class ProfileSocketEndpoint {
     private final OmniConnectionService connectionManager;
-    private final ConcurrentHashMap<UUID, CompletableFuture<ProfileMapper.ProfileData>> queue = new ConcurrentHashMap<>();
 
-    //TODO REFACTOR
-    final Cache<UUID, ProfileMapper.ProfileData> profileCache = Caffeine.newBuilder().expireAfterWrite(Duration.ofSeconds(3)).build();
+    private final ConcurrentHashMap<UUID, CompletableFuture<ProfileMapper.ProfileData>> requestQueue = new ConcurrentHashMap<>();
+
+    private final ConcurrentHashMap<UUID, CompletableFuture<ProfileMapper.ProfileData>> inFlightFetches = new ConcurrentHashMap<>();
+
+    private final Cache<DuplicationKey, Boolean> deduplicationCache = Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMillis(500))
+            .build();
+
+    private final Cache<UUID, ProfileMapper.ProfileData> profileCache = Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofSeconds(3))
+            .build();
 
     public ProfileSocketEndpoint(OmniConnectionService connectionManager) {
         this.connectionManager = connectionManager;
     }
 
     public void handleProfileResult(ProfileMapper.ProfileData resultData) {
-        CompletableFuture<ProfileMapper.ProfileData> future = queue.remove(resultData.requestId());
         profileCache.put(resultData.playerId(), resultData);
 
-        if (future != null) future.complete(resultData);
+        CompletableFuture<ProfileMapper.ProfileData> future = requestQueue.remove(resultData.requestId());
+        if (future != null) {
+            future.complete(resultData);
+        }
     }
 
     public void updateProfile(ProfileMapper.ProfileData profileData) {
+        DuplicationKey key = new DuplicationKey(profileData.playerId(), NetworkPackets.ProfilePacket.Action.UPDATE);
+
+        if (deduplicationCache.asMap().putIfAbsent(key, Boolean.TRUE) != null) {
+            return;
+        }
 
         profileCache.invalidate(profileData.playerId());
 
@@ -42,34 +59,37 @@ public class ProfileSocketEndpoint {
     }
 
     public CompletableFuture<ProfileMapper.ProfileData> getProfile(UUID playerId) {
-        CompletableFuture<ProfileMapper.ProfileData> future = new CompletableFuture<>();
-
         ProfileMapper.ProfileData cachedProfile = profileCache.getIfPresent(playerId);
-        if(cachedProfile != null)
-            future.complete(cachedProfile);
+        if (cachedProfile != null) {
+            return CompletableFuture.completedFuture(cachedProfile);
+        }
 
-        final UUID uuid = UUID.randomUUID();
-        queue.put(uuid, future);
+        return inFlightFetches.computeIfAbsent(playerId, id -> {
+            CompletableFuture<ProfileMapper.ProfileData> future = new CompletableFuture<>();
+            UUID requestId = UUID.randomUUID();
 
-        final ProfileMapper.ProfileData profileData = new ProfileMapper.ProfileData(
-                connectionManager.getApiKey(),
-                NetworkPackets.ProfilePacket.Action.FETCH,
-                playerId,
-                uuid,
-                NetworkPackets.ProfilePacket.ConsentType.UNKNOWN
-        );
+            requestQueue.put(requestId, future);
 
-        System.out.println("SENDING " + profileData);
+            ProfileMapper.ProfileData profileData = new ProfileMapper.ProfileData(
+                    connectionManager.getApiKey(),
+                    NetworkPackets.ProfilePacket.Action.FETCH,
+                    playerId,
+                    requestId,
+                    NetworkPackets.ProfilePacket.ConsentType.UNKNOWN
+            );
 
-        connectionManager.sendPacket(PacketRegistry.PROFILE,
-                PacketMapperRegistry.toProto(
-                        profileData
-                ));
+            System.out.println("SENDING " + profileData);
 
-        return future.orTimeout(60, TimeUnit.SECONDS).exceptionally(ex -> {
-            queue.remove(uuid);
-            return new ProfileMapper.ProfileData("NULL", null, null, null, null);
+            connectionManager.sendPacket(PacketRegistry.PROFILE, PacketMapperRegistry.toProto(profileData));
+
+            return future.orTimeout(60, TimeUnit.SECONDS)
+                    .whenComplete((res, ex) -> {
+                        requestQueue.remove(requestId);
+                        inFlightFetches.remove(playerId);
+                    })
+                    .exceptionally(ex -> new ProfileMapper.ProfileData("NULL", null, null, null, null));
         });
     }
 
+    public record DuplicationKey(UUID uuid, NetworkPackets.ProfilePacket.Action action) {}
 }
