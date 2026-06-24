@@ -1,27 +1,38 @@
-package org.pytenix.backend;
+package org.pytenix.network.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import lombok.Getter;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.packets.PacketRegistry;
 import org.pytenix.packets.impl.ProfileMapper;
 import org.pytenix.proto.generated.NetworkPackets;
+import org.transport.TransportService;
 
 import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+//TODO: LOOK PROXY SIDE; REFACTOR!
 
-public class ProfileSocketEndpoint {
-    private final OmniConnectionService connectionManager;
+public class ProfileService {
+    private final TranslatorPlugin translatorPlugin;
+    private final String pluginMessageChannel;
+    private final TransportService<String> transportService;
+
+
     private final ConcurrentHashMap<UUID, CompletableFuture<ProfileMapper.ProfileData>> queue = new ConcurrentHashMap<>();
 
     //TODO REFACTOR
+    @Getter
     final Cache<UUID, ProfileMapper.ProfileData> profileCache = Caffeine.newBuilder().expireAfterWrite(Duration.ofSeconds(3)).build();
 
-    public ProfileSocketEndpoint(OmniConnectionService connectionManager) {
-        this.connectionManager = connectionManager;
+    public ProfileService(TranslatorPlugin translatorPlugin) {
+        this.translatorPlugin = translatorPlugin;
+        this.transportService = translatorPlugin.getSpigotTransport().getTransportService();
+        this.pluginMessageChannel = translatorPlugin.getPluginMessagingChannel();
     }
 
     public void handleProfileResult(ProfileMapper.ProfileData resultData) {
@@ -31,15 +42,6 @@ public class ProfileSocketEndpoint {
         if (future != null) future.complete(resultData);
     }
 
-    public void updateProfile(ProfileMapper.ProfileData profileData) {
-
-        profileCache.invalidate(profileData.playerId());
-
-        connectionManager.sendPacket(PacketRegistry.PROFILE,
-                PacketMapperRegistry.toProto(
-                        profileData.withAction(NetworkPackets.ProfilePacket.Action.UPDATE)
-                ));
-    }
 
     public CompletableFuture<ProfileMapper.ProfileData> getProfile(UUID playerId) {
         CompletableFuture<ProfileMapper.ProfileData> future = new CompletableFuture<>();
@@ -52,7 +54,7 @@ public class ProfileSocketEndpoint {
         queue.put(uuid, future);
 
         final ProfileMapper.ProfileData profileData = new ProfileMapper.ProfileData(
-                connectionManager.getApiKey(),
+                translatorPlugin.getConfigurationFile().getLicenseKey(),
                 NetworkPackets.ProfilePacket.Action.FETCH,
                 playerId,
                 uuid,
@@ -61,10 +63,11 @@ public class ProfileSocketEndpoint {
 
         System.out.println("SENDING " + profileData);
 
-        connectionManager.sendPacket(PacketRegistry.PROFILE,
-                PacketMapperRegistry.toProto(
-                        profileData
-                ));
+        transportService.send(pluginMessageChannel, PacketRegistry.PROFILE, PacketMapperRegistry.toProto(
+                profileData
+        ));
+
+
 
         return future.orTimeout(60, TimeUnit.SECONDS).exceptionally(ex -> {
             queue.remove(uuid);

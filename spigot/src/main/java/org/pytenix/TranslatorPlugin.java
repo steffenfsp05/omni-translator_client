@@ -19,6 +19,7 @@ import org.pytenix.listener.PlayerJoinQuitListener;
 import org.pytenix.listener.PlayerLocaleChangeListener;
 import org.pytenix.network.SpigotTransport;
 import org.pytenix.network.VelocitySecretReader;
+import org.pytenix.network.service.ProfileService;
 import org.pytenix.placeholder.GradientService;
 import org.pytenix.placeholder.PlaceholderService;
 import org.pytenix.placeholder.impl.DefaultGradientService;
@@ -67,6 +68,8 @@ public class TranslatorPlugin extends JavaPlugin {
     private GradientService gradientService;
     private EventService eventService;
 
+    private ProfileService profileService;
+
     @Override
     public void onEnable() {
 
@@ -95,6 +98,7 @@ public class TranslatorPlugin extends JavaPlugin {
 
         this.translatorService = new DefaultTranslationService(translationProcessor, placeholderService, gradientService, eventService);
 
+        this.profileService = new ProfileService(this);
 
         final VelocitySecretReader secretReader = new VelocitySecretReader();
         final String secret = secretReader.loadVelocitySecret();

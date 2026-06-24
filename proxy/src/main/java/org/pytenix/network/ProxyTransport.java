@@ -79,8 +79,7 @@ public class ProxyTransport {
         this.transportService.registerPacket(PacketRegistry.CONFIG_REQUEST, new ConfigRequestConsumer(translatorPlugin.getTranslatorService()));
         this.transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST, new TranslationRequestConsumer(translatorPlugin, apiExecutor));
         this.transportService.registerPacket(PacketRegistry.PROFILE, new ProfileConsumer());
-        this.transportService.registerPacket(PacketRegistry.CONSENT_REFRESH, (registeredServerPacketContext, consentRefreshRequest) -> {
-        });
+        this.transportService.registerPacket(PacketRegistry.CONSENT_REFRESH, (registeredServerPacketContext, consentRefreshRequest) -> {});
 
     }
 

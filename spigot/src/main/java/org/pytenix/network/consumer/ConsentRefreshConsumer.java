@@ -18,6 +18,8 @@ public class ConsentRefreshConsumer implements MappedPacketReceiveConsumer<Strin
     @Override
     public void handle(PacketContext<String> context, ConsentRefreshRequestMapper.Data javaPacket) {
 
+        translatorPlugin.getProfileService().getProfileCache().invalidate(javaPacket.playerId());
+
         if (Bukkit.getPlayer(javaPacket.playerId()) != null)
             translatorService.getEventService().callEvent(new ConsentUpdateEvent(javaPacket));
     }

@@ -1,4 +1,4 @@
-package org.pytenix.network;
+package org.pytenix.network.service;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRegisterChannelEvent;
 import org.bukkit.event.player.PlayerUnregisterChannelEvent;
+import org.pytenix.network.SpigotTransport;
 
 import java.util.Objects;
 import java.util.Optional;

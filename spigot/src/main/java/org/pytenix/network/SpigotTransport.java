@@ -8,13 +8,18 @@ import org.pytenix.network.consumer.ConfigUpdateConsumer;
 import org.pytenix.network.consumer.ConsentRefreshConsumer;
 import org.pytenix.network.listener.ConfigUpdateListener;
 import org.pytenix.network.listener.ConsentUpdateListener;
+import org.pytenix.network.service.ChannelCarrierService;
+import org.pytenix.network.service.ProfileService;
+import org.pytenix.network.service.TranslationRequestService;
 import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.packets.PacketRegistry;
+import org.pytenix.packets.impl.ProfileMapper;
 import org.pytenix.packets.impl.TranslationResultMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.transport.TransportService;
 import org.transport.io.minecraft.PluginMessageReceiver;
 
+import java.net.http.WebSocket;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -37,12 +42,15 @@ public class SpigotTransport {
 
     public Set<UUID> availableCarriers;
 
+    private ProfileService profileService;
+
     public SpigotTransport(TranslatorPlugin plugin, String secret, String pluginMessagingChannel) {
 
         this.pluginMessagingChannel = pluginMessagingChannel;
         this.plugin = plugin;
         this.hasConfiguration = false;
         this.availableCarriers = new HashSet<>();
+        this.profileService = plugin.getProfileService();
 
 
         this.translationRequestService = new TranslationRequestService(this, pluginMessagingChannel);
@@ -81,6 +89,14 @@ public class SpigotTransport {
         this.transportService.registerPacket(PacketRegistry.CONFIG_REQUEST, (stringPacketContext, translationRequest) -> {
         });
         this.transportService.registerPacket(PacketRegistry.CONSENT_REFRESH, new ConsentRefreshConsumer(plugin, plugin.getTranslatorService()));
+
+        transportService.registerPacket(PacketRegistry.PROFILE,
+                (MappedPacketReceiveConsumer<String, NetworkPackets.ProfilePacket, ProfileMapper.ProfileData>)
+                        (context, javaPacket) -> {
+                            System.out.println("INCOMING: " + javaPacket);
+                            if (profileService != null) profileService.handleProfileResult(javaPacket);
+
+                        });
     }
 
     private void registerEvents() {

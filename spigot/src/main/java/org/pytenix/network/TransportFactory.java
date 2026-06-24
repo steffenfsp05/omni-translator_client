@@ -1,6 +1,7 @@
 package org.pytenix.network;
 
 import org.pytenix.TranslatorPlugin;
+import org.pytenix.network.service.ChannelCarrierService;
 import org.transport.TransportOptions;
 import org.transport.TransportService;
 import org.transport.io.minecraft.PluginMessageSender;

@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.pytenix.chat.MessageSequencer;
 import org.pytenix.chat.SystemChatModule;
+import org.pytenix.proto.generated.NetworkPackets;
 
 import java.util.UUID;
 
@@ -30,6 +31,7 @@ public class SystemChatPacketListener implements PacketListener {
 
             Player player = systemChatService.getTranslatorPlugin().getProxyServer().getPlayer(uuid).orElse(null);
             if (player == null) return;
+
 
             if (!systemChatService.checkIfNeed(uuid)) return;
 
@@ -53,16 +55,28 @@ public class SystemChatPacketListener implements PacketListener {
                 return;
 
 
-            event.setCancelled(true);
+            //TODO: REFACTOR!!!!
+
+            systemChatService.getTranslatorPlugin().getProfileSocketEndpoint().getProfile(uuid)
+                    .thenAcceptAsync(profileData ->
+                    {
+                        if (profileData.consentType() == NetworkPackets.ProfilePacket.ConsentType.DECLINED)
+                            return;
+
+                        event.setCancelled(true);
 
 
-            messageSequencer.translateWithOrder(
-                    uuid,
-                    messageComponent,
-                    rawText,
-                    systemChatService.getPlayerLocaleProcessor().retrieveLocale(uuid),
-                    isOverlay
-            );
+                        messageSequencer.translateWithOrder(
+                                uuid,
+                                messageComponent,
+                                rawText,
+                                systemChatService.getPlayerLocaleProcessor().retrieveLocale(uuid),
+                                isOverlay
+                        );
+
+                    });
+
+
         }
     }
 }

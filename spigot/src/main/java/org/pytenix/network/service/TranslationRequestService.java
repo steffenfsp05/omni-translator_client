@@ -1,8 +1,9 @@
-package org.pytenix.network;
+package org.pytenix.network.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.pytenix.entity.ServerConfiguration;
+import org.pytenix.network.SpigotTransport;
 import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.packets.PacketRegistry;
 import org.pytenix.packets.impl.TranslationRequestMapper;
