@@ -10,7 +10,6 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.Getter;
 import org.pytenix.backend.GeoSocketEndpoint;
 import org.pytenix.backend.OmniConnectionService;
-import org.pytenix.backend.ProfileSocketEndpoint;
 import org.pytenix.backend.TranslationSocketEndpoint;
 import org.pytenix.cache.CacheProvider;
 import org.pytenix.cache.impl.CaffeineCacheProvider;
@@ -24,10 +23,13 @@ import org.pytenix.limbo.LimboService;
 import org.pytenix.listener.PlayerConnectionChangeListener;
 import org.pytenix.listener.ProxyPingListener;
 import org.pytenix.network.ProxyTransport;
+import org.pytenix.packets.PacketRegistry;
 import org.pytenix.placeholder.GradientService;
 import org.pytenix.placeholder.PlaceholderService;
 import org.pytenix.placeholder.impl.DefaultGradientService;
 import org.pytenix.placeholder.impl.DefaultPlaceholderService;
+import org.pytenix.profile.ProfileService;
+import org.pytenix.profile.impl.DefaultProfileService;
 import org.pytenix.translation.TranslationProcessor;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.impl.DefaultTranslationService;
@@ -60,7 +62,6 @@ public class TranslatorPlugin {
     TranslationSocketEndpoint translationSocketEndpoint;
     OmniConnectionService connectionService;
     GeoSocketEndpoint geoSocketEndpoint;
-    ProfileSocketEndpoint profileSocketEndpoint;
 
     String remoteAddress = "192.168.178.121:8083";
 
@@ -72,6 +73,7 @@ public class TranslatorPlugin {
     PlaceholderService placeholderService;
     GradientService gradientService;
     EventService eventService;
+    ProfileService profileService;
 
     SystemChatModule systemChatService;
     TextComponentUtil textComponentUtil;
@@ -163,10 +165,15 @@ public class TranslatorPlugin {
         );
 
         this.geoSocketEndpoint = new GeoSocketEndpoint(connectionService);
-        this.profileSocketEndpoint = new ProfileSocketEndpoint(connectionService);
 
-        connectionService.setServices(translationSocketEndpoint, geoSocketEndpoint, profileSocketEndpoint);
+        this.profileService = new DefaultProfileService(
+                configurationFile::getLicenseKey,
+                profilePacket -> connectionService.sendPacket(PacketRegistry.PROFILE, profilePacket)
+        );
+
+        connectionService.setServices(translationSocketEndpoint, geoSocketEndpoint, profileService);
         connectionService.connect();
+
 
 
         server.getEventManager().register(this, new ProxyPingListener(this));

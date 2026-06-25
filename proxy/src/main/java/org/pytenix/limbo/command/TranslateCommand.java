@@ -27,7 +27,7 @@ public class TranslateCommand implements SimpleCommand {
         if (!(invocation.source() instanceof Player)) return;
         Player player = (Player) invocation.source();
 
-        translatorPlugin.getProfileSocketEndpoint().getProfile(player.getUniqueId())
+        translatorPlugin.getProfileService().retrieveProfile(player.getUniqueId())
                 .thenAcceptAsync(profileData ->
                 {
 
@@ -41,15 +41,19 @@ public class TranslateCommand implements SimpleCommand {
                             if (args[0].equalsIgnoreCase("accept")) {
                                 player.sendMessage(Component.text("§aYou accepted!"));
 
-                                translatorPlugin.getProfileSocketEndpoint().updateProfile(profileData.withConsentType(NetworkPackets.ProfilePacket.ConsentType.EXPLICIT));
+                                translatorPlugin.getProfileService().updateProfile(
+                                        profileData.withConsentType(NetworkPackets.ProfilePacket.ConsentType.EXPLICIT)
+                                );
 
                                 sendToLobby(player);
                                 return;
-
                             } else if (args[0].equalsIgnoreCase("decline")) {
                                 player.sendMessage(Component.text("§cYou declined!"));
 
-                                translatorPlugin.getProfileSocketEndpoint().updateProfile(profileData.withConsentType(NetworkPackets.ProfilePacket.ConsentType.DECLINED));
+                                translatorPlugin.getProfileService().updateProfile(
+                                        profileData.withConsentType(NetworkPackets.ProfilePacket.ConsentType.DECLINED)
+                                );
+
                                 sendToLobby(player);
                                 return;
 
@@ -75,7 +79,9 @@ public class TranslateCommand implements SimpleCommand {
                                     registeredServer = player.getCurrentServer().get().getServer();
 
 
-                                translatorPlugin.getProfileSocketEndpoint().updateProfile(profileData.withConsentType(newConsent));
+                                translatorPlugin.getProfileService().updateProfile(
+                                        profileData.withConsentType(newConsent)
+                                );
 
 
                                 if (registeredServer != null)

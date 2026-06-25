@@ -9,15 +9,16 @@ import org.pytenix.network.consumer.ConsentRefreshConsumer;
 import org.pytenix.network.listener.ConfigUpdateListener;
 import org.pytenix.network.listener.ConsentUpdateListener;
 import org.pytenix.network.service.ChannelCarrierService;
-import org.pytenix.network.service.ProfileService;
 import org.pytenix.network.service.TranslationRequestService;
 import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.packets.PacketRegistry;
 import org.pytenix.packets.impl.ProfileMapper;
 import org.pytenix.packets.impl.TranslationResultMapper;
+import org.pytenix.profile.ProfileService;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.transport.TransportService;
 import org.transport.io.minecraft.PluginMessageReceiver;
+import org.transport.service.PacketContext;
 
 import java.net.http.WebSocket;
 import java.util.HashSet;
@@ -42,15 +43,12 @@ public class SpigotTransport {
 
     public Set<UUID> availableCarriers;
 
-    private ProfileService profileService;
-
     public SpigotTransport(TranslatorPlugin plugin, String secret, String pluginMessagingChannel) {
 
         this.pluginMessagingChannel = pluginMessagingChannel;
         this.plugin = plugin;
         this.hasConfiguration = false;
         this.availableCarriers = new HashSet<>();
-        this.profileService = plugin.getProfileService();
 
 
         this.translationRequestService = new TranslationRequestService(this, pluginMessagingChannel);
@@ -92,11 +90,8 @@ public class SpigotTransport {
 
         transportService.registerPacket(PacketRegistry.PROFILE,
                 (MappedPacketReceiveConsumer<String, NetworkPackets.ProfilePacket, ProfileMapper.ProfileData>)
-                        (context, javaPacket) -> {
-                            System.out.println("INCOMING: " + javaPacket);
-                            if (profileService != null) profileService.handleProfileResult(javaPacket);
-
-                        });
+                        (context, javaPacket) -> plugin.getProfileService().handleProfileResult(javaPacket)
+        );
     }
 
     private void registerEvents() {

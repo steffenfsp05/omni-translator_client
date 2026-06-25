@@ -75,6 +75,7 @@ public class ProxyPingListener {
         ));
     }
 
+
     @Subscribe
     public EventTask onPing(com.velocitypowered.api.event.proxy.ProxyPingEvent event) {
 
@@ -85,47 +86,36 @@ public class ProxyPingListener {
             return null;
         }
 
-
         if (!configuration.getModules().getOrDefault(ServerConfiguration.Module.MOTD.getModuleName(), true))
             return null;
-
 
         String ipAddress = anonymizeAddress(event.getConnection().getRemoteAddress().getAddress().getHostAddress());
 
         final UUID uuid = UUID.randomUUID();
 
+        CompletableFuture<Void> pingPipeline = geoSocketEndpoint.sendGeoRequest(uuid, ipAddress)
+                .thenCompose(locale -> translator.getTextComponentUtil().translateComplexMessage(
+                        event.getPing().getDescriptionComponent(),
+                        locale,
+                        ServerConfiguration.Module.MOTD.getModuleName()
+                ))
+                .thenAccept(component -> {
 
-        //String finalIpAddress = getTestIps().get(new Random().nextInt(getTestIps().size()));
-        return EventTask.async(() -> {
+                    ServerPing.Builder builder = event.getPing().asBuilder();
+                    builder.description(component);
+                    event.setPing(builder.build());
 
-            CompletableFuture<String> localeFuture = geoSocketEndpoint.sendGeoRequest(
-                    uuid,
-                    ipAddress
-            );
+                })
+                .exceptionally(throwable -> {
 
-            try {
-                String locale = localeFuture.get(2, TimeUnit.SECONDS);
+                    System.err.println("[MOTD] Fehler beim asynchronen Verarbeiten des Ping-Events!");
+                    throwable.printStackTrace();
+                    return null;
+                });
 
-                String originalMotdText = legacyComponentSerializer
-                        .serialize(event.getPing().getDescriptionComponent());
-
-
-                CompletableFuture<String> translationFuture = translator.getTranslatorService()
-                        .translate(originalMotdText, locale, ServerConfiguration.Module.MOTD.getModuleName());
-
-                String translatedMotd = translationFuture.get(2, TimeUnit.SECONDS);
-
-                ServerPing ping = event.getPing();
-                ServerPing.Builder builder = ping.asBuilder();
-
-                builder.description(Component.text(translatedMotd));
-                event.setPing(builder.build());
-
-            } catch (Exception e) {
-                System.out.println("MOTD Translation failed: " + e.getMessage());
-            }
-        });
+        return EventTask.resumeWhenComplete(pingPipeline);
     }
+
 
 
     private String anonymizeAddress(String ipAddress) {

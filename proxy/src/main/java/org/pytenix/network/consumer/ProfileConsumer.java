@@ -22,7 +22,7 @@ public class ProfileConsumer implements MappedPacketReceiveConsumer<RegisteredSe
         switch (javaPacket.action())
         {
             case FETCH -> {
-                translatorPlugin.getProfileSocketEndpoint().getProfile(javaPacket.playerId())
+                translatorPlugin.getProfileService().retrieveProfile(javaPacket.playerId())
                         .thenAcceptAsync(profileData ->
                                 context.reply(PacketRegistry.PROFILE,
                                         PacketMapperRegistry.toProto(profileData.withAction(NetworkPackets.ProfilePacket.Action.RESPONSE)))

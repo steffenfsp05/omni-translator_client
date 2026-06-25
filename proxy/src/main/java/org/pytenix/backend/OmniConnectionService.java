@@ -12,6 +12,7 @@ import org.pytenix.packets.PacketRegistry;
 import org.pytenix.packets.impl.GeoResultMapper;
 import org.pytenix.packets.impl.ProfileMapper;
 import org.pytenix.packets.impl.TranslationResultMapper;
+import org.pytenix.profile.ProfileService;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.util.FastByteArrayOutputStream;
 import org.transport.TransportOptions;
@@ -40,10 +41,10 @@ public class OmniConnectionService {
     private final ProxyServer proxyServer;
     private final TranslatorPlugin translatorPlugin;
     private final TransportService<WebSocket> transportService;
+    private ProfileService profileService;
     private WebSocket webSocket;
     private TranslationSocketEndpoint translationSocketEndpoint;
     private GeoSocketEndpoint geoSocketEndpoint;
-    private ProfileSocketEndpoint profileSocketEndpoint;
 
     public OmniConnectionService(TranslatorPlugin translatorPlugin, String apiKey, ProxyServer proxyServer) {
         this.translatorPlugin = translatorPlugin;
@@ -72,10 +73,10 @@ public class OmniConnectionService {
                 .build();
     }
 
-    public void setServices(TranslationSocketEndpoint translationSocketEndpoint, GeoSocketEndpoint geoSocketEndpoint, ProfileSocketEndpoint profileSocketEndpoint) {
+    public void setServices(TranslationSocketEndpoint translationSocketEndpoint, GeoSocketEndpoint geoSocketEndpoint, ProfileService profileService) {
         this.translationSocketEndpoint = translationSocketEndpoint;
         this.geoSocketEndpoint = geoSocketEndpoint;
-        this.profileSocketEndpoint = profileSocketEndpoint;
+        this.profileService = profileService;
         registerPackets();
     }
 
@@ -107,7 +108,7 @@ public class OmniConnectionService {
                 (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.ProfilePacket, ProfileMapper.ProfileData>)
                         (context, javaPacket) -> {
                             System.out.println("INCOMING: " + javaPacket);
-                            if (profileSocketEndpoint != null) profileSocketEndpoint.handleProfileResult(javaPacket);
+                            if (profileService != null) profileService.handleProfileResult(javaPacket);
 
                         });
 

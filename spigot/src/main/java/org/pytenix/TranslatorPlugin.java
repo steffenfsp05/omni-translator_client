@@ -19,11 +19,13 @@ import org.pytenix.listener.PlayerJoinQuitListener;
 import org.pytenix.listener.PlayerLocaleChangeListener;
 import org.pytenix.network.SpigotTransport;
 import org.pytenix.network.VelocitySecretReader;
-import org.pytenix.network.service.ProfileService;
+import org.pytenix.packets.PacketRegistry;
 import org.pytenix.placeholder.GradientService;
 import org.pytenix.placeholder.PlaceholderService;
 import org.pytenix.placeholder.impl.DefaultGradientService;
 import org.pytenix.placeholder.impl.DefaultPlaceholderService;
+import org.pytenix.profile.ProfileService;
+import org.pytenix.profile.impl.DefaultProfileService;
 import org.pytenix.service.ModuleService;
 import org.pytenix.service.TaskScheduler;
 import org.pytenix.translation.TranslationProcessor;
@@ -33,6 +35,7 @@ import org.pytenix.util.TextComponentUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.function.Supplier;
 
 
 @Getter
@@ -45,6 +48,7 @@ public class TranslatorPlugin extends JavaPlugin {
             .hexColors()
             .flattener(ComponentFlattener.basic())
             .build();
+
     public String pluginMessagingChannel;
     @Getter
     TextComponentUtil textComponentUtil;
@@ -75,7 +79,7 @@ public class TranslatorPlugin extends JavaPlugin {
 
         this.pluginMessagingChannel = "translator:main";
 
-        this.caffeineCache = new CaffeineCacheProvider();
+        this.caffeineCache = new CaffeineCacheProvider<>();
 
         this.configService = new ConfigService();
 
@@ -98,7 +102,10 @@ public class TranslatorPlugin extends JavaPlugin {
 
         this.translatorService = new DefaultTranslationService(translationProcessor, placeholderService, gradientService, eventService);
 
-        this.profileService = new ProfileService(this);
+        this.profileService = new DefaultProfileService(
+                () -> translatorService.getTranslationConfiguration().getLicenseKey(),
+                profilePacket -> getSpigotTransport().getTransportService().send(pluginMessagingChannel, PacketRegistry.PROFILE, profilePacket)
+        );
 
         final VelocitySecretReader secretReader = new VelocitySecretReader();
         final String secret = secretReader.loadVelocitySecret();

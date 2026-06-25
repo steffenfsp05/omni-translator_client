@@ -6,31 +6,31 @@ import org.pytenix.cache.CacheProvider;
 
 import java.time.Duration;
 
-public class CaffeineCacheProvider implements CacheProvider<String, String> {
+public class CaffeineCacheProvider<A,B> implements CacheProvider<A, B> {
 
-    private final Cache<String, String> translationCache = Caffeine.newBuilder()
+    private final Cache<A, B> translationCache = Caffeine.newBuilder()
             .maximumSize(10_000)
             .expireAfterWrite(Duration.ofSeconds(5))
             .build();
 
 
     @Override
-    public void set(String key, String value) {
+    public void set(A key, B value) {
         translationCache.put(key, value);
     }
 
     @Override
-    public String get(String key) {
+    public B get(A key) {
         return translationCache.getIfPresent(key);
     }
 
     @Override
-    public void invalidate(String key) {
+    public void invalidate(A key) {
         translationCache.invalidate(key);
     }
 
     @Override
-    public boolean exists(String key) {
+    public boolean exists(A key) {
         return translationCache.getIfPresent(key) != null;
     }
 }

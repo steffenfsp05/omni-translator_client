@@ -54,7 +54,7 @@ public class SystemChatPacketListener implements PacketListener {
 
         event.setCancelled(true);
 
-        systemChatService.getTranslatorPlugin().getProfileSocketEndpoint().getProfile(uuid)
+        systemChatService.getTranslatorPlugin().getProfileService().retrieveProfile(uuid)
                 .thenAcceptAsync(profileData -> {
 
                     if (profileData.consentType() == NetworkPackets.ProfilePacket.ConsentType.DECLINED) {
