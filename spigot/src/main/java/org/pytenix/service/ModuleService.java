@@ -5,6 +5,7 @@ import org.pytenix.module.gui.InventoryModule;
 import org.pytenix.module.hologram.HologramModule;
 import org.pytenix.module.player.LiveChatModule;
 import org.pytenix.module.signs.SignsModule;
+import org.pytenix.profile.ProfileService;
 import org.pytenix.translation.AbstractTranslatorModule;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.locale.PlayerLocaleProcessor;
@@ -20,16 +21,16 @@ public class ModuleService {
 
     final List<AbstractTranslatorModule> modules;
 
-    public ModuleService(TranslatorPlugin translatorPlugin, TranslatorService translatorService, PlayerLocaleProcessor playerLocaleProcessor) {
+    public ModuleService(ProfileService profileService, TranslatorPlugin translatorPlugin, TranslatorService translatorService, PlayerLocaleProcessor playerLocaleProcessor) {
         this.translatorService = translatorService;
         this.playerLocaleProcessor = playerLocaleProcessor;
         this.modules = new ArrayList<>();
 
-        registerModule(new InventoryModule(translatorService, playerLocaleProcessor));
+        registerModule(new InventoryModule(profileService, translatorService, playerLocaleProcessor));
         //registerModule(new PluginChatModule(translatorService, playerLocaleProcessor));
-        registerModule(new LiveChatModule(translatorPlugin, translatorService, playerLocaleProcessor));
-        registerModule(new HologramModule(translatorService, playerLocaleProcessor));
-        registerModule(new SignsModule(translatorService, playerLocaleProcessor));
+        registerModule(new LiveChatModule(profileService, translatorPlugin, translatorService, playerLocaleProcessor));
+        registerModule(new HologramModule(profileService, translatorService, playerLocaleProcessor));
+        registerModule(new SignsModule(profileService, translatorService, playerLocaleProcessor));
     }
 
 

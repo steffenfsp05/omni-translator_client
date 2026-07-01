@@ -59,20 +59,16 @@ public class TranslateCommand implements SimpleCommand {
 
                             } else if (args[0].equalsIgnoreCase("toggle")) {
                                 NetworkPackets.ProfilePacket.ConsentType newConsent = NetworkPackets.ProfilePacket.ConsentType.DECLINED;
-                                ComponentLike component = Component.text("§cUnknown value");
 
-                                if (profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.EXPLICIT)) {
-                                    newConsent = NetworkPackets.ProfilePacket.ConsentType.DECLINED;
-                                    component = Component.text("§cYou turned translations off");
-                                }
+                              //  if (profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.EXPLICIT)) {
+                            //    }
 
-                                if (profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.DECLINED)) {
+                                //TODO: IMPLEMENT FOR AUTO_OPT LOGIC
+
+                                if (profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.DECLINED))
                                     newConsent = NetworkPackets.ProfilePacket.ConsentType.EXPLICIT;
-                                    component = Component.text("§aYou turned translations on");
-                                }
 
 
-                                player.sendMessage(component);
 
                                 RegisteredServer registeredServer = null;
                                 if (player.getCurrentServer().isPresent())

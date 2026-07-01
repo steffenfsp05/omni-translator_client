@@ -1,6 +1,7 @@
 package org.pytenix.profile;
 
 import com.github.benmanes.caffeine.cache.Cache;
+import com.google.gson.Gson;
 import org.pytenix.cache.CacheProvider;
 import org.pytenix.packets.impl.ProfileMapper;
 
@@ -21,12 +22,7 @@ public abstract class ProfileService {
 
 
 
-    public void handleProfileResult(ProfileMapper.ProfileData resultData) {
-        CompletableFuture<ProfileMapper.ProfileData> future = queue.remove(resultData.requestId());
-        cacheProvider().put(resultData.playerId(), resultData);
-
-        if (future != null) future.complete(resultData);
-    }
+    public abstract void handleProfileResult(ProfileMapper.ProfileData resultData);
 
 
 }

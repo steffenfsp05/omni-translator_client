@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.gui.listener.PacketListener;
+import org.pytenix.profile.ProfileService;
 import org.pytenix.translation.AbstractTranslatorModule;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.locale.PlayerLocaleProcessor;
@@ -26,8 +27,8 @@ public class InventoryModule extends AbstractTranslatorModule {
     LegacyComponentSerializer legacyComponentSerializer;
 
 
-    public InventoryModule(TranslatorService translatorService, PlayerLocaleProcessor playerLocaleProcessor) {
-        super(translatorService, "gui", playerLocaleProcessor);
+    public InventoryModule(ProfileService profileService, TranslatorService translatorService, PlayerLocaleProcessor playerLocaleProcessor) {
+        super(profileService, translatorService, "gui", playerLocaleProcessor);
 
         this.legacyComponentSerializer = TranslatorPlugin.getLegacyComponentSerializer();
 

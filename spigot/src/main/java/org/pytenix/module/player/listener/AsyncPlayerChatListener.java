@@ -9,7 +9,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.player.LiveChatModule;
-import org.pytenix.service.PlayerLocaleService;
 import org.pytenix.service.TaskScheduler;
 
 import java.util.ArrayList;
@@ -39,14 +38,15 @@ public class AsyncPlayerChatListener implements Listener {
         Component originalMessage = event.message();
 
 
-        String senderLang = PlayerLocaleService.getPlayerLocale(sender.getUniqueId()).split("_")[0].toLowerCase();
+        //TODO: WIRD EHRLICH _ BEIM LOCALE ENTHALTEN??
+        String senderLang = liveChatModule.getPlayerLocaleProcessor().retrieveLocale(sender.getUniqueId()).split("_")[0].toLowerCase();
 
         Map<String, List<Player>> languageGroups = new HashMap<>();
 
         for (Audience audience : event.viewers()) {
             if (audience instanceof Player p && !p.getUniqueId().equals(sender.getUniqueId())) {
 
-                String targetLang = PlayerLocaleService.getPlayerLocale(p.getUniqueId()).split("_")[0].toLowerCase();
+                String targetLang = liveChatModule.getPlayerLocaleProcessor().retrieveLocale(p.getUniqueId()).split("_")[0].toLowerCase();
 
                 // 2. DER KOSTEN-KILLER: Gleiche Sprache? -> Direkt senden, kein API Call!
                 //HIER AMBESTEN NICHT AUF DEFAULTLANGUAGE VERLASSEN!!

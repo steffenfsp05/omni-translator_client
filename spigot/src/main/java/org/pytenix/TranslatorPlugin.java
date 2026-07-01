@@ -129,7 +129,7 @@ public class TranslatorPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerJoinQuitListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerLocaleChangeListener(this), this);
 
-        moduleService = new ModuleService(this, translatorService, uuid -> {
+        moduleService = new ModuleService(profileService, this, translatorService, uuid -> {
 
             final Player player = Bukkit.getPlayer(uuid);
             if (player == null)

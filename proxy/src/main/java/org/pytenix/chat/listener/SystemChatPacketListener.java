@@ -31,8 +31,6 @@ public class SystemChatPacketListener implements PacketListener {
         Player player = systemChatService.getTranslatorPlugin().getProxyServer().getPlayer(uuid).orElse(null);
         if (player == null) return;
 
-        if (!systemChatService.checkIfNeed(uuid)) return;
-
         WrapperPlayServerSystemChatMessage packet = new WrapperPlayServerSystemChatMessage(event);
         boolean isOverlay = packet.isOverlay();
 
@@ -54,22 +52,30 @@ public class SystemChatPacketListener implements PacketListener {
 
         event.setCancelled(true);
 
-        systemChatService.getTranslatorPlugin().getProfileService().retrieveProfile(uuid)
-                .thenAcceptAsync(profileData -> {
+        systemChatService.requiresTranslation(uuid).thenAcceptAsync(aBoolean ->
+        {
+            if(!aBoolean)
+            {
+                messageSequencer.ignoreNextMessage(uuid, messageComponent);
+                player.sendMessage(messageComponent);
+                return;
+            }
 
-                    if (profileData.consentType() == NetworkPackets.ProfilePacket.ConsentType.DECLINED) {
-                        messageSequencer.ignoreNextMessage(uuid, messageComponent);
-                        player.sendMessage(messageComponent);
-                        return;
-                    }
+            systemChatService.getTranslatorPlugin().getProfileService().retrieveProfile(uuid)
+                    .thenAcceptAsync(profileData -> {
 
-                    messageSequencer.translateWithOrder(
-                            uuid,
-                            messageComponent,
-                            rawText,
-                            systemChatService.getPlayerLocaleProcessor().retrieveLocale(uuid),
-                            isOverlay
-                    );
-                });
+                        messageSequencer.translateWithOrder(
+                                uuid,
+                                messageComponent,
+                                rawText,
+                                systemChatService.getPlayerLocaleProcessor().retrieveLocale(uuid),
+                                isOverlay
+                        );
+                    });
+
+        });
+
+
+
     }
 }

@@ -7,6 +7,7 @@ import org.pytenix.TranslatorPlugin;
 import org.pytenix.chat.listener.PlayerDisconnectListener;
 import org.pytenix.chat.listener.SystemChatPacketListener;
 import org.pytenix.entity.ServerConfiguration;
+import org.pytenix.profile.ProfileService;
 import org.pytenix.translation.AbstractTranslatorModule;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.locale.PlayerLocaleProcessor;
@@ -22,13 +23,14 @@ public class SystemChatModule extends AbstractTranslatorModule {
     final MessageSequencer messageSequencer;
 
     public SystemChatModule(
+            ProfileService profileService,
             TranslatorPlugin translatorPlugin,
             TranslatorService translatorService,
             TextComponentUtil textComponentUtil,
             MessageSequencer messageSequencer,
             PlayerLocaleProcessor playerLocaleProcessor
     ) {
-        super(translatorService, "plugin_chat", playerLocaleProcessor);
+        super(profileService,translatorService, "plugin_chat", playerLocaleProcessor);
         this.translatorPlugin = translatorPlugin;
         this.textComponentUtil = textComponentUtil;
         this.messageSequencer = messageSequencer;

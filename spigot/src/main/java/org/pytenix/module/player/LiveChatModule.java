@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.player.listener.AsyncPlayerChatListener;
+import org.pytenix.profile.ProfileService;
 import org.pytenix.translation.AbstractTranslatorModule;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.locale.PlayerLocaleProcessor;
@@ -15,11 +16,12 @@ public class LiveChatModule extends AbstractTranslatorModule {
 
 
     public LiveChatModule(
+            ProfileService profileService,
             TranslatorPlugin translatorPlugin,
             TranslatorService translatorService,
             PlayerLocaleProcessor playerLocaleProcessor
     ) {
-        super(translatorService, "live_chat", playerLocaleProcessor);
+        super(profileService, translatorService, "live_chat", playerLocaleProcessor);
 
 
         Bukkit.getPluginManager().registerEvents(new AsyncPlayerChatListener(this, translatorPlugin), translatorPlugin);

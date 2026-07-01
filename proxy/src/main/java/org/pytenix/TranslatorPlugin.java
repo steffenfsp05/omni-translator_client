@@ -118,13 +118,6 @@ public class TranslatorPlugin {
         this.messageSequencer = new MessageSequencer(this, textComponentUtil);
 
 
-        this.systemChatService = new SystemChatModule(
-                this,
-                translatorService,
-                textComponentUtil,
-                messageSequencer,
-                uuid -> this.getProxyServer().getPlayer(uuid).get().getEffectiveLocale().toString().toLowerCase()
-        );
 
         final String secret = loadForwardingSecret();
 
@@ -175,6 +168,14 @@ public class TranslatorPlugin {
         connectionService.connect();
 
 
+        this.systemChatService = new SystemChatModule(
+                profileService,
+                this,
+                translatorService,
+                textComponentUtil,
+                messageSequencer,
+                uuid -> this.getProxyServer().getPlayer(uuid).get().getEffectiveLocale().toString().toLowerCase()
+        );
 
         server.getEventManager().register(this, new ProxyPingListener(this));
         server.getEventManager().register(this, new PlayerConnectionChangeListener(this));

@@ -9,7 +9,6 @@ import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.pytenix.module.gui.InventoryModule;
-import org.pytenix.service.PlayerLocaleService;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -37,15 +36,24 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
             return;
 
         if (event.getPacketType() == PacketType.Play.Server.WINDOW_ITEMS) {
-            if (!inventoryModule.isActive() || !inventoryModule.checkIfNeed(event.getUser().getUUID()))
-                return;
 
-            handleWindowItems(event);
+            inventoryModule.requiresTranslation(event.getUser().getUUID()).thenAccept(aBoolean ->
+            {
+                if(!aBoolean)
+                    return;
+                handleWindowItems(event);
+            });
+
+
         } else if (event.getPacketType() == PacketType.Play.Server.SET_SLOT) {
-            if (!inventoryModule.isActive() || !inventoryModule.checkIfNeed(event.getUser().getUUID()))
-                return;
 
-            handleSetSlot(event);
+            inventoryModule.requiresTranslation(event.getUser().getUUID()).thenAccept(aBoolean ->
+            {
+                if(!aBoolean)
+                    return;
+                handleSetSlot(event);
+            });
+
         }
     }
 
@@ -91,7 +99,7 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
                         .map(SpigotConversionUtil::toBukkitItemStack)
                         .orElse(null);
 
-                String locale = PlayerLocaleService.getPlayerLocale(player.getUniqueId());
+                String locale = inventoryModule.getPlayerLocaleProcessor().retrieveLocale(player.getUniqueId());
 
 
                 CompletableFuture.runAsync(() -> {
@@ -135,7 +143,7 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
         int stateId = wrapper.getStateId();
         int slot = wrapper.getSlot();
         final ItemStack item = SpigotConversionUtil.toBukkitItemStack(wrapper.getItem()).clone();
-        String locale = PlayerLocaleService.getPlayerLocale(player.getUniqueId());
+        String locale = inventoryModule.getPlayerLocaleProcessor().retrieveLocale(player.getUniqueId());
 
 
         inventoryModule.translateItem(item, locale).thenAccept(translatedItem -> {

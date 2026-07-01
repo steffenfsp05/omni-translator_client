@@ -2,6 +2,7 @@ package org.pytenix.profile.impl;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.gson.Gson;
 import org.pytenix.cache.CacheProvider;
 import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.packets.PacketMapperRegistry;
@@ -48,6 +49,7 @@ public class DefaultProfileService extends ProfileService {
     }
 
 
+
     @Override
     public Cache<UUID, ProfileMapper.ProfileData> cacheProvider() {
         return cacheProvider;
@@ -57,35 +59,36 @@ public class DefaultProfileService extends ProfileService {
     public CompletableFuture<ProfileMapper.ProfileData> retrieveProfile(UUID uuid) {
 
         ProfileMapper.ProfileData cachedProfile = cacheProvider().getIfPresent(uuid);
-        if (cachedProfile != null)
+        if (cachedProfile != null) {
             return CompletableFuture.completedFuture(cachedProfile);
-
+        }
 
         return inFlightFetches.computeIfAbsent(uuid, id -> {
             CompletableFuture<ProfileMapper.ProfileData> future = new CompletableFuture<>();
             UUID requestId = UUID.randomUUID();
 
-            queue.put(requestId, future);
-
             ProfileMapper.ProfileData profileData = new ProfileMapper.ProfileData(
                     licenseKey.get(),
                     NetworkPackets.ProfilePacket.Action.FETCH,
-                    uuid,
-                    requestId,
+                    uuid,       // Player-ID
+                    requestId,  // Request-ID
                     NetworkPackets.ProfilePacket.ConsentType.UNKNOWN
             );
 
-            System.out.println("SENDING " + profileData);
-
-
-            sendEndpoint.accept( PacketMapperRegistry.toProto(profileData));
+            queue.put(requestId, future);
+            sendEndpoint.accept(PacketMapperRegistry.toProto(profileData));
 
             return future.orTimeout(60, TimeUnit.SECONDS)
-                    .whenComplete((res, ex) -> {
-                        queue.remove(requestId);
-                        inFlightFetches.remove(uuid);
-                    })
-                    .exceptionally(ex -> new ProfileMapper.ProfileData("NULL", null, null, null, null));
+                    .exceptionally(ex -> {
+                        System.err.println("Fehler beim Abrufen des Profils für " + uuid + ": " + ex.getMessage());
+                        return new ProfileMapper.ProfileData(
+                                "NULL",
+                                NetworkPackets.ProfilePacket.Action.FETCH,
+                                uuid, // Original UUID behalten
+                                requestId,
+                                NetworkPackets.ProfilePacket.ConsentType.UNKNOWN
+                        );
+                    });
         });
     }
 
@@ -106,6 +109,25 @@ public class DefaultProfileService extends ProfileService {
                 profileData.withAction(NetworkPackets.ProfilePacket.Action.UPDATE)
         ));
 
+    }
+
+    @Override
+    public void handleProfileResult(ProfileMapper.ProfileData resultData) {
+
+        final UUID requestId = resultData.requestId();
+        final UUID playerId = resultData.playerId();
+
+        System.out.println("AAA INCOMING " + new Gson().toJson(resultData));
+
+        CompletableFuture<ProfileMapper.ProfileData> future = queue.remove(requestId);
+
+        inFlightFetches.remove(playerId);
+
+        cacheProvider().put(playerId, resultData);
+
+        if (future != null) {
+            future.complete(resultData);
+        }
     }
 
     public record DuplicationKey(UUID uuid, NetworkPackets.ProfilePacket.Action action) {}

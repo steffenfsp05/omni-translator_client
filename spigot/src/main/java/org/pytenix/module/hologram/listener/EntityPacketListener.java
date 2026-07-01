@@ -16,7 +16,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.hologram.HologramModule;
-import org.pytenix.service.PlayerLocaleService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,105 +73,114 @@ public class EntityPacketListener implements PacketListener, Listener {
 
         final Player player = Bukkit.getPlayer(user.getUUID());
 
-        if (!hologramModule.checkIfNeed(event.getUser().getUUID()))
-            return;
+        hologramModule.requiresTranslation(event.getUser().getUUID())
+                .thenAcceptAsync(aBoolean ->
+                {
+                    if(!aBoolean)
+                        return;
 
-        Cache<Component, Component> personalCache = getHologramCache(PlayerLocaleService.getPlayerLocale(player.getUniqueId()));
-        if (personalCache == null) return;
 
-        List<EntityData<?>> newMetadataList = new ArrayList<>();
-        List<EntityData<?>> toTranslateAsync = new ArrayList<>();
-        boolean packetModified = false;
+                    Cache<Component, Component> personalCache = getHologramCache(hologramModule.getPlayerLocaleProcessor().retrieveLocale(player.getUniqueId()));
+                    if (personalCache == null) return;
 
-        // ==========================================================
-        // PHASE 1: SYNCHRONER CACHE CHECK (Kein Delay, kein Flickering)
-        // ==========================================================
-        for (EntityData data : dataList) {
-            Object value = data.getValue();
-            Component originalComponent = null;
-            boolean wasOptional = false;
+                    List<EntityData<?>> newMetadataList = new ArrayList<>();
+                    List<EntityData<?>> toTranslateAsync = new ArrayList<>();
+                    boolean packetModified = false;
 
-            // Extrahiere die Component
-            if (value instanceof Optional<?> opt) {
-                if (opt.isPresent() && opt.get() instanceof Component comp) {
-                    originalComponent = comp;
-                    wasOptional = true;
-                }
-            } else if (value instanceof Component comp) {
-                originalComponent = comp;
-                wasOptional = false;
-            }
+                    // ==========================================================
+                    // PHASE 1: SYNCHRONER CACHE CHECK (Kein Delay, kein Flickering)
+                    // ==========================================================
+                    for (EntityData data : dataList) {
+                        Object value = data.getValue();
+                        Component originalComponent = null;
+                        boolean wasOptional = false;
 
-            if (originalComponent != null) {
-                Component cachedTranslation = personalCache.getIfPresent(originalComponent);
+                        // Extrahiere die Component
+                        if (value instanceof Optional<?> opt) {
+                            if (opt.isPresent() && opt.get() instanceof Component comp) {
+                                originalComponent = comp;
+                                wasOptional = true;
+                            }
+                        } else if (value instanceof Component comp) {
+                            originalComponent = comp;
+                            wasOptional = false;
+                        }
 
-                if (cachedTranslation != null) {
-                    // 🎯 CACHE HIT: Paket sofort austauschen!
-                    Object newValue = wasOptional ? Optional.of(cachedTranslation) : cachedTranslation;
-                    EntityData newData = new EntityData(data.getIndex(), data.getType(), newValue);
-                    newMetadataList.add(newData);
-                    packetModified = true;
-                } else {
-                    newMetadataList.add(data);
-                    toTranslateAsync.add(data);
-                }
-            } else {
-                newMetadataList.add(data);
-            }
-        }
+                        if (originalComponent != null) {
+                            Component cachedTranslation = personalCache.getIfPresent(originalComponent);
 
-        if (packetModified) {
-            dataList.clear();
-            dataList.addAll(newMetadataList);
-            event.markForReEncode(true);
-        }
-
-        if (!toTranslateAsync.isEmpty()) {
-            CompletableFuture.runAsync(() -> {
-                for (EntityData dataToTranslate : toTranslateAsync) {
-                    Object value = dataToTranslate.getValue();
-                    Component originalComponent = null;
-                    boolean wasOptional = false;
-
-                    if (value instanceof Optional<?> opt) {
-                        originalComponent = (Component) opt.get();
-                        wasOptional = true;
-                    } else {
-                        originalComponent = (Component) value;
+                            if (cachedTranslation != null) {
+                                // 🎯 CACHE HIT: Paket sofort austauschen!
+                                Object newValue = wasOptional ? Optional.of(cachedTranslation) : cachedTranslation;
+                                EntityData newData = new EntityData(data.getIndex(), data.getType(), newValue);
+                                newMetadataList.add(newData);
+                                packetModified = true;
+                            } else {
+                                newMetadataList.add(data);
+                                toTranslateAsync.add(data);
+                            }
+                        } else {
+                            newMetadataList.add(data);
+                        }
                     }
 
-                    String legacyText = TranslatorPlugin.getLegacyComponentSerializer().serialize(originalComponent);
-
-                    if (!legacyText.trim().isEmpty()) {
-                        final Component keyComponent = originalComponent;
-                        final boolean isOptionalFinal = wasOptional;
-
-                        translateHologramLine(player, legacyText)
-                                .thenAccept(translatedComponent -> {
-                                    if (translatedComponent == null) return;
-
-                                    // 1. Für die Zukunft in den Cache legen
-                                    personalCache.put(keyComponent, translatedComponent);
-
-                                    // 2. Ein Update-Paket (Fake) schicken, damit der Spieler es jetzt sieht
-                                    Object newValue = isOptionalFinal ? Optional.of(translatedComponent) : translatedComponent;
-                                    EntityData newDataUpdate = new EntityData(dataToTranslate.getIndex(), dataToTranslate.getType(), newValue);
-
-                                    List<EntityData<?>> singleUpdateList = new ArrayList<>();
-                                    singleUpdateList.add(newDataUpdate);
-
-                                    // Sendet das Paket still an den Spieler
-                                    sendUpdatePacket(user, entityId, singleUpdateList);
-                                });
+                    if (packetModified) {
+                        dataList.clear();
+                        dataList.addAll(newMetadataList);
+                        event.markForReEncode(true);
                     }
-                }
-            });
-        }
+
+                    if (!toTranslateAsync.isEmpty()) {
+                        CompletableFuture.runAsync(() -> {
+                            for (EntityData dataToTranslate : toTranslateAsync) {
+                                Object value = dataToTranslate.getValue();
+                                Component originalComponent = null;
+                                boolean wasOptional = false;
+
+                                if (value instanceof Optional<?> opt) {
+                                    originalComponent = (Component) opt.get();
+                                    wasOptional = true;
+                                } else {
+                                    originalComponent = (Component) value;
+                                }
+
+                                String legacyText = TranslatorPlugin.getLegacyComponentSerializer().serialize(originalComponent);
+
+                                if (!legacyText.trim().isEmpty()) {
+                                    final Component keyComponent = originalComponent;
+                                    final boolean isOptionalFinal = wasOptional;
+
+                                    translateHologramLine(player, legacyText)
+                                            .thenAccept(translatedComponent -> {
+                                                if (translatedComponent == null) return;
+
+                                                // 1. Für die Zukunft in den Cache legen
+                                                personalCache.put(keyComponent, translatedComponent);
+
+                                                // 2. Ein Update-Paket (Fake) schicken, damit der Spieler es jetzt sieht
+                                                Object newValue = isOptionalFinal ? Optional.of(translatedComponent) : translatedComponent;
+                                                EntityData newDataUpdate = new EntityData(dataToTranslate.getIndex(), dataToTranslate.getType(), newValue);
+
+                                                List<EntityData<?>> singleUpdateList = new ArrayList<>();
+                                                singleUpdateList.add(newDataUpdate);
+
+                                                // Sendet das Paket still an den Spieler
+                                                sendUpdatePacket(user, entityId, singleUpdateList);
+                                            });
+                                }
+                            }
+                        });
+                    }
+
+
+                });
+
+
     }
 
     private CompletableFuture<Component> translateHologramLine(Player player, String text) {
         if (player == null) return CompletableFuture.completedFuture(null);
-        String lang = PlayerLocaleService.getPlayerLocale(player.getUniqueId());
+        String lang = hologramModule.getPlayerLocaleProcessor().retrieveLocale(player.getUniqueId());
 
         return hologramModule.translate(text, lang)
                 .thenApply(translatedString -> TranslatorPlugin.getLegacyComponentSerializer().deserialize(translatedString));
