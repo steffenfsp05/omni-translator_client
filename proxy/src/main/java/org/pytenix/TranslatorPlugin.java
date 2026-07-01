@@ -1,6 +1,8 @@
 package org.pytenix;
 
 
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -15,6 +17,7 @@ import org.pytenix.cache.CacheProvider;
 import org.pytenix.cache.impl.CaffeineCacheProvider;
 import org.pytenix.chat.MessageSequencer;
 import org.pytenix.chat.SystemChatModule;
+import org.pytenix.chat.listener.SystemChatPacketListener;
 import org.pytenix.config.ConfigService;
 import org.pytenix.config.ConfigurationFile;
 import org.pytenix.event.EventService;
@@ -30,6 +33,9 @@ import org.pytenix.placeholder.impl.DefaultGradientService;
 import org.pytenix.placeholder.impl.DefaultPlaceholderService;
 import org.pytenix.profile.ProfileService;
 import org.pytenix.profile.impl.DefaultProfileService;
+import org.pytenix.tracking.ROIService;
+import org.pytenix.tracking.listener.PlayerConnectListener;
+import org.pytenix.tracking.listener.PlayerDisconnectListener;
 import org.pytenix.translation.TranslationProcessor;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.impl.DefaultTranslationService;
@@ -78,6 +84,8 @@ public class TranslatorPlugin {
     SystemChatModule systemChatService;
     TextComponentUtil textComponentUtil;
     MessageSequencer messageSequencer;
+
+    ROIService roiService;
 
     LimboService limboService;
 
@@ -177,11 +185,32 @@ public class TranslatorPlugin {
                 uuid -> this.getProxyServer().getPlayer(uuid).get().getEffectiveLocale().toString().toLowerCase()
         );
 
+
+        this.roiService = new ROIService(this, connectionService);
+
+
+        registerListener();
+
+
+        logger.info("Translator Proxy erfolgreich gestartet!");
+    }
+
+
+    private void registerListener()
+    {
+        PacketEvents.getAPI().getEventManager().registerListener(
+                new SystemChatPacketListener(systemChatService, messageSequencer),
+                PacketListenerPriority.HIGHEST
+        );
+
+        server.getEventManager().register(this, new org.pytenix.chat.listener.PlayerDisconnectListener(this));
+
         server.getEventManager().register(this, new ProxyPingListener(this));
         server.getEventManager().register(this, new PlayerConnectionChangeListener(this));
 
 
-        logger.info("Translator Proxy erfolgreich gestartet!");
+        server.getEventManager().register(this, new PlayerConnectListener(roiService));
+        server.getEventManager().register(this, new PlayerDisconnectListener(roiService));
     }
 
 

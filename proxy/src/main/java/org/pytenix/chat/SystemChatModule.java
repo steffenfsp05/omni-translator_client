@@ -35,17 +35,9 @@ public class SystemChatModule extends AbstractTranslatorModule {
         this.textComponentUtil = textComponentUtil;
         this.messageSequencer = messageSequencer;
 
-        registerListener();
     }
 
 
-    public void registerListener() {
-        PacketEvents.getAPI().getEventManager().registerListener(
-                new SystemChatPacketListener(this, messageSequencer),
-                PacketListenerPriority.HIGHEST
-        );
-        translatorPlugin.getProxyServer().getEventManager().register(translatorPlugin, new PlayerDisconnectListener(translatorPlugin));
-    }
 
 
     public boolean isModuleActive() {

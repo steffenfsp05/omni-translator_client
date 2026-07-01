@@ -51,7 +51,7 @@ public class OmniConnectionService {
         this.proxyServer = proxyServer;
         this.apiKey = apiKey;
 
-        //CHANGE TO WSS IN PROD!!
+        //TODO: CHANGE TO WSS IN PROD!!
         this.url = "ws://" + translatorPlugin.getRemoteAddress() + "/ws/omni";
 
         this.httpClient = HttpClient.newBuilder()
