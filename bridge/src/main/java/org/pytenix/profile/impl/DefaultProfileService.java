@@ -94,6 +94,8 @@ public class DefaultProfileService extends ProfileService {
 
     public void updateProfile(ProfileMapper.ProfileData profileData) {
 
+
+
         DuplicationKey key = new DuplicationKey(profileData.playerId(), NetworkPackets.ProfilePacket.Action.UPDATE);
 
         if (deduplicationCache.asMap().putIfAbsent(key, Boolean.TRUE) != null) {
@@ -101,8 +103,7 @@ public class DefaultProfileService extends ProfileService {
         }
 
         //NOT WORKING ON SPIGOT SIDE
-
-        cacheProvider().invalidate(profileData.playerId());
+        cacheProvider().put(profileData.playerId(), profileData);
 
 
         sendEndpoint.accept(PacketMapperRegistry.toProto(
