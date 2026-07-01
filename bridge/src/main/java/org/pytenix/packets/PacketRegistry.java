@@ -55,4 +55,16 @@ public class PacketRegistry {
                     NetworkPackets.ConsentRefreshRequest.parser()
             );
 
+    public static final PacketDefinition<NetworkPackets.HeartbeatPacket> HEART_BEAT =
+            new PacketDefinition<>(
+                    9,
+                    NetworkPackets.HeartbeatPacket.parser()
+            );
+
+    public static final PacketDefinition<NetworkPackets.TrackPlayerPacket> TRACK_PLAYER =
+            new PacketDefinition<>(
+                    10,
+                    NetworkPackets.TrackPlayerPacket.parser()
+            );
+
 }

@@ -31,7 +31,7 @@ public class DefaultProfileService extends ProfileService {
 
 
     private final Cache<UUID, ProfileMapper.ProfileData> cacheProvider = Caffeine.newBuilder()
-            .expireAfterWrite(Duration.ofMillis(3000))
+            .expireAfterWrite(Duration.ofMinutes(10))
             .maximumSize(3000)
             .build();
 

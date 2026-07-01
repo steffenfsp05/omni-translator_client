@@ -21,6 +21,8 @@ public class PacketMapperRegistry {
         register(new TranslationResultMapper());
         register(new ProfileMapper());
         register(new ConsentRefreshRequestMapper());
+        register(new HeartBeatRequestMapper());
+        register(new TrackPlayerRequestMapper());
     }
 
     public static <P, J> void register(AbstractPacketMapper<P, J> mapper) {

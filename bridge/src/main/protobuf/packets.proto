@@ -21,6 +21,33 @@ message GeoRequestPacket
   string ip_address = 3;
 }
 
+
+message TrackPlayerPacket {
+
+  string license_key = 1;
+  int64 timestamp = 2;
+
+  fixed64 request_id_most_sig = 3;
+  fixed64 request_id_least_sig = 4;
+
+  fixed64 user_id_most_sig = 5;
+  fixed64 user_id_least_sig = 6;
+  int32 playtime_seconds = 7;
+}
+
+message HeartbeatPacket {
+
+  string license_key = 1;
+  int64 timestamp = 2;
+
+  fixed64 request_id_most_sig = 3;
+  fixed64 request_id_least_sig = 4;
+
+  int32 total_online = 5;
+  int32 translations_active = 6;
+  map<string, int32> lang_distribution = 7;
+}
+
 message GeoResultPacket
 {
   fixed64 request_id_most_sig = 1;
