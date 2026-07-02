@@ -122,14 +122,6 @@ public class TranslatorPlugin {
         this.gradientService = new DefaultGradientService();
         this.eventService = new DefaultEventService();
 
-
-        this.translatorService = new DefaultTranslationService(translationProcessor, placeholderService, gradientService, eventService);
-
-
-        this.textComponentUtil = new TextComponentUtil(translatorService);
-        this.messageSequencer = new MessageSequencer(this, textComponentUtil);
-
-
         this.playerLocaleProcessor = uuid ->
         {
             final Player player = this.getProxyServer().getPlayer(uuid).orElse(null);
@@ -138,7 +130,7 @@ public class TranslatorPlugin {
 
                 Locale locale = player.getEffectiveLocale();
                 if(locale != null)
-                     return locale.toString().toLowerCase();
+                    return locale.toString().toLowerCase();
 
                 return "en_en";
             }
@@ -146,6 +138,23 @@ public class TranslatorPlugin {
             return "en_en";
         };
 
+        this.profileService = new DefaultProfileService(
+                configurationFile::getLicenseKey,
+                profilePacket -> connectionService.sendPacket(PacketRegistry.PROFILE, profilePacket)
+        );
+
+        this.translatorService = new DefaultTranslationService(
+                translationProcessor,
+                placeholderService,
+                gradientService,
+                eventService,
+                playerLocaleProcessor,
+                profileService
+        );
+
+
+        this.textComponentUtil = new TextComponentUtil(translatorService);
+        this.messageSequencer = new MessageSequencer(this, textComponentUtil);
 
         final String secret = loadForwardingSecret();
 
@@ -187,10 +196,7 @@ public class TranslatorPlugin {
 
         this.geoSocketEndpoint = new GeoSocketEndpoint(connectionService);
 
-        this.profileService = new DefaultProfileService(
-                configurationFile::getLicenseKey,
-                profilePacket -> connectionService.sendPacket(PacketRegistry.PROFILE, profilePacket)
-        );
+
 
         connectionService.setServices(translationSocketEndpoint, geoSocketEndpoint, profileService);
         connectionService.connect();
@@ -214,6 +220,10 @@ public class TranslatorPlugin {
 
         logger.info("Translator Proxy erfolgreich gestartet!");
     }
+
+
+
+
 
 
     private void registerListener()

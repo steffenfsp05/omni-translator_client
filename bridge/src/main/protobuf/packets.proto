@@ -33,6 +33,9 @@ message TrackPlayerPacket {
   fixed64 user_id_most_sig = 5;
   fixed64 user_id_least_sig = 6;
   int32 playtime_seconds = 7;
+
+  bool is_translated = 8;
+  string language = 9;
 }
 
 message HeartbeatPacket {

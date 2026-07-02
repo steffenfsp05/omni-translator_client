@@ -31,6 +31,7 @@ import org.pytenix.service.TaskScheduler;
 import org.pytenix.translation.TranslationProcessor;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.impl.DefaultTranslationService;
+import org.pytenix.translation.locale.PlayerLocaleProcessor;
 import org.pytenix.util.TextComponentUtil;
 
 import java.io.File;
@@ -73,6 +74,7 @@ public class TranslatorPlugin extends JavaPlugin {
     private EventService eventService;
 
     private ProfileService profileService;
+    private PlayerLocaleProcessor playerLocaleProcessor;
 
     @Override
     public void onEnable() {
@@ -90,6 +92,14 @@ public class TranslatorPlugin extends JavaPlugin {
         }
         this.configurationFile = configService.loadConfig("config.json", ConfigurationFile.class);
 
+        this.playerLocaleProcessor = uuid -> {
+            final Player player = Bukkit.getPlayer(uuid);
+            if (player == null)
+                return "en-en";
+            else
+                return player.getLocale();
+
+        };
 
         this.serverName = this.getServer().getName();
         this.taskScheduler = new TaskScheduler(this);
@@ -100,12 +110,22 @@ public class TranslatorPlugin extends JavaPlugin {
         this.gradientService = new DefaultGradientService();
         this.eventService = new DefaultEventService();
 
-        this.translatorService = new DefaultTranslationService(translationProcessor, placeholderService, gradientService, eventService);
-
         this.profileService = new DefaultProfileService(
                 () -> translatorService.getTranslationConfiguration().getLicenseKey(),
                 profilePacket -> getSpigotTransport().getTransportService().send(pluginMessagingChannel, PacketRegistry.PROFILE, profilePacket)
         );
+
+        this.translatorService = new DefaultTranslationService(
+                translationProcessor,
+                placeholderService,
+                gradientService,
+                eventService,
+                playerLocaleProcessor,
+                profileService
+
+        );
+
+
 
         final VelocitySecretReader secretReader = new VelocitySecretReader();
         final String secret = secretReader.loadVelocitySecret();
@@ -129,16 +149,7 @@ public class TranslatorPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerJoinQuitListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerLocaleChangeListener(this), this);
 
-        moduleService = new ModuleService(profileService, this, translatorService, uuid -> {
-
-            final Player player = Bukkit.getPlayer(uuid);
-            if (player == null)
-                return "en-en";
-            else
-                return player.getLocale();
-
-
-        });
+        moduleService = new ModuleService(profileService, this, translatorService, playerLocaleProcessor);
 
         getServer().getCommandMap().register("translator", new org.bukkit.command.Command("testmsg") {
 

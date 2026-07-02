@@ -108,15 +108,22 @@ public class ROIService {
             long elapsedNanos = System.nanoTime() - nanoTime;
             int playtimeInSeconds = (int) TimeUnit.NANOSECONDS.toSeconds(elapsedNanos);
 
-            omniConnectionService.sendPacket(PacketRegistry.TRACK_PLAYER, PacketMapperRegistry.toProto(
-                    new TrackPlayerRequestMapper.TrackData(
-                            translatorPlugin.getConfigurationFile().getLicenseKey(),
-                            UUID.randomUUID(),
-                            uuid,
-                            System.currentTimeMillis(),
-                            playtimeInSeconds
-                    )
-            ));
+            translatorPlugin.getTranslatorService().requiresTranslation(uuid).thenAccept(requiresTranslation ->
+            {
+                omniConnectionService.sendPacket(PacketRegistry.TRACK_PLAYER, PacketMapperRegistry.toProto(
+                        new TrackPlayerRequestMapper.TrackData(
+                                translatorPlugin.getConfigurationFile().getLicenseKey(),
+                                UUID.randomUUID(),
+                                uuid,
+                                System.currentTimeMillis(),
+                                playtimeInSeconds,
+                                requiresTranslation,
+                                translatorPlugin.getPlayerLocaleProcessor().retrieveLocale(uuid)
+                        )
+                ));
+
+
+            });
         }
     }
 

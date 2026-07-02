@@ -34,26 +34,7 @@ public abstract class AbstractTranslatorModule {
     }
 
     public CompletableFuture<Boolean> requiresTranslation(UUID playerUUID) {
-
-        System.out.println("REQUIRING TRANSLATION");
-        if (getServerConfiguration() == null || getServerConfiguration().getDefaultLanguage() == null) {
-            return CompletableFuture.completedFuture(true);
-        }
-
-        String playerLocale = playerLocaleProcessor.retrieveLocale(playerUUID);
-        if (playerLocale != null && playerLocale.startsWith(getServerConfiguration().getDefaultLanguage())) {
-            return CompletableFuture.completedFuture(false);
-        }
-
-        return profileService.retrieveProfile(playerUUID)
-                .thenApply(profileData -> {
-                    System.out.println("REQUIRING TRANSLATION - " + profileData.consentType());
-                    if(getServerConfiguration().getConsentMode().equals(ServerConfiguration.ConsentMode.AUTO_OPT) &&
-                        profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.AUTO))
-                        return true;
-
-                    return !profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.DECLINED);
-                });
+        return translatorService.requiresTranslation(playerUUID);
     }
 
     public ServerConfiguration getServerConfiguration() {

@@ -4,12 +4,16 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import lombok.Setter;
+import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.event.EventService;
 import org.pytenix.placeholder.GradientService;
 import org.pytenix.placeholder.PlaceholderService;
 import org.pytenix.placeholder.listener.ConfigUpdateListener;
+import org.pytenix.profile.ProfileService;
+import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.translation.TranslationProcessor;
 import org.pytenix.translation.TranslatorService;
+import org.pytenix.translation.locale.PlayerLocaleProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +31,9 @@ public class DefaultTranslationService implements TranslatorService {
     final GradientService gradientService;
     final EventService eventService;
 
+    final PlayerLocaleProcessor playerLocaleProcessor;
+    final ProfileService profileService;
+
 
     private final Cache<UUID, List<UUID>> cachedReferences = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
@@ -40,11 +47,16 @@ public class DefaultTranslationService implements TranslatorService {
             TranslationProcessor translationProcessor,
             PlaceholderService placeholderService,
             GradientService gradientService,
-            EventService eventService) {
+            EventService eventService,
+            PlayerLocaleProcessor playerLocaleProcessor,
+            ProfileService profileService) {
 
         this.translationProcessor = translationProcessor;
         this.placeholderService = placeholderService;
         this.gradientService = gradientService;
+
+        this.playerLocaleProcessor = playerLocaleProcessor;
+        this.profileService = profileService;
 
         this.eventService = eventService;
 
@@ -61,6 +73,30 @@ public class DefaultTranslationService implements TranslatorService {
 
         String prepared = preparePayload(batchId, text);
         return processAndRestore(batchId, prepared, lang, module);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> requiresTranslation(UUID playerUUID) {
+
+        System.out.println("REQUIRING TRANSLATION");
+        if (translationConfiguration == null || translationConfiguration.getDefaultLanguage() == null) {
+            return CompletableFuture.completedFuture(true);
+        }
+
+        String playerLocale = playerLocaleProcessor.retrieveLocale(playerUUID);
+        if (playerLocale != null && playerLocale.startsWith(translationConfiguration.getDefaultLanguage())) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        return profileService.retrieveProfile(playerUUID)
+                .thenApply(profileData -> {
+                    System.out.println("REQUIRING TRANSLATION - " + profileData.consentType());
+                    if(translationConfiguration.getConsentMode().equals(ServerConfiguration.ConsentMode.AUTO_OPT) &&
+                            profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.AUTO))
+                        return true;
+
+                    return !profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.DECLINED);
+                });
     }
 
     public String handleGradient(UUID uuid, String text) {

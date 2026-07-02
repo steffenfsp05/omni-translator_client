@@ -23,6 +23,8 @@ public class TrackPlayerRequestMapper  extends AbstractPacketMapper<NetworkPacke
                 .setUserIdLeastSig(packet.playerId().getLeastSignificantBits())
                 .setPlaytimeSeconds(packet.playtimeSeconds())
                 .setTimestamp(packet.timestamp())
+                .setIsTranslated(packet.is_translated())
+                .setLanguage(packet.language())
                 .build();
     }
 
@@ -33,11 +35,13 @@ public class TrackPlayerRequestMapper  extends AbstractPacketMapper<NetworkPacke
                 new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig()),
                 new UUID(packet.getUserIdMostSig() , packet.getUserIdLeastSig()),
                 packet.getTimestamp(),
-                packet.getPlaytimeSeconds()
+                packet.getPlaytimeSeconds(),
+                packet.getIsTranslated(),
+                packet.getLanguage()
         );
     }
 
-    public record TrackData(String licenseKey, UUID requestId, UUID playerId, long timestamp, int playtimeSeconds)
+    public record TrackData(String licenseKey, UUID requestId, UUID playerId, long timestamp, int playtimeSeconds, boolean is_translated, String language)
     {
 
     }
