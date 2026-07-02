@@ -37,6 +37,7 @@ import org.pytenix.profile.impl.DefaultProfileService;
 import org.pytenix.tracking.ROIService;
 import org.pytenix.tracking.listener.PlayerConnectListener;
 import org.pytenix.tracking.listener.PlayerDisconnectListener;
+import org.pytenix.tracking.listener.PlayerSettingsChangeListener;
 import org.pytenix.translation.TranslationProcessor;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.impl.DefaultTranslationService;
@@ -123,20 +124,7 @@ public class TranslatorPlugin {
         this.eventService = new DefaultEventService();
 
         this.playerLocaleProcessor = uuid ->
-        {
-            final Player player = this.getProxyServer().getPlayer(uuid).orElse(null);
-
-            if(player != null) {
-
-                Locale locale = player.getEffectiveLocale();
-                if(locale != null)
-                    return locale.toString().toLowerCase();
-
-                return "en_en";
-            }
-
-            return "en_en";
-        };
+                roiService.getLanguageCache().get(uuid, uuid1 -> "en_en");
 
         this.profileService = new DefaultProfileService(
                 configurationFile::getLicenseKey,
@@ -241,6 +229,7 @@ public class TranslatorPlugin {
 
         server.getEventManager().register(this, new PlayerConnectListener(roiService));
         server.getEventManager().register(this, new PlayerDisconnectListener(roiService));
+        server.getEventManager().register(this, new PlayerSettingsChangeListener(roiService));
     }
 
 

@@ -84,7 +84,7 @@ public class DefaultTranslationService implements TranslatorService {
         }
 
         String playerLocale = playerLocaleProcessor.retrieveLocale(playerUUID);
-        if (playerLocale != null && playerLocale.startsWith(translationConfiguration.getDefaultLanguage())) {
+        if (playerLocale != null && playerLocale.startsWith(translationConfiguration.getDefaultLanguage().toLowerCase())) {
             return CompletableFuture.completedFuture(false);
         }
 

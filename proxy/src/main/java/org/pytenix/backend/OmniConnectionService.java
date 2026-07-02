@@ -63,9 +63,9 @@ public class OmniConnectionService {
                 .options(
                         TransportOptions.builder()
                                 .batchingEnabled(true)
-                                .maxBatchSize(100)
+                                .maxBatchSize(500)
                                 .batchingIntervalMs(5)
-                                .maxPayloadSize(20000)
+                                .maxPayloadSize(50000)
                                 .build()
                 )
                 .encryptionEnabled(false)

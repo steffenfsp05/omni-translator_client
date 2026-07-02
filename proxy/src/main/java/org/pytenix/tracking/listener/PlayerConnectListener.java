@@ -1,6 +1,7 @@
 package org.pytenix.tracking.listener;
 
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +15,9 @@ public class PlayerConnectListener {
 
 
     @Subscribe
-    public void onConnect(PostLoginEvent event) {
-        roiService.initTrackingProcess(event.getPlayer().getUniqueId());
+    public void onConnect(LoginEvent event) {
+        roiService.initTrackingProcess(event.getPlayer().getUniqueId());;
     }
+
 
 }
