@@ -139,9 +139,7 @@ public class InventoryModule extends AbstractTranslatorModule {
 
 
         return CompletableFuture.allOf(itemFutures.toArray(new CompletableFuture[0]))
-                .thenApply(v -> itemFutures.stream()
-                        .map(CompletableFuture::join)
-                        .collect(Collectors.toList())
+                .thenApply(v -> itemFutures.stream().map(CompletableFuture::join).collect(Collectors.toList())
                 );
     }
 

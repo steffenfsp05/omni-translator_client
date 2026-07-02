@@ -26,7 +26,10 @@ public class HeartBeatRequestMapper extends AbstractPacketMapper<NetworkPackets.
                 .setLicenseKey(packet.license())
                 .setTimestamp(packet.timestamp())
                 .setTotalOnline(packet.total_online())
-                .setTranslationsActive(packet.translations_enabled())
+                .setConsentUnknownCount(packet.consent_unknown())
+                .setConsentExplicitCount(packet.consent_explicit())
+                .setConsentAutoCount(packet.consent_auto())
+                .setConsentDeclinedCount(packet.consent_declined())
                 .putAllLangDistribution(packet.language_distribution())
                 .build();
     }
@@ -39,10 +42,23 @@ public class HeartBeatRequestMapper extends AbstractPacketMapper<NetworkPackets.
                 new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig()),
                 packet.getTimestamp(),
                 packet.getTotalOnline(),
-                packet.getTranslationsActive(),
+                packet.getConsentUnknownCount(),
+                packet.getConsentExplicitCount(),
+                packet.getConsentAutoCount(),
+                packet.getConsentDeclinedCount(),
                 packet.getLangDistributionMap());
     }
 
-    public record HeartBeatData(String license, UUID requestId , Long timestamp, int total_online, int translations_enabled, Map<String,Integer> language_distribution) {
+    public record HeartBeatData(
+            String license,
+            UUID requestId,
+            Long timestamp,
+            int total_online,
+            int consent_unknown,
+            int consent_explicit,
+            int consent_auto,
+            int consent_declined,
+            Map<String,Integer> language_distribution
+    ) {
     }
 }

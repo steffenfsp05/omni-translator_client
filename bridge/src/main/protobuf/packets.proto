@@ -44,8 +44,11 @@ message HeartbeatPacket {
   fixed64 request_id_least_sig = 4;
 
   int32 total_online = 5;
-  int32 translations_active = 6;
-  map<string, int32> lang_distribution = 7;
+  int32 consent_unknown_count = 6;
+  int32 consent_explicit_count = 7;
+  int32 consent_auto_count = 8;
+  int32 consent_declined_count = 9;
+  map<string, int32> lang_distribution = 10;
 }
 
 message GeoResultPacket

@@ -8,6 +8,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.Getter;
 import org.pytenix.backend.GeoSocketEndpoint;
@@ -39,6 +40,7 @@ import org.pytenix.tracking.listener.PlayerDisconnectListener;
 import org.pytenix.translation.TranslationProcessor;
 import org.pytenix.translation.TranslatorService;
 import org.pytenix.translation.impl.DefaultTranslationService;
+import org.pytenix.translation.locale.PlayerLocaleProcessor;
 import org.pytenix.util.TextComponentUtil;
 import org.slf4j.Logger;
 
@@ -47,6 +49,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 
 @Plugin(
         id = "translator",
@@ -80,6 +83,7 @@ public class TranslatorPlugin {
     GradientService gradientService;
     EventService eventService;
     ProfileService profileService;
+    PlayerLocaleProcessor playerLocaleProcessor;
 
     SystemChatModule systemChatService;
     TextComponentUtil textComponentUtil;
@@ -125,6 +129,22 @@ public class TranslatorPlugin {
         this.textComponentUtil = new TextComponentUtil(translatorService);
         this.messageSequencer = new MessageSequencer(this, textComponentUtil);
 
+
+        this.playerLocaleProcessor = uuid ->
+        {
+            final Player player = this.getProxyServer().getPlayer(uuid).orElse(null);
+
+            if(player != null) {
+
+                Locale locale = player.getEffectiveLocale();
+                if(locale != null)
+                     return locale.toString().toLowerCase();
+
+                return "en_en";
+            }
+
+            return "en_en";
+        };
 
 
         final String secret = loadForwardingSecret();
@@ -182,7 +202,7 @@ public class TranslatorPlugin {
                 translatorService,
                 textComponentUtil,
                 messageSequencer,
-                uuid -> this.getProxyServer().getPlayer(uuid).get().getEffectiveLocale().toString().toLowerCase()
+                playerLocaleProcessor
         );
 
 
