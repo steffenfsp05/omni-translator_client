@@ -19,5 +19,4 @@ public class PlayerConnectListener {
         roiService.initTrackingProcess(event.getPlayer().getUniqueId());;
     }
 
-
 }

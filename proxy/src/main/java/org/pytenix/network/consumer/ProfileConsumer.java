@@ -22,12 +22,18 @@ public class ProfileConsumer implements MappedPacketReceiveConsumer<RegisteredSe
         switch (javaPacket.action())
         {
             case FETCH -> {
+                System.out.println("INCOMING REQUEST FOR PROFILEDATE: " + javaPacket);
                 translatorPlugin.getProfileService().retrieveProfile(javaPacket.playerId())
                         .thenAcceptAsync(profileData ->
-                                context.reply(PacketRegistry.PROFILE,
-                                        PacketMapperRegistry.toProto(profileData.withAction(NetworkPackets.ProfilePacket.Action.RESPONSE)))
-                        );
+                        {
+                            System.out.println("RETURNING NOW: "+ profileData);
+                            context.reply(PacketRegistry.PROFILE,
+                                    PacketMapperRegistry.toProto(profileData.withRequestId(javaPacket.requestId()).withAction(NetworkPackets.ProfilePacket.Action.RESPONSE)));
+
+
+                        }  );
             }
         }
     }
 }
+

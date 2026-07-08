@@ -29,7 +29,7 @@ public class ModuleService {
         registerModule(new InventoryModule(profileService, translatorService, playerLocaleProcessor));
         //registerModule(new PluginChatModule(translatorService, playerLocaleProcessor));
         registerModule(new LiveChatModule(profileService, translatorPlugin, translatorService, playerLocaleProcessor));
-        registerModule(new HologramModule(profileService, translatorService, playerLocaleProcessor));
+        registerModule(new HologramModule(translatorPlugin, profileService, translatorService, playerLocaleProcessor));
         registerModule(new SignsModule(profileService, translatorService, playerLocaleProcessor));
     }
 

@@ -20,6 +20,7 @@ import org.pytenix.module.hologram.HologramModule;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -71,7 +72,8 @@ public class EntityPacketListener implements PacketListener, Listener {
     private void processHologram(PacketSendEvent event, com.github.retrooper.packetevents.protocol.player.User user, int entityId, List<EntityData<?>> dataList) {
         if (dataList == null || dataList.isEmpty()) return;
 
-        final Player player = Bukkit.getPlayer(user.getUUID());
+        final UUID playerUuid = user.getUUID();
+        final List<EntityData<?>> snapshotDataList = new ArrayList<>(dataList);
 
         hologramModule.requiresTranslation(event.getUser().getUUID())
                 .thenAcceptAsync(aBoolean ->
@@ -79,18 +81,14 @@ public class EntityPacketListener implements PacketListener, Listener {
                     if(!aBoolean)
                         return;
 
+                    Player player = Bukkit.getPlayer(playerUuid);
+                    if (player == null) return;
 
                     Cache<Component, Component> personalCache = getHologramCache(hologramModule.getPlayerLocaleProcessor().retrieveLocale(player.getUniqueId()));
                     if (personalCache == null) return;
 
-                    List<EntityData<?>> newMetadataList = new ArrayList<>();
-                    List<EntityData<?>> toTranslateAsync = new ArrayList<>();
-                    boolean packetModified = false;
-
-                    // ==========================================================
-                    // PHASE 1: SYNCHRONER CACHE CHECK (Kein Delay, kein Flickering)
-                    // ==========================================================
-                    for (EntityData data : dataList) {
+                    List<EntityData<?>> instantUpdatesToSend = new ArrayList<>();
+                    for (EntityData data : snapshotDataList) {
                         Object value = data.getValue();
                         Component originalComponent = null;
                         boolean wasOptional = false;
@@ -112,38 +110,8 @@ public class EntityPacketListener implements PacketListener, Listener {
                             if (cachedTranslation != null) {
                                 // 🎯 CACHE HIT: Paket sofort austauschen!
                                 Object newValue = wasOptional ? Optional.of(cachedTranslation) : cachedTranslation;
-                                EntityData newData = new EntityData(data.getIndex(), data.getType(), newValue);
-                                newMetadataList.add(newData);
-                                packetModified = true;
+                                instantUpdatesToSend.add(new EntityData(data.getIndex(), data.getType(), newValue));
                             } else {
-                                newMetadataList.add(data);
-                                toTranslateAsync.add(data);
-                            }
-                        } else {
-                            newMetadataList.add(data);
-                        }
-                    }
-
-                    if (packetModified) {
-                        dataList.clear();
-                        dataList.addAll(newMetadataList);
-                        event.markForReEncode(true);
-                    }
-
-                    if (!toTranslateAsync.isEmpty()) {
-                        CompletableFuture.runAsync(() -> {
-                            for (EntityData dataToTranslate : toTranslateAsync) {
-                                Object value = dataToTranslate.getValue();
-                                Component originalComponent = null;
-                                boolean wasOptional = false;
-
-                                if (value instanceof Optional<?> opt) {
-                                    originalComponent = (Component) opt.get();
-                                    wasOptional = true;
-                                } else {
-                                    originalComponent = (Component) value;
-                                }
-
                                 String legacyText = TranslatorPlugin.getLegacyComponentSerializer().serialize(originalComponent);
 
                                 if (!legacyText.trim().isEmpty()) {
@@ -154,25 +122,22 @@ public class EntityPacketListener implements PacketListener, Listener {
                                             .thenAccept(translatedComponent -> {
                                                 if (translatedComponent == null) return;
 
-                                                // 1. Für die Zukunft in den Cache legen
                                                 personalCache.put(keyComponent, translatedComponent);
 
-                                                // 2. Ein Update-Paket (Fake) schicken, damit der Spieler es jetzt sieht
-                                                Object newValue = isOptionalFinal ? Optional.of(translatedComponent) : translatedComponent;
-                                                EntityData newDataUpdate = new EntityData(dataToTranslate.getIndex(), dataToTranslate.getType(), newValue);
+                                                Object updatedValue = isOptionalFinal ? Optional.of(translatedComponent) : translatedComponent;
+                                                EntityData<?> newDataUpdate = new EntityData<>(data.getIndex(), data.getType(), updatedValue);
 
-                                                List<EntityData<?>> singleUpdateList = new ArrayList<>();
-                                                singleUpdateList.add(newDataUpdate);
-
-                                                // Sendet das Paket still an den Spieler
-                                                sendUpdatePacket(user, entityId, singleUpdateList);
+                                                // Schicke das frische Update-Paket einzeln raus
+                                                sendUpdatePacket(user, entityId, List.of(newDataUpdate));
                                             });
                                 }
                             }
-                        });
+                        }
                     }
 
-
+                    if (!instantUpdatesToSend.isEmpty()) {
+                        sendUpdatePacket(user, entityId, instantUpdatesToSend);
+                    }
                 });
 
 
@@ -199,7 +164,12 @@ public class EntityPacketListener implements PacketListener, Listener {
         );
 
 
-        PacketEvents.getAPI().getPlayerManager().sendPacketSilently(Bukkit.getPlayer(user.getUUID()), updatePacket);
+        hologramModule.getTranslatorPlugin().getTaskScheduler().runForEntity(Bukkit.getPlayer(user.getUUID()), () ->
+        {
+            PacketEvents.getAPI().getPlayerManager().sendPacketSilently(Bukkit.getPlayer(user.getUUID()), updatePacket);
+        });
+
+
     }
 
 

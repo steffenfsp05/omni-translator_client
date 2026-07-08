@@ -8,6 +8,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.Getter;
@@ -32,8 +33,10 @@ import org.pytenix.placeholder.GradientService;
 import org.pytenix.placeholder.PlaceholderService;
 import org.pytenix.placeholder.impl.DefaultGradientService;
 import org.pytenix.placeholder.impl.DefaultPlaceholderService;
+import org.pytenix.profile.AbstractAnalyticsSecret;
 import org.pytenix.profile.ProfileService;
 import org.pytenix.profile.impl.DefaultProfileService;
+import org.pytenix.tracking.ProxyAnalyticsSecret;
 import org.pytenix.tracking.ROIService;
 import org.pytenix.tracking.listener.PlayerConnectListener;
 import org.pytenix.tracking.listener.PlayerDisconnectListener;
@@ -94,12 +97,16 @@ public class TranslatorPlugin {
 
     LimboService limboService;
 
+    private final Path dataDirectory;
+    private AbstractAnalyticsSecret analyticsManager;
+
     @Inject
-    public TranslatorPlugin(ProxyServer server, Logger logger) {
+    public TranslatorPlugin(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
         this.server = server;
         this.proxyServer = server;
         this.logger = logger;
         this.caffeineCache = new CaffeineCacheProvider();
+        this.dataDirectory = dataDirectory;
 
 
         this.configService = new ConfigService();
@@ -117,6 +124,16 @@ public class TranslatorPlugin {
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
 
+        if (!Files.exists(dataDirectory)) {
+            try {
+                Files.createDirectories(dataDirectory);
+            } catch (IOException e) {
+                logger.error("Konnte den Plugin-Ordner nicht erstellen!", e);
+                return;
+            }
+        }
+
+        this.analyticsManager = new ProxyAnalyticsSecret(logger, dataDirectory);
 
         this.translationProcessor = (id, text, targetLang, module) -> translationSocketEndpoint.sendTranslationRequest(id, text, targetLang, module);
         this.placeholderService = new DefaultPlaceholderService();

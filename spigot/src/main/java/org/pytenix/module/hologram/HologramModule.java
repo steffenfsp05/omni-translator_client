@@ -6,6 +6,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.hologram.listener.EntityPacketListener;
 import org.pytenix.profile.ProfileService;
 import org.pytenix.translation.AbstractTranslatorModule;
@@ -23,10 +24,14 @@ public class HologramModule extends AbstractTranslatorModule {
             .expireAfterAccess(30, TimeUnit.MINUTES)
             .build();
 
+    @Getter
+    final TranslatorPlugin translatorPlugin;
 
-    public HologramModule(ProfileService profileService, TranslatorService translatorService, PlayerLocaleProcessor playerLocaleProcessor) {
+
+    public HologramModule(TranslatorPlugin translatorPlugin, ProfileService profileService, TranslatorService translatorService, PlayerLocaleProcessor playerLocaleProcessor) {
         super(profileService, translatorService, "hologram", playerLocaleProcessor);
 
+        this.translatorPlugin = translatorPlugin;
 
         PacketEvents.getAPI().getEventManager().registerListener(new EntityPacketListener(this),
                 PacketListenerPriority.HIGHEST);

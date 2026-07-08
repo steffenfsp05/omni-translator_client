@@ -78,7 +78,7 @@ public class DefaultProfileService extends ProfileService {
             queue.put(requestId, future);
             sendEndpoint.accept(PacketMapperRegistry.toProto(profileData));
 
-            return future.orTimeout(60, TimeUnit.SECONDS)
+            return future.orTimeout(5, TimeUnit.SECONDS)
                     .exceptionally(ex -> {
                         System.err.println("Fehler beim Abrufen des Profils für " + uuid + ": " + ex.getMessage());
                         return new ProfileMapper.ProfileData(
@@ -89,7 +89,7 @@ public class DefaultProfileService extends ProfileService {
                                 NetworkPackets.ProfilePacket.ConsentType.UNKNOWN
                         );
                     });
-        });
+      });
     }
 
     public void updateProfile(ProfileMapper.ProfileData profileData) {
@@ -118,7 +118,6 @@ public class DefaultProfileService extends ProfileService {
         final UUID requestId = resultData.requestId();
         final UUID playerId = resultData.playerId();
 
-        System.out.println("AAA INCOMING " + new Gson().toJson(resultData));
 
         CompletableFuture<ProfileMapper.ProfileData> future = queue.remove(requestId);
 
@@ -127,6 +126,8 @@ public class DefaultProfileService extends ProfileService {
         cacheProvider().put(playerId, resultData);
 
         if (future != null) {
+            System.out.println("COMPLETED FUTURE FOR: " + resultData.playerId() + " REQUESTID: " + resultData.requestId());
+
             future.complete(resultData);
         }
     }
