@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import net.kyori.adventure.text.Component;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.limbo.ConsentMessageFactory;
-import org.pytenix.profile.AnalyticsKey;
 import org.pytenix.proto.generated.NetworkPackets;
 
 @AllArgsConstructor

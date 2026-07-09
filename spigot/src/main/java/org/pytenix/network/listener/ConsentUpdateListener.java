@@ -10,7 +10,6 @@ import org.pytenix.event.annotation.OmniSubscribe;
 import org.pytenix.event.register.ConsentUpdateEvent;
 import org.pytenix.network.SpigotTransport;
 import org.pytenix.packets.impl.ConsentRefreshRequestMapper;
-import org.pytenix.packets.impl.ProfileMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 
 public class ConsentUpdateListener {

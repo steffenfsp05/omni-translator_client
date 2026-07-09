@@ -14,13 +14,10 @@ import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.packets.PacketRegistry;
 import org.pytenix.packets.impl.ProfileMapper;
 import org.pytenix.packets.impl.TranslationResultMapper;
-import org.pytenix.profile.ProfileService;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.transport.TransportService;
 import org.transport.io.minecraft.PluginMessageReceiver;
-import org.transport.service.PacketContext;
 
-import java.net.http.WebSocket;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;

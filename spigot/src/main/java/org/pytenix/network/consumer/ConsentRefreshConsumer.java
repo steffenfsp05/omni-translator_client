@@ -6,7 +6,6 @@ import org.pytenix.TranslatorPlugin;
 import org.pytenix.event.register.ConsentUpdateEvent;
 import org.pytenix.packets.MappedPacketReceiveConsumer;
 import org.pytenix.packets.impl.ConsentRefreshRequestMapper;
-import org.pytenix.profile.AnalyticsKey;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.translation.TranslatorService;
 import org.transport.service.PacketContext;

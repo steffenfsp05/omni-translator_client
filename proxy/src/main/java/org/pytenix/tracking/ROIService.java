@@ -2,36 +2,45 @@ package org.pytenix.tracking;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.velocitypowered.api.proxy.Player;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import net.kyori.adventure.translation.Translator;
+import org.omni.config.ConfigurationFile;
+import org.omni.packets.PacketMapperRegistry;
+import org.omni.packets.PacketRegistry;
+import org.omni.packets.data.HeartBeatUpdateData;
+import org.omni.packets.data.ProfileResultData;
+import org.omni.packets.data.TrackPlayerRequestData;
+import org.omni.profile.AbstractAnalyticsSecret;
+import org.omni.profile.ProfileService;
+import org.omni.proto.generated.Protobuf;
+import org.omni.translation.TranslatorService;
+import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.backend.OmniConnectionService;
-import org.pytenix.packets.PacketMapperRegistry;
-import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.HeartBeatRequestMapper;
-import org.pytenix.packets.impl.ProfileMapper;
-import org.pytenix.packets.impl.TrackPlayerRequestMapper;
-import org.pytenix.profile.AnalyticsKey;
-import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.tracking.mock.MockROIService;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+@Singleton
 public class ROIService {
 
     final TranslatorPlugin translatorPlugin;
 
     @Getter
     final OmniConnectionService omniConnectionService;
+    final PlayerLocaleProcessor playerLocaleProcessor;
+    final ProfileService profileService;
+    final PacketMapperRegistry packetMapperRegistry;
+    final MockROIService mockROIService;
+    final ConfigurationFile configurationFile;
+    final TranslatorService translatorService;
+    final AbstractAnalyticsSecret abstractAnalyticsSecret;
+
 
     final Cache<UUID,Long> trackCache = Caffeine.newBuilder()
             .maximumSize(3_000)
@@ -42,35 +51,48 @@ public class ROIService {
             .maximumSize(3_000)
             .build();
 
-
-
     final boolean isMock = false;
-    final MockROIService mockROIService;
 
 
 
-    public ROIService(TranslatorPlugin translatorPlugin, OmniConnectionService omniConnectionService) {
+
+    @Inject
+    public ROIService(
+            TranslatorPlugin translatorPlugin,
+            OmniConnectionService omniConnectionService,
+            PlayerLocaleProcessor playerLocaleProcessor,
+            ProfileService profileService,
+            PacketMapperRegistry packetMapperRegistry,
+            ConfigurationFile configurationFile,
+            TranslatorService translatorService,
+            AbstractAnalyticsSecret abstractAnalyticsSecret
+    ) {
+
         this.translatorPlugin = translatorPlugin;
         this.omniConnectionService = omniConnectionService;
+        this.playerLocaleProcessor = playerLocaleProcessor;
+        this.profileService = profileService;
+        this.packetMapperRegistry = packetMapperRegistry;
+        this.configurationFile = configurationFile;
+        this.translatorService = translatorService;
+        this.abstractAnalyticsSecret = abstractAnalyticsSecret;
 
-        if(isMock)
-        {
+        if(isMock) {
             this.mockROIService = new MockROIService(translatorPlugin, this);
         } else {
             mockROIService = null;
         }
 
-
-        translatorPlugin.getServer().getScheduler()
+        translatorPlugin.getProxyServer().getScheduler()
                 .buildTask(translatorPlugin, this::sendHeartbeat)
-                .repeat(Duration.ofSeconds(20)) //TODO:
+                .repeat(Duration.ofSeconds(20))
                 .schedule();
     }
 
     private void sendHeartbeat() {
 
         Map<String, Integer> langDistribution;
-        List<CompletableFuture<ProfileMapper.ProfileData>> futures;
+        List<CompletableFuture<ProfileResultData>> futures;
 
             if(isMock)
             {
@@ -86,37 +108,37 @@ public class ROIService {
 
             */
             } else {
-                langDistribution = translatorPlugin.getServer().getAllPlayers().stream()
+                langDistribution = translatorPlugin.getProxyServer().getAllPlayers().stream()
                         .collect(Collectors.toMap(
-                                player -> translatorPlugin.getPlayerLocaleProcessor().retrieveLocale(player.getUniqueId()),
+                                player -> playerLocaleProcessor.retrieveLocale(player.getUniqueId()),
                                 profile -> 1,
                                 Integer::sum
                         ));
 
-                futures = translatorPlugin.getServer().getAllPlayers().stream()
-                        .map(player -> translatorPlugin.getProfileService().retrieveProfile(player.getUniqueId()))
+                futures = translatorPlugin.getProxyServer().getAllPlayers().stream()
+                        .map(player -> profileService.retrieveProfile(player.getUniqueId()))
                         .toList();
             }
 
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                     .thenAccept(unused -> {
 
-                        List<ProfileMapper.ProfileData> data = futures.stream()
+                        List<ProfileResultData> data = futures.stream()
                                 .map(CompletableFuture::join)
                                 .filter(Objects::nonNull)
                                 .toList();
 
                         omniConnectionService.sendPacket(PacketRegistry.HEART_BEAT,
-                                PacketMapperRegistry.toProto(
-                                        new HeartBeatRequestMapper.HeartBeatData(
-                                                translatorPlugin.getConfigurationFile().getLicenseKey(),
+                                packetMapperRegistry.toProto(
+                                        new HeartBeatUpdateData(
+                                                configurationFile.getLicenseKey(),
                                                 UUID.randomUUID(),
                                                 System.currentTimeMillis(),
                                                 data.size(),
-                                                filterByConsent(data, NetworkPackets.ProfilePacket.ConsentType.UNKNOWN),
-                                                filterByConsent(data, NetworkPackets.ProfilePacket.ConsentType.EXPLICIT),
-                                                filterByConsent(data, NetworkPackets.ProfilePacket.ConsentType.AUTO),
-                                                filterByConsent(data, NetworkPackets.ProfilePacket.ConsentType.DECLINED),
+                                                filterByConsent(data, Protobuf.ConsentType.UNKNOWN),
+                                                filterByConsent(data, Protobuf.ConsentType.EXPLICIT),
+                                                filterByConsent(data, Protobuf.ConsentType.AUTO),
+                                                filterByConsent(data, Protobuf.ConsentType.DECLINED),
                                                 langDistribution
                                         )
                                 ));
@@ -128,7 +150,7 @@ public class ROIService {
 
 
 
-    private int filterByConsent(List<ProfileMapper.ProfileData> profileDataList, NetworkPackets.ProfilePacket.ConsentType consentType) {
+    private int filterByConsent(List<ProfileResultData> profileDataList, Protobuf.ConsentType consentType) {
         return (int) profileDataList.stream()
                 .filter(profileData -> profileData.consentType() == consentType)
                 .count();
@@ -153,17 +175,17 @@ public class ROIService {
             long elapsedNanos = System.nanoTime() - nanoTime;
             int playtimeInSeconds = (int) TimeUnit.NANOSECONDS.toSeconds(elapsedNanos);
 
-            translatorPlugin.getTranslatorService().requiresTranslation(uuid).thenAccept(requiresTranslation ->
+            translatorService.requiresTranslation(uuid).thenAccept(requiresTranslation ->
             {
-                omniConnectionService.sendPacket(PacketRegistry.TRACK_PLAYER, PacketMapperRegistry.toProto(
-                        new TrackPlayerRequestMapper.TrackData(
-                                translatorPlugin.getConfigurationFile().getLicenseKey(),
+                omniConnectionService.sendPacket(PacketRegistry.TRACK_PLAYER, packetMapperRegistry.toProto(
+                        new TrackPlayerRequestData(
+                                configurationFile.getLicenseKey(),
                                 UUID.randomUUID(),
-                                translatorPlugin.getAnalyticsManager().getAnalyticsByteId(uuid),
+                                abstractAnalyticsSecret.getAnalyticsByteId(uuid),
                                 System.currentTimeMillis(),
                                 playtimeInSeconds,
                                 requiresTranslation,
-                                translatorPlugin.getPlayerLocaleProcessor().retrieveLocale(uuid)
+                                playerLocaleProcessor.retrieveLocale(uuid)
                         )
                 ));
                 System.out.println("SENT PACK");

@@ -1,6 +1,7 @@
 package org.pytenix.tracking;
 
-import org.pytenix.profile.AbstractAnalyticsSecret;
+import com.google.inject.Singleton;
+import org.omni.profile.AbstractAnalyticsSecret;
 import org.slf4j.Logger;
 
 import java.io.FileInputStream;
@@ -10,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
+@Singleton
 public class ProxyAnalyticsSecret extends AbstractAnalyticsSecret {
 
     private final Logger logger;

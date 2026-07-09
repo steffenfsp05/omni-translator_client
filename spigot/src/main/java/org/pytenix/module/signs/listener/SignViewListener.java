@@ -10,10 +10,7 @@ public class SignViewListener implements PacketListener {
 
     private static final Pattern QUOTE_PATTERN = Pattern.compile("^[\"']+|[\"']+$");
 
-    private final SignsModule signsModule;
-
     public SignViewListener(SignsModule signsModule) {
-        this.signsModule = signsModule;
     }
 
     //TODO DEBUG!!

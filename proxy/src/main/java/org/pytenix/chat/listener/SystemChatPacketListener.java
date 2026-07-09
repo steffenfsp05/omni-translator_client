@@ -11,8 +11,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.pytenix.chat.MessageSequencer;
 import org.pytenix.chat.SystemChatModule;
 import org.pytenix.profile.AbstractAnalyticsSecret;
-import org.pytenix.profile.AnalyticsKey;
-import org.pytenix.proto.generated.NetworkPackets;
 
 import java.util.UUID;
 

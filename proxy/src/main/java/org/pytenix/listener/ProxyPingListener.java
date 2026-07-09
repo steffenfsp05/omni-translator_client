@@ -1,27 +1,41 @@
 package org.pytenix.listener;
 
+import com.google.inject.Inject;
 import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.server.ServerPing;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.omni.entity.ServerConfiguration;
+import org.omni.translation.TranslatorService;
+import org.omni.translation.component.TextComponentService;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.backend.GeoSocketEndpoint;
-import org.pytenix.entity.ServerConfiguration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class ProxyPingListener {
 
 
-    final TranslatorPlugin translator;
-    final GeoSocketEndpoint geoSocketEndpoint;
+
+    private final TranslatorPlugin translator;
+    private final GeoSocketEndpoint geoSocketEndpoint;
+    private final TranslatorService translatorService;
+    private final TextComponentService textComponentService;
+    // ... dein Serializer ...
+
+    @Inject
+    public ProxyPingListener(TranslatorPlugin translator, TranslatorService translatorService, GeoSocketEndpoint geoSocketEndpoint, TextComponentService textComponentService) {
+        this.translator = translator;
+        this.geoSocketEndpoint = geoSocketEndpoint;
+        this.translatorService = translatorService;
+        this.textComponentService = textComponentService;
+    }
+
 
 
     LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.builder()
@@ -31,13 +45,6 @@ public class ProxyPingListener {
             .flattener(ComponentFlattener.basic())
             .build();
 
-
-    public ProxyPingListener(TranslatorPlugin translator) {
-        this.translator = translator;
-        this.geoSocketEndpoint = translator.getGeoSocketEndpoint();
-
-
-    }
 
     public static List<String> getTestIps() {
         return new ArrayList<>(Arrays.asList(
@@ -79,7 +86,7 @@ public class ProxyPingListener {
     @Subscribe
     public EventTask onPing(com.velocitypowered.api.event.proxy.ProxyPingEvent event) {
 
-        ServerConfiguration configuration = translator.getTranslatorService().getTranslationConfiguration();
+        ServerConfiguration configuration = translatorService.getTranslationConfiguration();
 
         System.out.println("ONPING!");
         if (configuration == null) {
@@ -94,7 +101,7 @@ public class ProxyPingListener {
         final UUID uuid = UUID.randomUUID();
 
         CompletableFuture<Void> pingPipeline = geoSocketEndpoint.sendGeoRequest(uuid, ipAddress)
-                .thenCompose(locale -> translator.getTextComponentUtil().translateComplexMessage(
+                .thenCompose(locale -> textComponentService.translateComplexMessage(
                         event.getPing().getDescriptionComponent(),
                         locale,
                         ServerConfiguration.Module.MOTD.getModuleName()

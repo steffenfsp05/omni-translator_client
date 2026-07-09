@@ -1,0 +1,180 @@
+syntax = "proto3";
+
+package org.omni.proto;
+
+option java_package = "org.omni.proto.generated";
+option java_outer_classname = "Protobuf";
+
+
+message ServerConfiguration {
+  string license_key = 1;
+  string default_language = 2;
+  ConsentMode consentMode = 3;
+  repeated Module active_modules = 4; // Liste aller Module, die auf 'true' stehen
+  repeated string words = 5;
+}
+
+message GeoRequestPacket
+{
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+  string ip_address = 3;
+}
+
+
+message TrackPlayerPacket {
+
+  string license_key = 1;
+  int64 timestamp = 2;
+
+  fixed64 request_id_most_sig = 3;
+  fixed64 request_id_least_sig = 4;
+
+  bytes analytics_id = 5;
+
+  int32 playtime_seconds = 6;
+
+  bool is_translated = 7;
+  string language = 8;
+}
+
+message HeartbeatPacket {
+
+  string license_key = 1;
+  int64 timestamp = 2;
+
+  fixed64 request_id_most_sig = 3;
+  fixed64 request_id_least_sig = 4;
+
+  int32 total_online = 5;
+  int32 consent_unknown_count = 6;
+  int32 consent_explicit_count = 7;
+  int32 consent_auto_count = 8;
+  int32 consent_declined_count = 9;
+  map<string, int32> lang_distribution = 10;
+}
+
+message GeoResultPacket
+{
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+  string language = 3;
+}
+
+
+message ConfigRequestPacket {
+  int64 timestamp = 1;
+}
+
+message TranslationRequest {
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+  string text = 3;
+  string target_lang = 4;
+  Module module = 5;
+}
+
+message ConsentRefreshRequest
+{
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+
+  fixed64 user_id_most_sig = 3;
+  fixed64 user_id_least_sig = 4;
+
+  ConsentType consentType = 5;
+}
+
+//Für Proxy -> Backend
+message ProfileExternUpdate
+{
+  ProfilePacket profilePacket = 1;
+}
+
+//Für Proxy -> Backend
+message ProfileExternRequest
+{
+  string license = 1;
+  fixed64 request_id_most_sig = 2;
+  fixed64 request_id_least_sig = 3;
+  bytes analytics_id = 4;
+}
+
+//Nur für Spigot -> Proxy
+message ProfileInternRequest
+{
+  string license = 1;
+  fixed64 request_id_most_sig = 2;
+  fixed64 request_id_least_sig = 3;
+
+
+  fixed64 user_id_most_sig = 4;
+  fixed64 user_id_least_sig = 5;
+}
+
+message ProfilePacket {
+
+
+
+  string license = 1;
+  fixed64 request_id_most_sig = 3;
+  fixed64 request_id_least_sig = 4;
+
+  bytes analytics_id = 5;
+
+  ConsentType consentType = 6;
+}
+
+
+
+message TranslationResult {
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+  string result = 3;
+}
+
+
+enum ConsentType
+{
+  UNKNOWN = 0;
+  EXPLICIT = 1;
+  AUTO = 2;
+  DECLINED = 3;
+}
+
+enum ConsentMode {
+  CONSENT_UNKNOWN = 0;
+  CONSENT_STRICT = 1;
+  CONSENT_EXTERNAL = 2;
+  CONSENT_AUTO_OPT = 3;
+}
+
+
+enum Module {
+  MODULE_UNKNOWN = 0;
+  MODULE_LIVE_CHAT = 1;
+  MODULE_GUI = 2;
+  MODULE_HOLOGRAM = 3;
+  MODULE_PLUGIN_CHAT = 4;
+  MODULE_SIGNS = 5;
+  MODULE_MOTD = 6;
+}
+
+message PacketWrapper {
+  oneof payload {
+    ServerConfiguration config = 1;
+    ConfigRequestPacket config_request = 2;
+    GeoRequestPacket geo_request = 3;
+    GeoResultPacket geo_result = 4;
+    TranslationRequest translation_request = 5;
+    TranslationResult translation_result = 6;
+    ProfilePacket profile_packet = 7;
+    ConsentRefreshRequest consent_refresh_request = 8;
+    HeartbeatPacket heart_beat_packet = 9;
+    TrackPlayerPacket track_player_packet = 10;
+    ProfileInternRequest profile_intern_request = 11;
+    ProfileExternRequest profile_extern_request = 12;
+    ProfileExternUpdate profile_extern_update = 13;
+
+  }
+}

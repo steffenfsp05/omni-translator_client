@@ -1,33 +1,32 @@
 package org.pytenix.listener;
 
+import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
-import com.velocitypowered.api.event.player.ServerPostConnectEvent;
-import com.velocitypowered.api.proxy.Player;
+import org.omni.placeholder.protector.PlayerNameProtector;
+import org.omni.translation.TranslatorService;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.translation.TranslatorService;
 
 public class PlayerConnectionChangeListener {
 
 
-    final TranslatorPlugin translator;
-     final TranslatorService translatorService;
+    private final PlayerNameProtector playerNameProtector;
 
 
-    public PlayerConnectionChangeListener(TranslatorPlugin translator) {
-        this.translator = translator;
-        this.translatorService = translator.getTranslatorService();
+    @Inject
+    public PlayerConnectionChangeListener(PlayerNameProtector playerNameProtector) {
+        this.playerNameProtector = playerNameProtector;
     }
 
 
     @Subscribe
     public void onJoin(LoginEvent event) {
-        translatorService.getPlaceholderService().getPlayerNameProtector().addPlayer(event.getPlayer().getUsername());
+        playerNameProtector.addPlayer(event.getPlayer().getUsername());
     }
 
     @Subscribe
     public void onQuit(DisconnectEvent event) {
-        translatorService.getPlaceholderService().getPlayerNameProtector().addPlayer(event.getPlayer().getUsername());
+        playerNameProtector.addPlayer(event.getPlayer().getUsername());
     }
 }

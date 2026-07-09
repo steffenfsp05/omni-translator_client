@@ -19,12 +19,10 @@ import org.pytenix.listener.PlayerJoinQuitListener;
 import org.pytenix.listener.PlayerLocaleChangeListener;
 import org.pytenix.network.SpigotTransport;
 import org.pytenix.network.VelocitySecretReader;
-import org.pytenix.packets.PacketRegistry;
 import org.pytenix.placeholder.GradientService;
 import org.pytenix.placeholder.PlaceholderService;
 import org.pytenix.placeholder.impl.DefaultGradientService;
 import org.pytenix.placeholder.impl.DefaultPlaceholderService;
-import org.pytenix.profile.AbstractAnalyticsSecret;
 import org.pytenix.profile.ProfileService;
 import org.pytenix.service.InternProfileService;
 import org.pytenix.service.ModuleService;
@@ -37,8 +35,6 @@ import org.pytenix.util.TextComponentUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
-import java.util.function.Supplier;
 
 
 @Getter
@@ -67,7 +63,7 @@ public class TranslatorPlugin extends JavaPlugin {
     private TaskScheduler taskScheduler;
     private File configFile;
     private SpigotTransport spigotTransport;
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
 
     private TranslationProcessor translationProcessor;
@@ -133,7 +129,7 @@ public class TranslatorPlugin extends JavaPlugin {
         final VelocitySecretReader secretReader = new VelocitySecretReader();
         final String secret = secretReader.loadVelocitySecret();
 
-        if (secret == null || secret.equals("")) {
+        if (secret == null || secret.isEmpty()) {
             System.out.println("Cant read Velocity secret from Paper/Spigot config!");
             Bukkit.getPluginManager().disablePlugin(this);
             return;

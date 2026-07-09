@@ -1,0 +1,81 @@
+package org.omni.entity;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
+@Setter
+@Getter
+@AllArgsConstructor
+public class ServerConfiguration {
+
+    String licenseKey;
+    HashMap<String, Boolean> modules;
+    String defaultLanguage;
+    ConsentMode consentMode = ConsentMode.STRICT;
+    Set<String> blacklistedWords;
+    private String type = "CONFIG_UPDATE";
+
+
+    public ServerConfiguration() {
+
+    }
+
+
+    public static ServerConfiguration createDefault(String licenseKey) {
+        ServerConfiguration serverConfiguration = new ServerConfiguration();
+
+
+        HashMap<String, Boolean> hash = new HashMap<>();
+        for (Module value : Module.values()) {
+            hash.put(value.getModuleName(), true);
+        }
+
+        serverConfiguration.setConsentMode(ConsentMode.STRICT);
+        serverConfiguration.setModules(hash);
+        serverConfiguration.setDefaultLanguage("NOT_SET");
+        serverConfiguration.setLicenseKey(licenseKey);
+        serverConfiguration.setBlacklistedWords(new HashSet<>());
+
+        return serverConfiguration;
+    }
+
+
+    public enum ConsentMode {
+        STRICT,
+        EXTERNAL,
+        AUTO_OPT;
+
+        public static ConsentMode getConsentMode(String name) {
+            return valueOf(name.toUpperCase());
+        }
+
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public enum Module {
+        LIVE_CHAT("live_chat"),
+        GUI("gui"),
+        HOLOGRAM("hologram"),
+        PLUGIN_CHAT("plugin_chat"),
+        SIGNS("signs"),
+        MOTD("motd");
+
+
+        String moduleName;
+
+
+        public static Module getModule(String name) {
+            return valueOf(name.toUpperCase());
+        }
+
+    }
+
+}

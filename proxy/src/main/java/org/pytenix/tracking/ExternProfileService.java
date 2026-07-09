@@ -2,34 +2,36 @@ package org.pytenix.tracking;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import org.omni.packets.PacketMapperRegistry;
+import org.omni.packets.PacketRegistry;
+import org.omni.packets.data.ProfileExternRequestData;
+import org.omni.packets.data.ProfileExternUpdateData;
+import org.omni.packets.data.ProfileResultData;
+import org.omni.profile.AbstractAnalyticsSecret;
+import org.omni.profile.AnalyticsKey;
+import org.omni.profile.ProfileService;
+import org.omni.proto.generated.Protobuf;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.backend.OmniConnectionService;
-import org.pytenix.packets.PacketMapperRegistry;
-import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.ExternProfileRequestMapper;
-import org.pytenix.packets.impl.ExternProfileUpdateMapper;
-import org.pytenix.packets.impl.ProfileMapper;
-import org.pytenix.profile.AbstractAnalyticsSecret;
-import org.pytenix.profile.AnalyticsKey;
-import org.pytenix.profile.ProfileService;
-import org.pytenix.proto.generated.NetworkPackets;
 
 import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+@Singleton
 public class ExternProfileService extends ProfileService {
 
     private final Supplier<String> licenseKey;
 
-    private final ConcurrentHashMap<AnalyticsKey, CompletableFuture<ProfileMapper.ProfileData>> inFlightFetches = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<UUID, CompletableFuture<ProfileMapper.ProfileData>> queue = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<AnalyticsKey, CompletableFuture<ProfileResultData>> inFlightFetches = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, CompletableFuture<ProfileResultData>> queue = new ConcurrentHashMap<>();
 
-    private final Cache<UUID, ProfileMapper.ProfileData> cacheProvider = Caffeine.newBuilder()
+    private final Cache<UUID, ProfileResultData> cacheProvider = Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(10))
             .maximumSize(3000)
             .build();
@@ -40,12 +42,16 @@ public class ExternProfileService extends ProfileService {
 
     final TranslatorPlugin translatorPlugin;
     final AbstractAnalyticsSecret abstractAnalyticsSecret;
+    final PacketMapperRegistry packetMapperRegistry;
 
+    @Inject
     public ExternProfileService(
             TranslatorPlugin translatorPlugin,
             AbstractAnalyticsSecret abstractAnalyticsSecret,
-            Supplier<String> licenseKey
+            Supplier<String> licenseKey,
+            PacketMapperRegistry packetMapperRegistry
     ) {
+        this.packetMapperRegistry = packetMapperRegistry;
         this.translatorPlugin = translatorPlugin;
         this.licenseKey = licenseKey;
         this.abstractAnalyticsSecret = abstractAnalyticsSecret;
@@ -58,7 +64,7 @@ public class ExternProfileService extends ProfileService {
     }
 
     @Override
-    public Cache<UUID, ProfileMapper.ProfileData> cacheProvider() {
+    public Cache<UUID, ProfileResultData> cacheProvider() {
         return cacheProvider;
     }
 
@@ -66,21 +72,21 @@ public class ExternProfileService extends ProfileService {
 
 
     @Override
-    public CompletableFuture<ProfileMapper.ProfileData> retrieveProfile(UUID uuid) {
+    public CompletableFuture<ProfileResultData> retrieveProfile(UUID uuid) {
 
         AnalyticsKey analyticsKey = abstractAnalyticsSecret.getAnalyticsKey(uuid);
 
 
-        ProfileMapper.ProfileData cachedProfile = cacheProvider.getIfPresent(uuid);
+        ProfileResultData cachedProfile = cacheProvider.getIfPresent(uuid);
         if (cachedProfile != null) {
             return CompletableFuture.completedFuture(cachedProfile);
         }
 
         return inFlightFetches.computeIfAbsent(analyticsKey, key -> {
-            CompletableFuture<ProfileMapper.ProfileData> future = new CompletableFuture<>();
+            CompletableFuture<ProfileResultData> future = new CompletableFuture<>();
             UUID requestId = UUID.randomUUID();
 
-            ExternProfileRequestMapper.ExternProfileRequestData externProfileRequestData = new ExternProfileRequestMapper.ExternProfileRequestData(
+            ProfileExternRequestData externProfileRequestData = new ProfileExternRequestData(
                     licenseKey.get(),
                     analyticsKey.bytes(),
                     requestId
@@ -92,7 +98,7 @@ public class ExternProfileService extends ProfileService {
 
             getConnectionService().sendPacket(
                     PacketRegistry.PROFILE_REQUEST_EXTERN,
-                    PacketMapperRegistry.toProto(externProfileRequestData)
+                    packetMapperRegistry.toProto(externProfileRequestData)
             );
 
             return future.orTimeout(5, TimeUnit.SECONDS)
@@ -102,18 +108,18 @@ public class ExternProfileService extends ProfileService {
                         inFlightFetches.remove(key);
                         queue.remove(requestId);
 
-                        return new ProfileMapper.ProfileData(
+                        return new ProfileResultData(
                                 "NULL",
                                 key.bytes(),
                                 requestId,
-                                NetworkPackets.ProfilePacket.ConsentType.UNKNOWN
+                                Protobuf.ConsentType.UNKNOWN
                         );
                     });
         });
     }
 
     @Override
-    public void updateProfile(ProfileMapper.ProfileData profileData) {
+    public void updateProfile(ProfileResultData profileData) {
 
 
         final AnalyticsKey analyticsKey = new AnalyticsKey(profileData.analyticId());
@@ -127,20 +133,20 @@ public class ExternProfileService extends ProfileService {
         cacheProvider.put(playerId, profileData);
 
         getConnectionService().sendPacket(PacketRegistry.PROFILE_UPDATE_EXTERN,
-                PacketMapperRegistry.toProto(
-                        new ExternProfileUpdateMapper.ExternProfileUpdateData(
+                packetMapperRegistry.toProto(
+                        new ProfileExternUpdateData(
                                 profileData
                         )
                 ));
     }
 
     @Override
-    public void handleProfileResult(ProfileMapper.ProfileData resultData) {
+    public void handleProfileResult(ProfileResultData resultData) {
         final UUID requestId = resultData.requestId();
         final AnalyticsKey analyticsKey = new AnalyticsKey(resultData.analyticId());
         final UUID playerId = abstractAnalyticsSecret.getUuidFromAnalyticsKey(analyticsKey);
 
-        CompletableFuture<ProfileMapper.ProfileData> future = queue.remove(requestId);
+        CompletableFuture<ProfileResultData> future = queue.remove(requestId);
 
         inFlightFetches.remove(analyticsKey);
         cacheProvider.put(playerId, resultData);

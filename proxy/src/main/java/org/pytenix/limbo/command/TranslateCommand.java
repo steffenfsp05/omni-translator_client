@@ -4,12 +4,10 @@ import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.packets.PacketRegistry;
 import org.pytenix.packets.impl.ConsentRefreshRequestMapper;
-import org.pytenix.profile.AnalyticsKey;
 import org.pytenix.proto.generated.NetworkPackets;
 
 import java.util.UUID;
@@ -97,10 +95,11 @@ public class TranslateCommand implements SimpleCommand {
                             }
 
 
-                            player.sendMessage(Component.text("§cInvalid command.\n" +
-                                    "§c/translate toggle\n" +
-                                    "§c/translate accept\n" +
-                                    "§c/translate decline"));
+                            player.sendMessage(Component.text("""
+                                    §cInvalid command.
+                                    §c/translate toggle
+                                    §c/translate accept
+                                    §c/translate decline"""));
 
 
                             return;

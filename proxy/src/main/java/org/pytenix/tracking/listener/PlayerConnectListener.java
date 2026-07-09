@@ -1,22 +1,24 @@
 package org.pytenix.tracking.listener;
 
+import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
-import com.velocitypowered.api.event.connection.PostLoginEvent;
-import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import lombok.RequiredArgsConstructor;
 import org.pytenix.tracking.ROIService;
 
 
-@RequiredArgsConstructor
+
 public class PlayerConnectListener {
 
-    final ROIService roiService;
+    private final ROIService roiService;
 
+    @Inject
+    public PlayerConnectListener(ROIService roiService) {
+        this.roiService = roiService;
+    }
 
     @Subscribe
     public void onConnect(LoginEvent event) {
-        roiService.initTrackingProcess(event.getPlayer().getUniqueId());;
+        roiService.initTrackingProcess(event.getPlayer().getUniqueId());
     }
-
 }

@@ -1,11 +1,7 @@
 package org.pytenix.chat;
 
-import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import lombok.Getter;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.chat.listener.PlayerDisconnectListener;
-import org.pytenix.chat.listener.SystemChatPacketListener;
 import org.pytenix.entity.ServerConfiguration;
 import org.pytenix.profile.ProfileService;
 import org.pytenix.translation.AbstractTranslatorModule;

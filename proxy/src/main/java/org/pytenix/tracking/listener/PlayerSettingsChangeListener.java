@@ -1,15 +1,20 @@
 package org.pytenix.tracking.listener;
 
+import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerSettingsChangedEvent;
 import com.velocitypowered.api.proxy.Player;
 import lombok.RequiredArgsConstructor;
 import org.pytenix.tracking.ROIService;
 
-@RequiredArgsConstructor
 public class PlayerSettingsChangeListener {
 
-    final ROIService roiService;
+    private final ROIService roiService;
+
+    @Inject
+    public PlayerSettingsChangeListener(ROIService roiService) {
+        this.roiService = roiService;
+    }
 
     //TODO:
     @Subscribe

@@ -28,7 +28,7 @@ The project is built as a multi-module Maven project, featuring native integrati
 
 The project is organized into three main modules as defined in the `pom.xml`:
 
-1. **`bridge`**:
+1. **`core-api`**:
    The core logic of the project. It contains shared services used by both the Proxy and Spigot modules, including
    network protocols (Protobuf), configuration management (`ConfigService`), caching, placeholder
    processing (`PlaceholderService`), and security utilities.
@@ -74,4 +74,4 @@ mvn clean install
   like `TranslationRequest` and `ConfigRequestPacket`.
 * **Caffeine:** A high-performance caching library used to reduce redundant translation API calls.
 
-*This project (GroupId: `org.example`, ArtifactId: `Omni`) is currently under development in version `1.0-SNAPSHOT`.*
+*This project (GroupId: `org.omni`, ArtifactId: `Omni`) is currently under development in version `1.0-SNAPSHOT`.*

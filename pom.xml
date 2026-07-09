@@ -11,7 +11,8 @@
     <modules>
         <module>proxy</module>
         <module>spigot</module>
-        <module>bridge</module>
+        <module>core-api</module>
+        <module>core-impl</module>
     </modules>
 
     <properties>

@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 
 public class TranslationSocketEndpoint {
 
-    private final TranslatorPlugin translatorPlugin;
     private final OmniConnectionService connectionManager;
 
     private final TranslatorService translatorService;
@@ -28,7 +27,6 @@ public class TranslationSocketEndpoint {
     private final ConcurrentHashMap<UUID, CompletableFuture<String>> queue = new ConcurrentHashMap<>();
 
     public TranslationSocketEndpoint(TranslatorPlugin translatorPlugin, OmniConnectionService connectionManager) {
-        this.translatorPlugin = translatorPlugin;
         this.connectionManager = connectionManager;
         this.translatorService = translatorPlugin.getTranslatorService();
         this.proxyTransport = translatorPlugin.getProxyTransport();

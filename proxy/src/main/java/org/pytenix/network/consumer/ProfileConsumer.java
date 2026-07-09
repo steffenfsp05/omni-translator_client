@@ -1,33 +1,41 @@
 package org.pytenix.network.consumer;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.units.qual.A;
+import org.omni.packets.MappedPacketReceiveConsumer;
+import org.omni.packets.PacketMapperRegistry;
+import org.omni.packets.PacketRegistry;
+import org.omni.packets.data.ProfileInternRequestData;
+import org.omni.profile.ProfileService;
+import org.omni.proto.generated.Protobuf;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.packets.MappedPacketReceiveConsumer;
-import org.pytenix.packets.PacketMapperRegistry;
-import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.InternProfileRequestMapper;
-import org.pytenix.packets.impl.ProfileMapper;
-import org.pytenix.profile.AnalyticsKey;
-import org.pytenix.proto.generated.NetworkPackets;
 import org.transport.service.PacketContext;
 
-@RequiredArgsConstructor
-public class ProfileConsumer implements MappedPacketReceiveConsumer<RegisteredServer, NetworkPackets.ProfileInternRequest, InternProfileRequestMapper.InternProfileData> {
+@Singleton
+public class ProfileConsumer extends MappedPacketReceiveConsumer<RegisteredServer, Protobuf.ProfileInternRequest, ProfileInternRequestData> {
 
-    final TranslatorPlugin translatorPlugin;
+    private final TranslatorPlugin translatorPlugin;
+    private final ProfileService profileService;
+    private final PacketMapperRegistry packetMapperRegistry;
+
+    @Inject
+    public ProfileConsumer(TranslatorPlugin translatorPlugin, ProfileService profileService, PacketMapperRegistry packetMapperRegistry) {
+        this.translatorPlugin = translatorPlugin;
+        this.profileService = profileService;
+        this.packetMapperRegistry = packetMapperRegistry;
+    }
 
 
     @Override
-    public void handle(PacketContext<RegisteredServer> context, InternProfileRequestMapper.InternProfileData javaPacket) {
+    public void handle(PacketContext<RegisteredServer> context, ProfileInternRequestData javaPacket) {
 
             System.out.println("INCOMING REQUEST FOR PROFILEDATE: " + javaPacket);
 
-            translatorPlugin.getProfileService().retrieveProfile(javaPacket.playerId()).thenAccept(profileData ->
+        profileService.retrieveProfile(javaPacket.playerId()).thenAccept(profileData ->
             {
                 context.reply(PacketRegistry.PROFILE,
-                        PacketMapperRegistry.toProto(
+                        packetMapperRegistry.toProto(
                                 profileData
                                         .withRequestId(javaPacket.requestId())
                         )
