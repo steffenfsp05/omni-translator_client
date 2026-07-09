@@ -11,18 +11,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class ProfileService {
 
-
-    public final ConcurrentHashMap<UUID, CompletableFuture<ProfileMapper.ProfileData>> queue = new ConcurrentHashMap<>();
-
     public abstract Cache<UUID, ProfileMapper.ProfileData> cacheProvider();
 
-
     public abstract CompletableFuture<ProfileMapper.ProfileData> retrieveProfile(UUID uuid);
+
     public abstract void updateProfile(ProfileMapper.ProfileData profileData);
 
-
-
     public abstract void handleProfileResult(ProfileMapper.ProfileData resultData);
-
 
 }

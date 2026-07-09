@@ -34,8 +34,9 @@ import org.pytenix.placeholder.PlaceholderService;
 import org.pytenix.placeholder.impl.DefaultGradientService;
 import org.pytenix.placeholder.impl.DefaultPlaceholderService;
 import org.pytenix.profile.AbstractAnalyticsSecret;
+import org.pytenix.profile.AnalyticsKey;
 import org.pytenix.profile.ProfileService;
-import org.pytenix.profile.impl.DefaultProfileService;
+import org.pytenix.tracking.ExternProfileService;
 import org.pytenix.tracking.ProxyAnalyticsSecret;
 import org.pytenix.tracking.ROIService;
 import org.pytenix.tracking.listener.PlayerConnectListener;
@@ -143,9 +144,10 @@ public class TranslatorPlugin {
         this.playerLocaleProcessor = uuid ->
                 roiService.getLanguageCache().get(uuid, uuid1 -> "en_en");
 
-        this.profileService = new DefaultProfileService(
-                configurationFile::getLicenseKey,
-                profilePacket -> connectionService.sendPacket(PacketRegistry.PROFILE, profilePacket)
+        this.profileService = new ExternProfileService(
+                this,
+                analyticsManager,
+                configurationFile::getLicenseKey
         );
 
         this.translatorService = new DefaultTranslationService(
@@ -234,7 +236,7 @@ public class TranslatorPlugin {
     private void registerListener()
     {
         PacketEvents.getAPI().getEventManager().registerListener(
-                new SystemChatPacketListener(systemChatService, messageSequencer),
+                new SystemChatPacketListener(analyticsManager,systemChatService, messageSequencer),
                 PacketListenerPriority.HIGHEST
         );
 

@@ -13,6 +13,7 @@ import org.pytenix.packets.PacketRegistry;
 import org.pytenix.packets.impl.HeartBeatRequestMapper;
 import org.pytenix.packets.impl.ProfileMapper;
 import org.pytenix.packets.impl.TrackPlayerRequestMapper;
+import org.pytenix.profile.AnalyticsKey;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.tracking.mock.MockROIService;
 
@@ -73,7 +74,7 @@ public class ROIService {
 
             if(isMock)
             {
-                langDistribution = mockROIService.getVirtualPlayers().keySet().stream()
+           /*     langDistribution = mockROIService.getVirtualPlayers().keySet().stream()
                         .collect(Collectors.toMap(
                                 uuid -> translatorPlugin.getPlayerLocaleProcessor().retrieveLocale(uuid),
                                 profile -> 1,
@@ -82,6 +83,8 @@ public class ROIService {
                 futures = mockROIService.getVirtualPlayers().keySet().stream()
                         .map(uuid -> translatorPlugin.getProfileService().retrieveProfile(uuid))
                         .toList();
+
+            */
             } else {
                 langDistribution = translatorPlugin.getServer().getAllPlayers().stream()
                         .collect(Collectors.toMap(
@@ -156,7 +159,7 @@ public class ROIService {
                         new TrackPlayerRequestMapper.TrackData(
                                 translatorPlugin.getConfigurationFile().getLicenseKey(),
                                 UUID.randomUUID(),
-                                uuid,
+                                translatorPlugin.getAnalyticsManager().getAnalyticsByteId(uuid),
                                 System.currentTimeMillis(),
                                 playtimeInSeconds,
                                 requiresTranslation,

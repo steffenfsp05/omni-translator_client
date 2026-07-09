@@ -1,5 +1,6 @@
 package org.pytenix.tracking.mock;
 
+import com.google.protobuf.ByteString;
 import lombok.Getter;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.packets.PacketMapperRegistry;
@@ -63,7 +64,7 @@ public class MockROIService {
     }
 
     private void prefillServer() {
-        for (UUID uuid : MockData.HARDCODED_UUIDS) {
+       /* for (UUID uuid : MockData.HARDCODED_UUIDS) {
 
 
                 translatorPlugin.getProfileService().retrieveProfile(uuid).thenAccept(profileData -> {
@@ -76,6 +77,8 @@ public class MockROIService {
                 });
 
         }
+
+ */
     }
     private void startSimulation() {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -101,7 +104,7 @@ public class MockROIService {
     }
 
     public void onJoin(UUID uuid, String locale) {
-        translatorPlugin.getProfileService().retrieveProfile(uuid).thenAccept(profileData -> {
+       /* translatorPlugin.getProfileService().retrieveProfile(uuid).thenAccept(profileData -> {
             roiService.getLanguageCache().put(uuid, locale.toLowerCase());
 
             translatorPlugin.getTranslatorService().requiresTranslation(uuid).thenAccept(aBoolean -> {
@@ -119,6 +122,8 @@ public class MockROIService {
                 roiService.initTrackingProcess(uuid);
             });
         });
+
+        */
     }
 
     private long calculateDuration(boolean isDeclined, boolean isExplicitOrAuto, boolean isNative) {
@@ -166,7 +171,7 @@ public class MockROIService {
                         new TrackPlayerRequestMapper.TrackData(
                                 translatorPlugin.getConfigurationFile().getLicenseKey(),
                                 UUID.randomUUID(),
-                                uuid,
+                                ByteString.fromHex(uuid.toString()).toByteArray(),
                                 System.currentTimeMillis(),
                                 playtimeInSeconds,
                                 requiresTranslation,

@@ -117,6 +117,8 @@ public class OmniConnectionService {
         });
         transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST, (webSocketPacketContext, translationRequest) -> {
         });
+        transportService.registerPacket(PacketRegistry.PROFILE_UPDATE_EXTERN, (webSocketPacketContext, translationRequest) -> {
+        });
     }
 
     public void connect() {

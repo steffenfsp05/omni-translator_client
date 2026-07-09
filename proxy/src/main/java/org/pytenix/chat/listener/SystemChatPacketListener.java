@@ -10,6 +10,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.pytenix.chat.MessageSequencer;
 import org.pytenix.chat.SystemChatModule;
+import org.pytenix.profile.AbstractAnalyticsSecret;
+import org.pytenix.profile.AnalyticsKey;
 import org.pytenix.proto.generated.NetworkPackets;
 
 import java.util.UUID;
@@ -17,6 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SystemChatPacketListener implements PacketListener {
 
+    private final AbstractAnalyticsSecret abstractAnalyticsSecret;
     private final SystemChatModule systemChatService;
     private final MessageSequencer messageSequencer;
 
@@ -61,7 +64,7 @@ public class SystemChatPacketListener implements PacketListener {
                 return;
             }
 
-            systemChatService.getTranslatorPlugin().getProfileService().retrieveProfile(uuid)
+            systemChatService.getTranslatorPlugin().getProfileService().retrieveProfile(player.getUniqueId())
                     .thenAcceptAsync(profileData -> {
 
                         messageSequencer.translateWithOrder(

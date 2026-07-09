@@ -9,6 +9,8 @@ import org.pytenix.event.EventService;
 import org.pytenix.placeholder.GradientService;
 import org.pytenix.placeholder.PlaceholderService;
 import org.pytenix.placeholder.listener.ConfigUpdateListener;
+import org.pytenix.profile.AbstractAnalyticsSecret;
+import org.pytenix.profile.AnalyticsKey;
 import org.pytenix.profile.ProfileService;
 import org.pytenix.proto.generated.NetworkPackets;
 import org.pytenix.translation.TranslationProcessor;
@@ -33,6 +35,7 @@ public class DefaultTranslationService implements TranslatorService {
 
     final PlayerLocaleProcessor playerLocaleProcessor;
     final ProfileService profileService;
+
 
 
     private final Cache<UUID, List<UUID>> cachedReferences = CacheBuilder.newBuilder()
@@ -87,6 +90,7 @@ public class DefaultTranslationService implements TranslatorService {
         if (playerLocale != null && playerLocale.startsWith(translationConfiguration.getDefaultLanguage().toLowerCase())) {
             return CompletableFuture.completedFuture(false);
         }
+
 
         return profileService.retrieveProfile(playerUUID)
                 .thenApply(profileData -> {

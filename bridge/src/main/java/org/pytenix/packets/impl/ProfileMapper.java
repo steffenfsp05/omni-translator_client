@@ -1,5 +1,7 @@
 package org.pytenix.packets.impl;
 
+import com.google.common.io.ByteStreams;
+import com.google.protobuf.ByteString;
 import org.pytenix.packets.AbstractPacketMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 
@@ -16,12 +18,10 @@ public class ProfileMapper extends AbstractPacketMapper<NetworkPackets.ProfilePa
     public NetworkPackets.ProfilePacket to(ProfileData packet) {
         return NetworkPackets.ProfilePacket.newBuilder()
                 .setLicense(packet.license())
-                .setAction(packet.action())
                 .setConsentType(packet.consentType() == null ? NetworkPackets.ProfilePacket.ConsentType.UNKNOWN : packet.consentType())
                 .setRequestIdMostSig(packet.requestId().getMostSignificantBits())
                 .setRequestIdLeastSig(packet.requestId().getLeastSignificantBits())
-                .setUserIdMostSig(packet.playerId().getMostSignificantBits())
-                .setUserIdLeastSig(packet.playerId().getLeastSignificantBits())
+                .setAnalyticsId(ByteString.copyFrom(packet.analyticId()))
                 .build();
     }
 
@@ -29,8 +29,7 @@ public class ProfileMapper extends AbstractPacketMapper<NetworkPackets.ProfilePa
     public ProfileData from(NetworkPackets.ProfilePacket packet) {
         return new ProfileData(
                 packet.getLicense(),
-                packet.getAction(),
-                new UUID(packet.getUserIdMostSig(), packet.getUserIdLeastSig()),
+                packet.getAnalyticsId().toByteArray(),
                 new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig()),
                 packet.getConsentType()
         );
@@ -39,16 +38,14 @@ public class ProfileMapper extends AbstractPacketMapper<NetworkPackets.ProfilePa
 
     public record ProfileData(
             String license,
-            NetworkPackets.ProfilePacket.Action action,
-            UUID playerId,
+            byte[] analyticId,
             UUID requestId,
             NetworkPackets.ProfilePacket.ConsentType consentType
     ) {
-        public static ProfileData createDefault(String license, UUID playerId, UUID requestId) {
+        public static ProfileData createDefault(String license, byte[] analyticId, UUID requestId) {
             return new ProfileData(
                     license,
-                    NetworkPackets.ProfilePacket.Action.RESPONSE,
-                    playerId,
+                    analyticId,
                     requestId,
                     NetworkPackets.ProfilePacket.ConsentType.UNKNOWN
             );
@@ -57,28 +54,17 @@ public class ProfileMapper extends AbstractPacketMapper<NetworkPackets.ProfilePa
         public ProfileData withRequestId(UUID newRequestId) {
             return new ProfileData(
                     this.license,
-                    this.action,
-                    this.playerId,
+                    this.analyticId,
                     newRequestId,
                     this.consentType
             );
         }
 
-        public ProfileData withAction(NetworkPackets.ProfilePacket.Action newAction) {
-            return new ProfileData(
-                    this.license,
-                    newAction,
-                    this.playerId,
-                    this.requestId,
-                    this.consentType
-            );
-        }
 
         public ProfileData withConsentType(NetworkPackets.ProfilePacket.ConsentType newConsent) {
             return new ProfileData(
                     this.license,
-                    this.action,
-                    this.playerId,
+                    this.analyticId,
                     this.requestId,
                     newConsent
             );

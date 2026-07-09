@@ -1,22 +1,48 @@
 package org.pytenix.profile;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import org.pytenix.packets.impl.ProfileMapper;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractAnalyticsSecret {
-    private final String serverSalt;
+    private String serverSalt;
 
-    public AbstractAnalyticsSecret() {
-        this.serverSalt = getOrCreateSalt();
-    }
+    private final Cache<AnalyticsKey, UUID> reverseLookupMap = Caffeine.newBuilder()
+            .maximumSize(10000)
+            .build();
 
     protected abstract String getStoredSalt();
     protected abstract void saveSaltToConfig(String salt);
     protected abstract void logInfo(String message);
     protected abstract void logError(String message, Throwable throwable);
+
+    public AnalyticsKey getAnalyticsKey(UUID uuid) {
+        if (uuid == null) return null;
+
+        byte[] bytes = getAnalyticsByteId(uuid);
+        if (bytes == null) return null;
+
+        AnalyticsKey key = new AnalyticsKey(bytes);
+
+        // Hier merken wir uns den Rückweg!
+        reverseLookupMap.put(key, uuid);
+
+        return key;
+    }
+
+
+    public UUID getUuidFromAnalyticsKey(AnalyticsKey key) {
+        if (key == null) return null;
+        return reverseLookupMap.getIfPresent(key);
+    }
 
     private String getOrCreateSalt() {
         String existingSalt = getStoredSalt();
@@ -41,23 +67,18 @@ public abstract class AbstractAnalyticsSecret {
         return newSalt;
     }
 
-    public String getAnalyticsId(UUID playerUuid) {
+    public byte[] getAnalyticsByteId(UUID playerUuid) {
         if (playerUuid == null) return null;
+
+        if (this.serverSalt == null) {
+            this.serverSalt = getOrCreateSalt();
+        }
 
         String rawInput = playerUuid.toString() + this.serverSalt;
 
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(rawInput.getBytes(StandardCharsets.UTF_8));
-
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hashBytes) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            return hexString.toString();
-
+            return digest.digest(rawInput.getBytes(StandardCharsets.UTF_8));
         } catch (NoSuchAlgorithmException e) {
             logError("SHA-256 Algorithmus fehlt im System!", e);
             return null;

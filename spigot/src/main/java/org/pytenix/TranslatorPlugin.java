@@ -24,8 +24,9 @@ import org.pytenix.placeholder.GradientService;
 import org.pytenix.placeholder.PlaceholderService;
 import org.pytenix.placeholder.impl.DefaultGradientService;
 import org.pytenix.placeholder.impl.DefaultPlaceholderService;
+import org.pytenix.profile.AbstractAnalyticsSecret;
 import org.pytenix.profile.ProfileService;
-import org.pytenix.profile.impl.DefaultProfileService;
+import org.pytenix.service.InternProfileService;
 import org.pytenix.service.ModuleService;
 import org.pytenix.service.TaskScheduler;
 import org.pytenix.translation.TranslationProcessor;
@@ -36,6 +37,7 @@ import org.pytenix.util.TextComponentUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 
@@ -79,6 +81,7 @@ public class TranslatorPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
 
+
         this.pluginMessagingChannel = "translator:main";
 
         this.caffeineCache = new CaffeineCacheProvider<>();
@@ -110,9 +113,9 @@ public class TranslatorPlugin extends JavaPlugin {
         this.gradientService = new DefaultGradientService();
         this.eventService = new DefaultEventService();
 
-        this.profileService = new DefaultProfileService(
-                () -> translatorService.getTranslationConfiguration().getLicenseKey(),
-                profilePacket -> getSpigotTransport().getTransportService().send(pluginMessagingChannel, PacketRegistry.PROFILE, profilePacket)
+        this.profileService = new InternProfileService(
+                (definition, o) -> getSpigotTransport().getTransportService().send(pluginMessagingChannel, definition, o),
+                () -> getTranslatorService().getTranslationConfiguration().getLicenseKey()
         );
 
         this.translatorService = new DefaultTranslationService(

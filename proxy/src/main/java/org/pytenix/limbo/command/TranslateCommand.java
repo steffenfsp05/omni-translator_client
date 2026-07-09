@@ -9,6 +9,7 @@ import org.pytenix.TranslatorPlugin;
 import org.pytenix.packets.PacketMapperRegistry;
 import org.pytenix.packets.PacketRegistry;
 import org.pytenix.packets.impl.ConsentRefreshRequestMapper;
+import org.pytenix.profile.AnalyticsKey;
 import org.pytenix.proto.generated.NetworkPackets;
 
 import java.util.UUID;

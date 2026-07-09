@@ -1,6 +1,7 @@
 package org.pytenix.packets.impl;
 
 import com.fasterxml.jackson.databind.deser.std.UUIDDeserializer;
+import com.google.protobuf.ByteString;
 import org.pytenix.packets.AbstractPacketMapper;
 import org.pytenix.proto.generated.NetworkPackets;
 
@@ -19,8 +20,7 @@ public class TrackPlayerRequestMapper  extends AbstractPacketMapper<NetworkPacke
                 .setLicenseKey(packet.licenseKey())
                 .setRequestIdMostSig(packet.requestId().getMostSignificantBits())
                 .setRequestIdLeastSig(packet.requestId().getLeastSignificantBits())
-                .setUserIdMostSig(packet.playerId().getMostSignificantBits())
-                .setUserIdLeastSig(packet.playerId().getLeastSignificantBits())
+                .setAnalyticsId(ByteString.copyFrom(packet.analyticId()))
                 .setPlaytimeSeconds(packet.playtimeSeconds())
                 .setTimestamp(packet.timestamp())
                 .setIsTranslated(packet.is_translated())
@@ -33,7 +33,7 @@ public class TrackPlayerRequestMapper  extends AbstractPacketMapper<NetworkPacke
         return new TrackData(
                 packet.getLicenseKey(),
                 new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig()),
-                new UUID(packet.getUserIdMostSig() , packet.getUserIdLeastSig()),
+                packet.getAnalyticsId().toByteArray(),
                 packet.getTimestamp(),
                 packet.getPlaytimeSeconds(),
                 packet.getIsTranslated(),
@@ -41,8 +41,7 @@ public class TrackPlayerRequestMapper  extends AbstractPacketMapper<NetworkPacke
         );
     }
 
-    public record TrackData(String licenseKey, UUID requestId, UUID playerId, long timestamp, int playtimeSeconds, boolean is_translated, String language)
-    {
+    public record TrackData(String licenseKey, UUID requestId, byte[] analyticId, long timestamp, int playtimeSeconds, boolean is_translated, String language)    {
 
     }
 }

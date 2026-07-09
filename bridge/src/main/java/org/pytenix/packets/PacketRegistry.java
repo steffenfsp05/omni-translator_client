@@ -67,4 +67,20 @@ public class PacketRegistry {
                     NetworkPackets.TrackPlayerPacket.parser()
             );
 
+    public static final PacketDefinition<NetworkPackets.ProfileInternRequest> PROFILE_REQUEST_INTERN =
+            new PacketDefinition<>(
+                    11,
+                    NetworkPackets.ProfileInternRequest.parser()
+            );
+    public static final PacketDefinition<NetworkPackets.ProfileExternRequest> PROFILE_REQUEST_EXTERN =
+            new PacketDefinition<>(
+                    12,
+                    NetworkPackets.ProfileExternRequest.parser()
+            );
+
+    public static final PacketDefinition<NetworkPackets.ProfileExternUpdate> PROFILE_UPDATE_EXTERN =
+            new PacketDefinition<>(
+                    13,
+                    NetworkPackets.ProfileExternUpdate.parser()
+            );
 }

@@ -30,12 +30,12 @@ message TrackPlayerPacket {
   fixed64 request_id_most_sig = 3;
   fixed64 request_id_least_sig = 4;
 
-  fixed64 user_id_most_sig = 5;
-  fixed64 user_id_least_sig = 6;
-  int32 playtime_seconds = 7;
+  bytes analytics_id = 5;
 
-  bool is_translated = 8;
-  string language = 9;
+  int32 playtime_seconds = 6;
+
+  bool is_translated = 7;
+  string language = 8;
 }
 
 message HeartbeatPacket {
@@ -85,12 +85,34 @@ message ConsentRefreshRequest
   ProfilePacket.ConsentType consentType = 5;
 }
 
+//Für Proxy -> Backend
+message ProfileExternUpdate
+{
+  ProfilePacket profilePacket = 1;
+}
+
+//Für Proxy -> Backend
+message ProfileExternRequest
+{
+  string license = 1;
+  fixed64 request_id_most_sig = 2;
+  fixed64 request_id_least_sig = 3;
+  bytes analytics_id = 4;
+}
+
+//Nur für Spigot -> Proxy
+message ProfileInternRequest
+{
+  string license = 1;
+  fixed64 request_id_most_sig = 2;
+  fixed64 request_id_least_sig = 3;
+
+
+  fixed64 user_id_most_sig = 4;
+  fixed64 user_id_least_sig = 5;
+}
+
 message ProfilePacket {
-  enum Action {
-    FETCH = 0;   // Proxy/Spigot fragt Profil an (Backend soll lesen)
-    UPDATE = 1;  // Proxy/Spigot sendet Änderung (Backend soll speichern)
-    RESPONSE = 2;// Backend antwortet mit den Daten an den Proxy/Spigot
-  }
 
   enum ConsentType
   {
@@ -101,14 +123,12 @@ message ProfilePacket {
   }
 
   string license = 1;
-  Action action = 2;
   fixed64 request_id_most_sig = 3;
   fixed64 request_id_least_sig = 4;
 
-  fixed64 user_id_most_sig = 5;
-  fixed64 user_id_least_sig = 6;
+  bytes analytics_id = 5;
 
-  ConsentType consentType = 7;
+  ConsentType consentType = 6;
 }
 
 
@@ -145,7 +165,12 @@ message PacketWrapper {
     TranslationRequest translation_request = 5;
     TranslationResult translation_result = 6;
     ProfilePacket profile_packet = 7;
-    ConsentRefreshRequest consentrefresh_request = 8;
+    ConsentRefreshRequest consent_refresh_request = 8;
+    HeartbeatPacket heart_beat_packet = 9;
+    TrackPlayerPacket track_player_packet = 10;
+    ProfileInternRequest profile_intern_request = 11;
+    ProfileExternRequest profile_extern_request = 12;
+    ProfileExternUpdate profile_extern_update = 13;
 
   }
 }
