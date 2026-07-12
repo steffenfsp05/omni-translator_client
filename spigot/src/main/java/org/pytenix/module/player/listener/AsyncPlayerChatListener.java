@@ -2,6 +2,7 @@ package org.pytenix.module.player.listener;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@Singleton
 public class AsyncPlayerChatListener implements Listener {
 
     private final Provider<LiveChatModule> liveChatModuleProvider;

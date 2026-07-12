@@ -21,8 +21,12 @@ import org.pytenix.TranslatorPlugin;
 import org.pytenix.listener.PlayerJoinQuitListener;
 import org.pytenix.listener.PlayerLocaleChangeListener;
 import org.pytenix.module.gui.InventoryModule;
+import org.pytenix.module.gui.cache.ItemStackCache;
+import org.pytenix.module.gui.listener.PacketListener;
 import org.pytenix.module.hologram.HologramModule;
+import org.pytenix.module.hologram.listener.EntityPacketListener;
 import org.pytenix.module.player.LiveChatModule;
+import org.pytenix.module.player.listener.AsyncPlayerChatListener;
 import org.pytenix.network.DefaultPacketRegistrar;
 import org.pytenix.network.SpigotTransport;
 import org.pytenix.network.listener.ConfigUpdateListener;
@@ -65,11 +69,8 @@ public class TranslatorSpigotModule extends AbstractModule {
         }).to(new TypeLiteral<CaffeineCacheProvider<String, String>>() {
         }).in(Scopes.SINGLETON);
 
-        bind(ChannelCarrierService.class).in(Scopes.SINGLETON);
-        bind(TranslationRequestService.class).in(Scopes.SINGLETON);
 
         bind(ProfileService.class).to(InternProfileService.class).in(Scopes.SINGLETON);
-        bind(TaskScheduler.class).in(Scopes.SINGLETON);
 
         bind(new TypeLiteral<PacketRegistrar<String>>() {
         }).to(DefaultPacketRegistrar.class).in(Scopes.SINGLETON);
@@ -79,15 +80,7 @@ public class TranslatorSpigotModule extends AbstractModule {
         moduleBinder.addBinding().to(LiveChatModule.class);
         moduleBinder.addBinding().to(HologramModule.class);
 
-        bind(ModuleService.class).in(Scopes.SINGLETON);
 
-        // Listeners
-        bind(PlayerJoinQuitListener.class).in(Scopes.SINGLETON);
-        bind(PlayerLocaleChangeListener.class).in(Scopes.SINGLETON);
-        bind(ConfigUpdateListener.class).in(Scopes.SINGLETON);
-        bind(ConsentUpdateListener.class).in(Scopes.SINGLETON);
-
-        bind(SpigotTransport.class).in(Scopes.SINGLETON);
 
     }
 

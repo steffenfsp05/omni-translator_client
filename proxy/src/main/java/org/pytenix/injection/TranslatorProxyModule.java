@@ -57,24 +57,11 @@ public class TranslatorProxyModule extends AbstractModule {
         }).in(Scopes.SINGLETON);
         bind(ProfileService.class).to(ExternProfileService.class).in(Scopes.SINGLETON);
 
-        bind(MessageSequencer.class).in(Scopes.SINGLETON);
-        bind(ROIService.class).in(Scopes.SINGLETON);
-        bind(SystemChatModule.class).in(Scopes.SINGLETON);
-        bind(GeoSocketEndpoint.class).in(Scopes.SINGLETON);
-        bind(TranslationSocketEndpoint.class).in(Scopes.SINGLETON);
-        bind(OmniConnectionService.class).in(Scopes.SINGLETON);
 
-        bind(InternConfigRequestConsumer.class).in(Scopes.SINGLETON);
-        bind(InternTranslationRequestConsumer.class).in(Scopes.SINGLETON);
-        bind(InternProfileConsumer.class).in(Scopes.SINGLETON);
 
         bind(new TypeLiteral<PacketRegistrar<RegisteredServer>>() {
         }).to(InternPacketRegistrar.class).in(Scopes.SINGLETON);
 
-        bind(BackendServerConfigConsumer.class).in(Scopes.SINGLETON);
-        bind(BackendTranslationResultConsumer.class).in(Scopes.SINGLETON);
-        bind(BackendGeoResultConsumer.class).in(Scopes.SINGLETON);
-        bind(BackendProfileResultConsumer.class).in(Scopes.SINGLETON);
 
     }
 

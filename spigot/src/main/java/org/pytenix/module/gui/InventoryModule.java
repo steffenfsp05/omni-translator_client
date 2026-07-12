@@ -14,6 +14,7 @@ import org.omni.translation.TranslatorService;
 import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.omni.translation.module.AbstractTranslatorModule;
 import org.pytenix.TranslatorPlugin;
+import org.pytenix.module.gui.cache.ItemStackCache;
 import org.pytenix.module.gui.listener.PacketListener;
 
 import java.util.ArrayList;
@@ -29,16 +30,19 @@ public class InventoryModule extends AbstractTranslatorModule {
     private final LegacyComponentSerializer legacyComponentSerializer;
 
     final PacketListener inventoryPacketListener;
+    final ItemStackCache itemStackCache;
 
     @Inject
     public InventoryModule(
             ProfileService profileService,
             TranslatorService translatorService,
             PlayerLocaleProcessor playerLocaleProcessor,
-            PacketListener inventoryPacketListener
+            PacketListener inventoryPacketListener,
+            ItemStackCache itemStackCache
     ) {
         super(profileService, translatorService, playerLocaleProcessor, "gui");
 
+        this.itemStackCache = itemStackCache;
         this.legacyComponentSerializer = TranslatorPlugin.getLegacyComponentSerializer();
         this.inventoryPacketListener = inventoryPacketListener;
 
@@ -58,73 +62,76 @@ public class InventoryModule extends AbstractTranslatorModule {
             return CompletableFuture.completedFuture(item);
         }
 
-        ItemStack clonedItem = item.clone();
-        ItemMeta meta = clonedItem.getItemMeta();
+        return itemStackCache.getOrCompute(item, targetLanguage, () -> {
 
-        List<CompletableFuture<?>> allFutures = new ArrayList<>();
+            ItemStack clonedItem = item.clone();
+            ItemMeta meta = clonedItem.getItemMeta();
 
-        final CompletableFuture<String> nameFuture = meta.hasDisplayName()
-                ? translate(legacyComponentSerializer.serialize(meta.displayName()), targetLanguage)
-                : CompletableFuture.completedFuture(null);
+            List<CompletableFuture<?>> allFutures = new ArrayList<>();
 
-        if (meta.hasDisplayName()) {
-            allFutures.add(nameFuture);
-        }
+            final CompletableFuture<String> nameFuture = meta.hasDisplayName()
+                    ? translate(legacyComponentSerializer.serialize(meta.displayName()), targetLanguage)
+                    : CompletableFuture.completedFuture(null);
 
-        List<CompletableFuture<String>> loreFutures = new ArrayList<>();
+            if (meta.hasDisplayName()) {
+                allFutures.add(nameFuture);
+            }
 
-        if (meta.hasLore() && meta.lore() != null) {
-            StringBuilder currentBlock = new StringBuilder();
+            List<CompletableFuture<String>> loreFutures = new ArrayList<>();
 
-            for (Component component : meta.lore()) {
-                String serialized = legacyComponentSerializer.serialize(component);
+            if (meta.hasLore() && meta.lore() != null) {
+                StringBuilder currentBlock = new StringBuilder();
 
-                if (serialized.trim().isEmpty() || COLOR_PATTERN.matcher(serialized).matches()) {
-                    if (!currentBlock.isEmpty()) {
-                        CompletableFuture<String> blockFuture = translate(currentBlock.toString(), targetLanguage);
-                        loreFutures.add(blockFuture);
-                        allFutures.add(blockFuture);
-                        currentBlock.setLength(0);
+                for (Component component : meta.lore()) {
+                    String serialized = legacyComponentSerializer.serialize(component);
+
+                    if (serialized.trim().isEmpty() || COLOR_PATTERN.matcher(serialized).matches()) {
+                        if (!currentBlock.isEmpty()) {
+                            CompletableFuture<String> blockFuture = translate(currentBlock.toString(), targetLanguage);
+                            loreFutures.add(blockFuture);
+                            allFutures.add(blockFuture);
+                            currentBlock.setLength(0);
+                        }
+                        loreFutures.add(CompletableFuture.completedFuture(serialized));
+                    } else {
+                        if (!currentBlock.isEmpty()) {
+                            currentBlock.append("\n");
+                        }
+                        currentBlock.append(serialized);
                     }
-                    loreFutures.add(CompletableFuture.completedFuture(serialized));
-                } else {
-                    if (!currentBlock.isEmpty()) {
-                        currentBlock.append("\n");
-                    }
-                    currentBlock.append(serialized);
+                }
+
+                if (!currentBlock.isEmpty()) {
+                    CompletableFuture<String> lastBlockFuture = translate(currentBlock.toString(), targetLanguage);
+                    loreFutures.add(lastBlockFuture);
+                    allFutures.add(lastBlockFuture);
                 }
             }
 
-            if (!currentBlock.isEmpty()) {
-                CompletableFuture<String> lastBlockFuture = translate(currentBlock.toString(), targetLanguage);
-                loreFutures.add(lastBlockFuture);
-                allFutures.add(lastBlockFuture);
-            }
-        }
-
-        return CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0]))
-                .thenApply(v -> {
-                    if (meta.hasDisplayName()) {
-                        String translatedName = nameFuture.join();
-                        if (translatedName != null) {
-                            meta.displayName(legacyComponentSerializer.deserialize(translatedName));
-                        }
-                    }
-
-                    if (!loreFutures.isEmpty()) {
-                        List<Component> newLore = new ArrayList<>();
-                        for (CompletableFuture<String> future : loreFutures) {
-                            String result = future.join();
-                            for (String line : result.split("\n")) {
-                                newLore.add(legacyComponentSerializer.deserialize(line));
+            return CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0]))
+                    .thenApply(v -> {
+                        if (meta.hasDisplayName()) {
+                            String translatedName = nameFuture.join();
+                            if (translatedName != null) {
+                                meta.displayName(legacyComponentSerializer.deserialize(translatedName));
                             }
                         }
-                        meta.lore(newLore);
-                    }
 
-                    clonedItem.setItemMeta(meta);
-                    return clonedItem;
-                });
+                        if (!loreFutures.isEmpty()) {
+                            List<Component> newLore = new ArrayList<>();
+                            for (CompletableFuture<String> future : loreFutures) {
+                                String result = future.join();
+                                for (String line : result.split("\n")) {
+                                    newLore.add(legacyComponentSerializer.deserialize(line));
+                                }
+                            }
+                            meta.lore(newLore);
+                        }
+
+                        clonedItem.setItemMeta(meta);
+                        return clonedItem;
+                    });
+        });
     }
 
     public CompletableFuture<List<ItemStack>> translateInventoryBatch(List<ItemStack> items, String targetLanguage) {
