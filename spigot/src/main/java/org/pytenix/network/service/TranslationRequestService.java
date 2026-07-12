@@ -7,6 +7,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.omni.entity.ServerConfiguration;
+import org.omni.entity.TranslationModule;
 import org.omni.packets.PacketMapperRegistry;
 import org.omni.packets.PacketRegistry;
 import org.omni.packets.data.TranslationRequestData;
@@ -21,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class TranslationRequestService {
+
+
     public final Cache<UUID, List<CompletableFuture<String>>> pendingRequests = Caffeine.newBuilder()
             .maximumSize(10_000)
             .expireAfterWrite(Duration.ofSeconds(20))
@@ -45,10 +48,10 @@ public class TranslationRequestService {
         this.packetMapperRegistry = packetMapperRegistry;
     }
 
-    public CompletableFuture<String> translate(UUID id, String text, String targetLang, String module) {
+    public CompletableFuture<String> translate(UUID id, String text, String targetLang, TranslationModule translationModule) {
         if (text == null || text.isEmpty()) return CompletableFuture.completedFuture("");
 
-        DeduplicationKey key = new DeduplicationKey(text, targetLang, module);
+        DeduplicationKey key = new DeduplicationKey(text, targetLang, translationModule);
         CompletableFuture<String> future = new CompletableFuture<>();
         future.orTimeout(15, TimeUnit.SECONDS).exceptionally(ex -> text);
 
@@ -68,7 +71,7 @@ public class TranslationRequestService {
                             masterId,
                             text,
                             targetLang,
-                            ServerConfiguration.Module.getModule(module)
+                            translationModule
                     )));
         }
 
@@ -85,6 +88,6 @@ public class TranslationRequestService {
         }
     }
 
-    public record DeduplicationKey(String text, String lang, String module) {
+    public record DeduplicationKey(String text, String lang, TranslationModule translationModule) {
     }
 }

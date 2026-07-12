@@ -9,6 +9,7 @@ import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.omni.entity.TranslationModule;
 import org.omni.translation.TranslatorService;
 
 import java.util.*;
@@ -41,9 +42,9 @@ public class DefaultTextComponentService implements TextComponentService {
         this.translatorService = translatorService;
     }
 
-    public CompletableFuture<Component> translateComplexMessage(Component originalComponent, String lang, String module) {
-        TranslationKey key = new TranslationKey(originalComponent, lang, module);
-        return translationCache.get(key, (k, executor) -> doTranslateComplexMessage(k.component(), k.lang(), k.module()));
+    public CompletableFuture<Component> translateComplexMessage(Component originalComponent, String lang, TranslationModule translationModule) {
+        TranslationKey key = new TranslationKey(originalComponent, lang, translationModule);
+        return translationCache.get(key, (k, executor) -> doTranslateComplexMessage(k.component(), k.lang(), k.translationModule()));
     }
 
     public String sanitizeLegacyText(String text) {
@@ -55,7 +56,7 @@ public class DefaultTextComponentService implements TextComponentService {
         return sanitized;
     }
 
-    private CompletableFuture<Component> doTranslateComplexMessage(Component originalComponent, String lang, String module) {
+    private CompletableFuture<Component> doTranslateComplexMessage(Component originalComponent, String lang, TranslationModule translationModule) {
         TranslationContext ctx = new TranslationContext();
         Component taggedComponent = injectTags(originalComponent, ctx);
         String mainPayload = legacySerializer.serialize(taggedComponent);
@@ -66,13 +67,13 @@ public class DefaultTextComponentService implements TextComponentService {
             int id = entry.getKey();
             String legacyHover = legacySerializer.serialize(entry.getValue());
 
-            hoverFutures.put(id, translatorService.translate(legacyHover, lang, module).exceptionally(ex -> {
+            hoverFutures.put(id, translatorService.translate(legacyHover, lang, translationModule).exceptionally(ex -> {
                 System.err.println("Translation failed for Hover ID " + id + ": " + ex.getMessage());
                 return legacyHover;
             }));
         }
 
-        CompletableFuture<String> mainFuture = translatorService.translate(mainPayload, lang, module).exceptionally(ex -> {
+        CompletableFuture<String> mainFuture = translatorService.translate(mainPayload, lang, translationModule).exceptionally(ex -> {
             System.err.println("Translation failed for main payload: " + ex.getMessage());
             return mainPayload;
         });
@@ -173,7 +174,7 @@ public class DefaultTextComponentService implements TextComponentService {
         return modified;
     }
 
-    private record TranslationKey(Component component, String lang, String module) {
+    private record TranslationKey(Component component, String lang, TranslationModule translationModule) {
     }
 
     private static class TranslationContext {

@@ -37,7 +37,7 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
         if (event.isCancelled()) return;
 
         InventoryModule inventoryModule = inventoryModuleProvider.get();
-        if (!inventoryModule.isActive()) return;
+        if (!inventoryModule.isModuleActive()) return;
 
         if (event.getPacketType() == PacketType.Play.Server.WINDOW_ITEMS) {
             inventoryModule.requiresTranslation(event.getUser().getUUID()).thenAccept(requiresTranslation -> {

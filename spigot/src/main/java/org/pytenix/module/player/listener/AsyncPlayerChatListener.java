@@ -36,7 +36,7 @@ public class AsyncPlayerChatListener implements Listener {
 
         LiveChatModule liveChatModule = liveChatModuleProvider.get();
 
-        if (!liveChatModule.isActive()) return;
+        if (!liveChatModule.isModuleActive()) return;
 
         Player sender = event.getPlayer();
         Component originalMessage = event.message();
@@ -71,7 +71,7 @@ public class AsyncPlayerChatListener implements Listener {
 
         languageGroups.forEach((targetLang, groupMembers) -> {
 
-            textComponentUtil.translateComplexMessage(originalMessage, targetLang, liveChatModule.getModuleName())
+            textComponentUtil.translateComplexMessage(originalMessage, targetLang, liveChatModule.getTranslationModule())
                     .orTimeout(5, TimeUnit.SECONDS)
                     .whenComplete((translatedText, ex) -> {
 

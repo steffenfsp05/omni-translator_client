@@ -2,6 +2,7 @@ package org.omni.packets.impl;
 
 import com.google.inject.Singleton;
 import org.omni.entity.ServerConfiguration;
+import org.omni.entity.TranslationModule;
 import org.omni.packets.AbstractPacketMapper;
 import org.omni.packets.data.HeartBeatUpdateData;
 import org.omni.proto.generated.Protobuf;
@@ -14,7 +15,7 @@ import java.util.UUID;
 public class HeartBeatRequestMapper extends AbstractPacketMapper<Protobuf.HeartbeatPacket, HeartBeatUpdateData> {
 
 
-    private static final Map<Protobuf.Module, ServerConfiguration.Module> MODULE_MAP = new EnumMap<>(Protobuf.Module.class);
+    private static final Map<Protobuf.Module, TranslationModule> MODULE_MAP = new EnumMap<>(Protobuf.Module.class);
 
     public HeartBeatRequestMapper() {
         super(Protobuf.HeartbeatPacket.class, HeartBeatUpdateData.class);

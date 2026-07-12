@@ -56,7 +56,7 @@ public class EntityPacketListener implements PacketListener, Listener {
     @Override
     public void onPacketSend(PacketSendEvent event) {
         HologramModule hologramModule = hologramModuleProvider.get();
-        if (!hologramModule.isActive()) return;
+        if (!hologramModule.isModuleActive()) return;
 
         if (event.getPacketType() == PacketType.Play.Server.ENTITY_METADATA) {
             WrapperPlayServerEntityMetadata wrapper = new WrapperPlayServerEntityMetadata(event);

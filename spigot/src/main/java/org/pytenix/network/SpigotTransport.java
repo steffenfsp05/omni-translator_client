@@ -6,6 +6,7 @@ import com.google.inject.name.Named;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
+import org.omni.entity.TranslationModule;
 import org.omni.event.EventService;
 import org.omni.packets.registry.PacketRegistrar;
 import org.pytenix.TranslatorPlugin;
@@ -79,7 +80,7 @@ public class SpigotTransport {
                 });
     }
 
-    public CompletableFuture<String> translate(UUID id, String text, String targetLang, String module) {
-        return translationRequestService.translate(id, text, targetLang, module);
+    public CompletableFuture<String> translate(UUID id, String text, String targetLang, TranslationModule translationModule) {
+        return translationRequestService.translate(id, text, targetLang, translationModule);
     }
 }

@@ -9,6 +9,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.omni.entity.TranslationModule;
 import org.omni.profile.ProfileService;
 import org.omni.translation.TranslatorService;
 import org.omni.translation.locale.PlayerLocaleProcessor;
@@ -40,7 +41,7 @@ public class InventoryModule extends AbstractTranslatorModule {
             PacketListener inventoryPacketListener,
             ItemStackCache itemStackCache
     ) {
-        super(profileService, translatorService, playerLocaleProcessor, "gui");
+        super(profileService, translatorService, playerLocaleProcessor, TranslationModule.GUI);
 
         this.itemStackCache = itemStackCache;
         this.legacyComponentSerializer = TranslatorPlugin.getLegacyComponentSerializer();

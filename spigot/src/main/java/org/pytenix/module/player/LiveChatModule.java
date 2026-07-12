@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.omni.entity.TranslationModule;
 import org.omni.profile.ProfileService;
 import org.omni.translation.TranslatorService;
 import org.omni.translation.locale.PlayerLocaleProcessor;
@@ -30,7 +31,7 @@ public class LiveChatModule extends AbstractTranslatorModule {
             AsyncPlayerChatListener chatListener
     ) {
 
-        super(profileService, translatorService, playerLocaleProcessor, "live_chat");
+        super(profileService, translatorService, playerLocaleProcessor, TranslationModule.LIVE_CHAT);
 
         this.translatorPlugin = translatorPlugin;
         this.chatListener = chatListener;

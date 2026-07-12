@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import org.omni.entity.TranslationModule;
 import org.omni.profile.ProfileService;
 import org.omni.translation.TranslatorService;
 import org.omni.translation.locale.PlayerLocaleProcessor;
@@ -34,7 +35,7 @@ public class HologramModule extends AbstractTranslatorModule {
             TranslatorPlugin translatorPlugin,
             EntityPacketListener entityPacketListener
     ) {
-        super(profileService, translatorService, playerLocaleProcessor, "hologram");
+        super(profileService, translatorService, playerLocaleProcessor, TranslationModule.HOLOGRAM);
 
         this.translatorPlugin = translatorPlugin;
         this.playerTranslationCache = CacheBuilder.newBuilder()

@@ -5,12 +5,14 @@ import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import org.omni.entity.ServerConfiguration;
+import org.omni.entity.TranslationModule;
 import org.omni.translation.TranslatorService;
 import org.omni.translation.component.TextComponentService;
 import org.pytenix.backend.GeoSocketEndpoint;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class ProxyPingListener {
 
@@ -19,11 +21,15 @@ public class ProxyPingListener {
     private final TranslatorService translatorService;
     private final TextComponentService textComponentService;
 
+    private final TranslationModule translationModule;
+
     @Inject
     public ProxyPingListener(TranslatorService translatorService, GeoSocketEndpoint geoSocketEndpoint, TextComponentService textComponentService) {
         this.geoSocketEndpoint = geoSocketEndpoint;
         this.translatorService = translatorService;
         this.textComponentService = textComponentService;
+
+        this.translationModule = TranslationModule.MOTD;
     }
 
     @Subscribe
@@ -31,13 +37,13 @@ public class ProxyPingListener {
         System.out.println("[MOTD] Ping empfangen!");
 
         ServerConfiguration configuration = translatorService.getTranslationConfiguration();
+
         if (configuration == null) {
             System.out.println("[MOTD] Abbruch: ServerConfiguration ist NULL. (Noch nicht geladen?)");
             return null;
         }
 
-        String moduleName = ServerConfiguration.Module.MOTD.getModuleName();
-        if (!configuration.getModules().getOrDefault(moduleName, true)) {
+        if (!configuration.getModules().getOrDefault(translationModule, true)) {
             System.out.println("[MOTD] Abbruch: MOTD-Modul ist in der Config deaktiviert.");
             return null;
         }
@@ -48,17 +54,17 @@ public class ProxyPingListener {
         System.out.println("[MOTD] Starte asynchrone Übersetzung für IP: " + ipAddress);
 
         CompletableFuture<Void> pingPipeline = geoSocketEndpoint.sendGeoRequest(uuid, ipAddress)
-                .orTimeout(400, java.util.concurrent.TimeUnit.MILLISECONDS)
+                .orTimeout(400, TimeUnit.MILLISECONDS)
                 .thenCompose(locale -> {
                     System.out.println("[MOTD] Geo-Location erhalten: " + locale + ". Übersetze Text...");
 
                     return textComponentService.translateComplexMessage(
                             event.getPing().getDescriptionComponent(),
                             locale,
-                            moduleName
+                            translationModule
                     );
                 })
-                .orTimeout(400, java.util.concurrent.TimeUnit.MILLISECONDS)
+                .orTimeout(400, TimeUnit.MILLISECONDS)
                 .thenAccept(translatedComponent -> {
                     System.out.println("[MOTD] Übersetzung fertig! Wende neue MOTD an.");
 

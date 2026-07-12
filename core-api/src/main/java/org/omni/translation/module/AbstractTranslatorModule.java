@@ -3,6 +3,7 @@ package org.omni.translation.module;
 
 import lombok.Getter;
 import org.omni.entity.ServerConfiguration;
+import org.omni.entity.TranslationModule;
 import org.omni.profile.ProfileService;
 import org.omni.translation.TranslatorService;
 import org.omni.translation.locale.PlayerLocaleProcessor;
@@ -18,27 +19,27 @@ public abstract class AbstractTranslatorModule {
     final TranslatorService translatorService;
     final PlayerLocaleProcessor playerLocaleProcessor;
 
-    final String moduleName;
+    final TranslationModule translationModule;
 
 
     public AbstractTranslatorModule(
             ProfileService profileService,
             TranslatorService translatorService,
             PlayerLocaleProcessor playerLocaleProcessor,
-            String moduleName
+            TranslationModule translationModule
     ) {
 
         this.profileService = profileService;
         this.translatorService = translatorService;
         this.playerLocaleProcessor = playerLocaleProcessor;
-        this.moduleName = moduleName;
+        this.translationModule = translationModule;
     }
 
 
     public void init() { }
 
-    public boolean isActive() {
-        return getServerConfiguration().getModules().getOrDefault(moduleName, true);
+    public boolean isModuleActive() {
+        return getServerConfiguration().getModules().getOrDefault(translationModule, true);
     }
 
     public CompletableFuture<Boolean> requiresTranslation(UUID playerUUID) {
@@ -64,7 +65,7 @@ public abstract class AbstractTranslatorModule {
         //  if (cached != null)
         //      return CompletableFuture.completedFuture(cached);
 
-        return translatorService.translate(text, locale, this.moduleName).whenComplete((result, throwable) -> {
+        return translatorService.translate(text, locale, this.translationModule).whenComplete((result, throwable) -> {
 
             if (throwable == null && result != null) {
                 //translatorPlugin.getCaffeineCache().set(generateKey(text, locale), result);

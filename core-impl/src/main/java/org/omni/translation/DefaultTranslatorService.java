@@ -7,6 +7,8 @@ import com.google.inject.Singleton;
 import lombok.Getter;
 import lombok.Setter;
 import org.omni.entity.ServerConfiguration;
+import org.omni.entity.ServerConsentMode;
+import org.omni.entity.TranslationModule;
 import org.omni.event.EventService;
 import org.omni.placeholder.gradient.ExtractionResult;
 import org.omni.placeholder.gradient.GradientData;
@@ -70,7 +72,7 @@ public class DefaultTranslatorService implements TranslatorService {
     }
 
 
-    public CompletableFuture<String> translate(String text, String lang, String module) {
+    public CompletableFuture<String> translate(String text, String lang, TranslationModule module) {
         if (text == null || text.isBlank()) return CompletableFuture.completedFuture(text);
 
         UUID batchId = UUID.randomUUID();
@@ -96,7 +98,7 @@ public class DefaultTranslatorService implements TranslatorService {
         return profileService.retrieveProfile(playerUUID)
                 .thenApply(profileData -> {
                     System.out.println("REQUIRING TRANSLATION - " + profileData.consentType());
-                    if (translationConfiguration.getConsentMode().equals(ServerConfiguration.ConsentMode.AUTO_OPT) &&
+                    if (translationConfiguration.getConsentMode().equals(ServerConsentMode.AUTO_OPT) &&
                             profileData.consentType().equals(Protobuf.ConsentType.AUTO))
                         return true;
 
@@ -114,8 +116,8 @@ public class DefaultTranslatorService implements TranslatorService {
     }
 
 
-    public CompletableFuture<String> process(UUID id, String text, String targetLang, String module) {
-        return translationProcessor.endpointTranslation(id, text, targetLang, module);
+    public CompletableFuture<String> process(UUID id, String text, String targetLang, TranslationModule translationModule) {
+        return translationProcessor.endpointTranslation(id, text, targetLang, translationModule);
     }
 
 
@@ -136,8 +138,8 @@ public class DefaultTranslatorService implements TranslatorService {
         return String.join("\n", processedLines);
     }
 
-    public CompletableFuture<String> processAndRestore(UUID batchId, String payload, String lang, String module) {
-        return process(batchId, payload, lang, module)
+    public CompletableFuture<String> processAndRestore(UUID batchId, String payload, String lang, TranslationModule translationModule) {
+        return process(batchId, payload, lang, translationModule)
                 .thenApplyAsync(s -> handlePlaceholders(batchId, s));
     }
 

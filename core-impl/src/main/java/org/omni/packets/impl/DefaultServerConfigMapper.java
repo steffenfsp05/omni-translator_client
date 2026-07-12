@@ -3,6 +3,8 @@ package org.omni.packets.impl;
 import com.google.inject.Singleton;
 import org.jetbrains.annotations.NotNull;
 import org.omni.entity.ServerConfiguration;
+import org.omni.entity.ServerConsentMode;
+import org.omni.entity.TranslationModule;
 import org.omni.packets.AbstractPacketMapper;
 import org.omni.proto.generated.Protobuf;
 
@@ -18,17 +20,17 @@ public class DefaultServerConfigMapper extends AbstractPacketMapper<Protobuf.Ser
         super(Protobuf.ServerConfiguration.class, ServerConfiguration.class);
     }
 
-    private static @NotNull HashMap<String, Boolean> getMappedModules(Protobuf.ServerConfiguration serverConfiguration) {
-        HashMap<String, Boolean> mappedModules = new HashMap<>();
+    private static @NotNull HashMap<TranslationModule, Boolean> getMappedModules(Protobuf.ServerConfiguration serverConfiguration) {
+        HashMap<TranslationModule, Boolean> mappedModules = new HashMap<>();
 
-        for (ServerConfiguration.Module module : ServerConfiguration.Module.values()) {
-            mappedModules.put(module.name().toLowerCase(), false);
+        for (TranslationModule module : TranslationModule.values()) {
+            mappedModules.put(module, false);
         }
 
         for (Protobuf.Module protoModule : serverConfiguration.getActiveModulesList()) {
             if (protoModule != Protobuf.Module.MODULE_UNKNOWN && protoModule != Protobuf.Module.UNRECOGNIZED) {
                 String javaModuleName = protoModule.name().replace("MODULE_", "").toLowerCase();
-                mappedModules.put(javaModuleName, true);
+                mappedModules.put(TranslationModule.getModule(javaModuleName), true);
             }
         }
         return mappedModules;
@@ -39,10 +41,10 @@ public class DefaultServerConfigMapper extends AbstractPacketMapper<Protobuf.Ser
         Protobuf.ServerConfiguration.Builder builder = Protobuf.ServerConfiguration.newBuilder();
 
         if (javaConfig.getModules() != null) {
-            for (Map.Entry<String, Boolean> entry : javaConfig.getModules().entrySet()) {
+            for (Map.Entry<TranslationModule, Boolean> entry : javaConfig.getModules().entrySet()) {
                 if (entry.getValue() != null && entry.getValue()) {
                     try {
-                        String enumName = "MODULE_" + entry.getKey().toUpperCase();
+                        String enumName = "MODULE_" + entry.getKey().getModuleName().toUpperCase();
                         Protobuf.Module protoModule = Protobuf.Module.valueOf(enumName);
                         builder.addActiveModules(protoModule);
                     } catch (IllegalArgumentException e) {
@@ -72,9 +74,9 @@ public class DefaultServerConfigMapper extends AbstractPacketMapper<Protobuf.Ser
     public ServerConfiguration from(Protobuf.ServerConfiguration serverConfiguration) {
         ServerConfiguration update = new ServerConfiguration();
 
-        HashMap<String, Boolean> mappedModules = getMappedModules(serverConfiguration);
+        HashMap<TranslationModule, Boolean> mappedModules = getMappedModules(serverConfiguration);
 
-        update.setConsentMode(ServerConfiguration.ConsentMode.getConsentMode(serverConfiguration.getConsentMode().name().replace("CONSENT_", "")));
+        update.setConsentMode(ServerConsentMode.getConsentMode(serverConfiguration.getConsentMode().name().replace("CONSENT_", "")));
         update.setModules(mappedModules);
         update.setBlacklistedWords(new HashSet<>(serverConfiguration.getWordsList()));
         update.setDefaultLanguage(serverConfiguration.getDefaultLanguage());

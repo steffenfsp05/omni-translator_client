@@ -2,6 +2,7 @@ package org.omni.packets.impl;
 
 import com.google.inject.Singleton;
 import org.omni.entity.ServerConfiguration;
+import org.omni.entity.TranslationModule;
 import org.omni.packets.AbstractPacketMapper;
 import org.omni.packets.data.TranslationRequestData;
 import org.omni.proto.generated.Protobuf;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @Singleton
 public class TranslationRequestMapper extends AbstractPacketMapper<Protobuf.TranslationRequest, TranslationRequestData> {
 
-    private static final Map<Protobuf.Module, ServerConfiguration.Module> MODULE_MAP = new EnumMap<>(Protobuf.Module.class);
+    private static final Map<Protobuf.Module, TranslationModule> MODULE_MAP = new EnumMap<>(Protobuf.Module.class);
 
     static {
         for (Protobuf.Module protoMod : Protobuf.Module.values()) {
@@ -22,7 +23,7 @@ public class TranslationRequestMapper extends AbstractPacketMapper<Protobuf.Tran
 
             String javaName = protoMod.name().replace("MODULE_", "");
             try {
-                MODULE_MAP.put(protoMod, ServerConfiguration.Module.getModule(javaName));
+                MODULE_MAP.put(protoMod, TranslationModule.getModule(javaName));
             } catch (IllegalArgumentException e) {
                 System.err.println("Modul gefunden, aber nicht in Java definiert: " + javaName);
             }
@@ -50,7 +51,7 @@ public class TranslationRequestMapper extends AbstractPacketMapper<Protobuf.Tran
     public TranslationRequestData from(Protobuf.TranslationRequest packet) {
         UUID requestId = new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig());
 
-        ServerConfiguration.Module javaModule = MODULE_MAP.getOrDefault(packet.getModule(), ServerConfiguration.Module.LIVE_CHAT);
+        TranslationModule javaModule = MODULE_MAP.getOrDefault(packet.getModule(), TranslationModule.LIVE_CHAT);
 
         return new TranslationRequestData(requestId, packet.getText(), packet.getTargetLang(), javaModule);
     }

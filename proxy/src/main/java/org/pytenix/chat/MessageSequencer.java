@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.omni.entity.ServerConfiguration;
+import org.omni.entity.TranslationModule;
 import org.omni.translation.component.TextComponentService;
 
 import java.util.ArrayDeque;
@@ -80,7 +81,7 @@ public class MessageSequencer {
             }
         }, 4, TimeUnit.SECONDS);
 
-        textComponentService.translateComplexMessage(component, locale, ServerConfiguration.Module.PLUGIN_CHAT.getModuleName())
+        textComponentService.translateComplexMessage(component, locale, TranslationModule.PLUGIN_CHAT)
                 .whenComplete((translatedComponent, throwable) -> {
                     timeoutTask.cancel(false);
 

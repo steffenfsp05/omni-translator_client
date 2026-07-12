@@ -8,6 +8,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import lombok.Getter;
 import org.omni.config.ConfigurationFile;
+import org.omni.entity.TranslationModule;
 import org.omni.packets.PacketRegistry;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.backend.consumer.BackendGeoResultConsumer;
@@ -187,7 +188,7 @@ public class OmniConnectionService {
 
             if (translationSocketEndpoint != null) {
                 System.out.println("Sending: This is a Test!");
-                translationSocketEndpoint.sendTranslationRequest(java.util.UUID.randomUUID(), "This is a Test!", "de_de", "live_chat");
+                translationSocketEndpoint.sendTranslationRequest(java.util.UUID.randomUUID(), "This is a Test!", "de_de", TranslationModule.PLUGIN_CHAT);
             }
         }
 

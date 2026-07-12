@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import org.omni.entity.ServerConfiguration;
+import org.omni.entity.TranslationModule;
 import org.omni.event.EventService;
 import org.omni.event.register.ConfigUpdateEvent;
 import org.omni.packets.PacketMapperRegistry;
@@ -56,7 +57,7 @@ public class TranslationSocketEndpoint {
         if (future != null) future.complete(resultData.result());
     }
 
-    public CompletableFuture<String> sendTranslationRequest(UUID id, String text, String lang, String module) {
+    public CompletableFuture<String> sendTranslationRequest(UUID id, String text, String lang, TranslationModule translationModule) {
         CompletableFuture<String> future = new CompletableFuture<>();
         if (text == null || text.isBlank()) return CompletableFuture.completedFuture(text);
 
@@ -64,7 +65,7 @@ public class TranslationSocketEndpoint {
 
         connectionManagerProvider.get().sendPacket(PacketRegistry.TRANSLATION_REQUEST,
                 packetMapperRegistry.toProto(new TranslationRequestData(
-                        id, text, lang, ServerConfiguration.Module.getModule(module)
+                        id, text, lang, translationModule
                 )));
 
         return future.orTimeout(60, TimeUnit.SECONDS).exceptionally(ex -> {

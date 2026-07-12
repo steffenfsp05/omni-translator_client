@@ -2,6 +2,7 @@ package org.omni.translation;
 
 
 import org.omni.entity.ServerConfiguration;
+import org.omni.entity.TranslationModule;
 import org.omni.event.EventService;
 import org.omni.placeholder.service.PlaceholderService;
 
@@ -12,7 +13,7 @@ public interface TranslatorService {
 
     CompletableFuture<Boolean> requiresTranslation(UUID playerUUID);
 
-    CompletableFuture<String> translate(String text, String lang, String module);
+    CompletableFuture<String> translate(String text, String lang, TranslationModule translationModule);
 
     ServerConfiguration getTranslationConfiguration();
 

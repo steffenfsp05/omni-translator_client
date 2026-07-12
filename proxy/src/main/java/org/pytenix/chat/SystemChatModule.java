@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import lombok.Getter;
 import org.omni.entity.ServerConfiguration;
+import org.omni.entity.TranslationModule;
 import org.omni.profile.ProfileService;
 import org.omni.translation.TranslatorService;
 import org.omni.translation.component.TextComponentService;
@@ -27,14 +28,10 @@ public class SystemChatModule extends AbstractTranslatorModule {
             MessageSequencer messageSequencer,
             PlayerLocaleProcessor playerLocaleProcessor
     ) {
-        super(profileService, translatorService, playerLocaleProcessor, "plugin_chat");
+        super(profileService, translatorService, playerLocaleProcessor, TranslationModule.PLUGIN_CHAT);
         this.translatorService = translatorService;
         this.textComponentService = textComponentService;
         this.messageSequencer = messageSequencer;
-    }
-
-    public boolean isModuleActive() {
-        return translatorService.getTranslationConfiguration().getModules().getOrDefault(ServerConfiguration.Module.PLUGIN_CHAT.getModuleName(), false);
     }
 
 

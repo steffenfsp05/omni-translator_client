@@ -56,7 +56,7 @@ public class InternTranslationRequestConsumer extends MappedPacketReceiveConsume
             reply(context, PacketRegistry.TRANSLATION_RESULT, new TranslationResultData(id, cached));
         } else {
             translationSocketEndpoint
-                    .sendTranslationRequest(id, text, lang, requestData.module().name())
+                    .sendTranslationRequest(id, text, lang, requestData.module())
                     .thenAcceptAsync(translatedText -> {
                         String finalString = (isSuccessfull(translatedText) && !translatedText.equals(text)) ? translatedText : text;
 
