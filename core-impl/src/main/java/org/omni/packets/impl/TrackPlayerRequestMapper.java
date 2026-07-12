@@ -9,7 +9,7 @@ import org.omni.proto.generated.Protobuf;
 import java.util.UUID;
 
 @Singleton
-public class TrackPlayerRequestMapper  extends AbstractPacketMapper<Protobuf.TrackPlayerPacket, TrackPlayerRequestData> {
+public class TrackPlayerRequestMapper extends AbstractPacketMapper<Protobuf.TrackPlayerPacket, TrackPlayerRequestData> {
 
 
     public TrackPlayerRequestMapper() {

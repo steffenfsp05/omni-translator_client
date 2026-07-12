@@ -1,19 +1,19 @@
 package org.pytenix.backend;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.protobuf.MessageLite;
 import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import lombok.Getter;
+import org.omni.config.ConfigurationFile;
+import org.omni.packets.PacketRegistry;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.entity.ServerConfiguration;
-import org.pytenix.packets.MappedPacketReceiveConsumer;
-import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.GeoResultMapper;
-import org.pytenix.packets.impl.ProfileMapper;
-import org.pytenix.packets.impl.TranslationResultMapper;
-import org.pytenix.profile.ProfileService;
-import org.pytenix.proto.generated.NetworkPackets;
+import org.pytenix.backend.consumer.BackendGeoResultConsumer;
+import org.pytenix.backend.consumer.BackendProfileResultConsumer;
+import org.pytenix.backend.consumer.BackendServerConfigConsumer;
+import org.pytenix.backend.consumer.BackendTranslationResultConsumer;
 import org.pytenix.util.FastByteArrayOutputStream;
 import org.transport.TransportOptions;
 import org.transport.TransportService;
@@ -30,98 +30,88 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Singleton
 public class OmniConnectionService {
 
     public final AtomicBoolean isConnected = new AtomicBoolean(false);
     @Getter
-    final String apiKey;
+    private final String apiKey;
     private final String url;
     private final HttpClient httpClient;
     private final AtomicInteger reconnectAttempts = new AtomicInteger(0);
     private final ProxyServer proxyServer;
     private final TranslatorPlugin translatorPlugin;
     private final TransportService<WebSocket> transportService;
-    private ProfileService profileService;
-    private WebSocket webSocket;
-    private TranslationSocketEndpoint translationSocketEndpoint;
-    private GeoSocketEndpoint geoSocketEndpoint;
 
-    public OmniConnectionService(TranslatorPlugin translatorPlugin, String apiKey, ProxyServer proxyServer) {
+    private final TranslationSocketEndpoint translationSocketEndpoint;
+
+    private final BackendServerConfigConsumer backendServerConfigConsumer;
+    private final BackendTranslationResultConsumer backendTranslationResultConsumer;
+    private final BackendGeoResultConsumer backendGeoResultConsumer;
+    private final BackendProfileResultConsumer backendProfileResultConsumer;
+
+    private WebSocket webSocket;
+
+    @Inject
+    public OmniConnectionService(
+            TranslatorPlugin translatorPlugin,
+            ConfigurationFile config,
+            ProxyServer proxyServer,
+            TranslationSocketEndpoint translationSocketEndpoint,
+            BackendServerConfigConsumer backendServerConfigConsumer,
+            BackendTranslationResultConsumer backendTranslationResultConsumer,
+            BackendGeoResultConsumer backendGeoResultConsumer,
+            BackendProfileResultConsumer backendProfileResultConsumer) {
+
+        System.out.println("OMNICONNECTIONSERVIUCE INIT!!!!!!!!");
+
         this.translatorPlugin = translatorPlugin;
         this.proxyServer = proxyServer;
-        this.apiKey = apiKey;
+        this.apiKey = config.getLicenseKey();
 
-        //TODO: CHANGE TO WSS IN PROD!!
-        this.url = "ws://" + translatorPlugin.getRemoteAddress() + "/ws/omni";
+        this.translationSocketEndpoint = translationSocketEndpoint;
 
-        this.httpClient = HttpClient.newBuilder()
-                .executor(Executors.newCachedThreadPool())
-                .build();
+        this.backendServerConfigConsumer = backendServerConfigConsumer;
+        this.backendTranslationResultConsumer = backendTranslationResultConsumer;
+        this.backendGeoResultConsumer = backendGeoResultConsumer;
+        this.backendProfileResultConsumer = backendProfileResultConsumer;
+
+        this.url = "ws://192.168.178.121:8083/ws/omni";
+
+        this.httpClient = HttpClient.newBuilder().executor(Executors.newCachedThreadPool()).build();
 
         this.transportService = TransportService.<WebSocket>builder()
                 .packetService(new DefaultPacketService<>())
-                .options(
-                        TransportOptions.builder()
-                                .batchingEnabled(true)
-                                .maxBatchSize(500)
-                                .batchingIntervalMs(5)
-                                .maxPayloadSize(50000)
-                                .build()
-                )
+                .options(TransportOptions.builder()
+                        .batchingEnabled(true)
+                        .maxBatchSize(500)
+                        .batchingIntervalMs(5)
+                        .maxPayloadSize(50000)
+                        .build())
                 .encryptionEnabled(false)
                 .networkSender(this::sendToWebSocket)
                 .build();
-    }
 
-    public void setServices(TranslationSocketEndpoint translationSocketEndpoint, GeoSocketEndpoint geoSocketEndpoint, ProfileService profileService) {
-        this.translationSocketEndpoint = translationSocketEndpoint;
-        this.geoSocketEndpoint = geoSocketEndpoint;
-        this.profileService = profileService;
         registerPackets();
+        System.out.println("OMNICONNECTIONSERVIUCE INIT!!!!!!!! REGUSTERED PACKEST");
     }
 
     private void registerPackets() {
+        transportService.registerPacket(PacketRegistry.SERVER_CONFIG, backendServerConfigConsumer);
+        transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT, backendTranslationResultConsumer);
+        transportService.registerPacket(PacketRegistry.GEO_RESULT, backendGeoResultConsumer);
+        transportService.registerPacket(PacketRegistry.PROFILE, backendProfileResultConsumer);
 
-        // Config Update registrieren
-
-        transportService.registerPacket(PacketRegistry.SERVER_CONFIG,
-                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.ServerConfiguration, ServerConfiguration>)
-                        (context, config) ->
-                                translationSocketEndpoint.handleConfigUpdate(config));
-
-
-        transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT,
-                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.TranslationResult, TranslationResultMapper.ResultData>)
-                        (context, resultData) -> {
-                            if (translationSocketEndpoint != null) translationSocketEndpoint.handleTranslationResult(resultData);
-
-                        });
-
-        transportService.registerPacket(PacketRegistry.GEO_RESULT,
-                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.GeoResultPacket, GeoResultMapper.ResultData>)
-                        (context, resultData) -> {
-                            if (geoSocketEndpoint != null) geoSocketEndpoint.handleGeoResult(resultData);
-
-                        });
-
-        transportService.registerPacket(PacketRegistry.PROFILE,
-                (MappedPacketReceiveConsumer<WebSocket, NetworkPackets.ProfilePacket, ProfileMapper.ProfileData>)
-                        (context, javaPacket) -> {
-                            System.out.println("INCOMING: " + javaPacket);
-                            if (profileService != null) profileService.handleProfileResult(javaPacket);
-
-                        });
-
-
-        transportService.registerPacket(PacketRegistry.GEO_REQUEST, (webSocketPacketContext, geoRequestPacket) -> {
+        transportService.registerPacket(PacketRegistry.GEO_REQUEST, (ctx, req) -> {
         });
-        transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST, (webSocketPacketContext, translationRequest) -> {
+        transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST, (ctx, req) -> {
         });
-        transportService.registerPacket(PacketRegistry.PROFILE_UPDATE_EXTERN, (webSocketPacketContext, translationRequest) -> {
+        transportService.registerPacket(PacketRegistry.PROFILE_UPDATE_EXTERN, (ctx, req) -> {
         });
     }
 
     public void connect() {
+        System.out.println("CONNECTING!!!!!!! ");
         httpClient.newWebSocketBuilder()
                 .header("X-API-KEY", apiKey)
                 .buildAsync(URI.create(url), new WebSocketListener())
@@ -129,9 +119,6 @@ public class OmniConnectionService {
                     if (ex == null) {
                         this.reconnectAttempts.set(0);
                         System.out.println("[OmniTranslator]  Erfolgreich mit dem Dispatcher verbunden!");
-                        System.out.println("Sende Test Nachricht");
-
-
                     } else {
                         handleConnectionError(ex);
                     }
@@ -161,9 +148,10 @@ public class OmniConnectionService {
         this.isConnected.set(false);
         String errorMsg = ex.toString();
 
+        ex.printStackTrace();
         if (errorMsg.contains("401") || errorMsg.contains("Unauthorized") || errorMsg.contains("WebSocketHandshakeException")) {
             System.err.println("============================================");
-            System.err.println("[OmniTranslator] ❌ ERROR: Invalid License!");
+            System.err.println("[OmniTranslator] ❌ ERROR: Invalid License! " + apiKey);
             System.err.println("[OmniTranslator] Connection will be permanently terminated.");
             System.err.println("============================================");
         } else {
@@ -192,18 +180,15 @@ public class OmniConnectionService {
         @Override
         public void onOpen(WebSocket webSocket) {
             OmniConnectionService.this.webSocket = webSocket;
-
             isConnected.set(true);
             transportService.connect(webSocket);
             transportService.ready(webSocket);
-
             WebSocket.Listener.super.onOpen(webSocket);
 
             if (translationSocketEndpoint != null) {
                 System.out.println("Sending: This is a Test!");
                 translationSocketEndpoint.sendTranslationRequest(java.util.UUID.randomUUID(), "This is a Test!", "de_de", "live_chat");
             }
-
         }
 
         @Override

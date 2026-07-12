@@ -1,42 +1,34 @@
 package org.pytenix.service;
 
-import org.pytenix.TranslatorPlugin;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import lombok.Getter;
+import org.omni.translation.module.AbstractTranslatorModule;
 import org.pytenix.module.gui.InventoryModule;
 import org.pytenix.module.hologram.HologramModule;
 import org.pytenix.module.player.LiveChatModule;
-import org.pytenix.module.signs.SignsModule;
-import org.pytenix.profile.ProfileService;
-import org.pytenix.translation.AbstractTranslatorModule;
-import org.pytenix.translation.TranslatorService;
-import org.pytenix.translation.locale.PlayerLocaleProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+@Getter
+@Singleton
 public class ModuleService {
 
+    private final List<AbstractTranslatorModule> modules = new ArrayList<>();
 
-    final TranslatorService translatorService;
-    final PlayerLocaleProcessor playerLocaleProcessor;
-
-    final List<AbstractTranslatorModule> modules;
-
-    public ModuleService(ProfileService profileService, TranslatorPlugin translatorPlugin, TranslatorService translatorService, PlayerLocaleProcessor playerLocaleProcessor) {
-        this.translatorService = translatorService;
-        this.playerLocaleProcessor = playerLocaleProcessor;
-        this.modules = new ArrayList<>();
-
-        registerModule(new InventoryModule(profileService, translatorService, playerLocaleProcessor));
-        //registerModule(new PluginChatModule(translatorService, playerLocaleProcessor));
-        registerModule(new LiveChatModule(profileService, translatorPlugin, translatorService, playerLocaleProcessor));
-        registerModule(new HologramModule(translatorPlugin, profileService, translatorService, playerLocaleProcessor));
-        registerModule(new SignsModule(profileService, translatorService, playerLocaleProcessor));
+    @Inject
+    public ModuleService(Set<AbstractTranslatorModule> modules) {
+        for (AbstractTranslatorModule module : modules) {
+            registerModule(module);
+        }
     }
 
-
-    public void registerModule(AbstractTranslatorModule abstractTranslatorModule) {
-        modules.add(abstractTranslatorModule);
+    public void registerModule(AbstractTranslatorModule module) {
+        System.out.println("ADDED MODULE: " + module.getModuleName());
+        modules.add(module);
+        module.init();
     }
-
 
 }

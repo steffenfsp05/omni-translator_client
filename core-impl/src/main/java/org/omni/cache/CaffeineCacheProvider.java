@@ -6,7 +6,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 
 import java.time.Duration;
 
-public class CaffeineCacheProvider<A,B> implements CacheProvider<A, B> {
+public class CaffeineCacheProvider<A, B> implements CacheProvider<A, B> {
 
     private final Cache<A, B> translationCache = Caffeine.newBuilder()
             .maximumSize(10_000)

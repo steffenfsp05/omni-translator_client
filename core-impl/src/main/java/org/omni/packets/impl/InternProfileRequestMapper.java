@@ -18,7 +18,6 @@ public class InternProfileRequestMapper extends AbstractPacketMapper<Protobuf.Pr
     @Override
     public Protobuf.ProfileInternRequest to(ProfileInternRequestData packet) {
         return Protobuf.ProfileInternRequest.newBuilder()
-                .setLicense(packet.license())
                 .setRequestIdMostSig(packet.requestId().getMostSignificantBits())
                 .setRequestIdLeastSig(packet.requestId().getLeastSignificantBits())
                 .setUserIdMostSig(packet.playerId().getMostSignificantBits())
@@ -29,7 +28,6 @@ public class InternProfileRequestMapper extends AbstractPacketMapper<Protobuf.Pr
     @Override
     public ProfileInternRequestData from(Protobuf.ProfileInternRequest packet) {
         return new ProfileInternRequestData(
-                packet.getLicense(),
                 new UUID(packet.getUserIdMostSig(), packet.getUserIdLeastSig()),
                 new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig())
         );

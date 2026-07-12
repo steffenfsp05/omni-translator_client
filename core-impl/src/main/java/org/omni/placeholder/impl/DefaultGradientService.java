@@ -107,7 +107,6 @@ public class DefaultGradientService implements GradientService {
     }
 
 
-
     @Override
     public void cacheGradient(UUID uuid, Map<String, GradientData> gradients) {
         cachedGradients.put(uuid, gradients);

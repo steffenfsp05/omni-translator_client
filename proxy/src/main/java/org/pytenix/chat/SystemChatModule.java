@@ -1,44 +1,41 @@
 package org.pytenix.chat;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import lombok.Getter;
-import org.pytenix.TranslatorPlugin;
-import org.pytenix.entity.ServerConfiguration;
-import org.pytenix.profile.ProfileService;
-import org.pytenix.translation.AbstractTranslatorModule;
-import org.pytenix.translation.TranslatorService;
-import org.pytenix.translation.locale.PlayerLocaleProcessor;
-import org.pytenix.util.TextComponentUtil;
+import org.omni.entity.ServerConfiguration;
+import org.omni.profile.ProfileService;
+import org.omni.translation.TranslatorService;
+import org.omni.translation.component.TextComponentService;
+import org.omni.translation.locale.PlayerLocaleProcessor;
+import org.omni.translation.module.AbstractTranslatorModule;
 
 
 @Getter
+@Singleton
 public class SystemChatModule extends AbstractTranslatorModule {
 
-    final TranslatorPlugin translatorPlugin;
+    private final TranslatorService translatorService;
+    private final TextComponentService textComponentService;
+    private final MessageSequencer messageSequencer;
 
-    final TextComponentUtil textComponentUtil;
-    final MessageSequencer messageSequencer;
-
+    @Inject
     public SystemChatModule(
             ProfileService profileService,
-            TranslatorPlugin translatorPlugin,
             TranslatorService translatorService,
-            TextComponentUtil textComponentUtil,
+            TextComponentService textComponentService,
             MessageSequencer messageSequencer,
             PlayerLocaleProcessor playerLocaleProcessor
     ) {
-        super(profileService,translatorService, "plugin_chat", playerLocaleProcessor);
-        this.translatorPlugin = translatorPlugin;
-        this.textComponentUtil = textComponentUtil;
+        super(profileService, translatorService, playerLocaleProcessor, "plugin_chat");
+        this.translatorService = translatorService;
+        this.textComponentService = textComponentService;
         this.messageSequencer = messageSequencer;
-
     }
-
-
-
 
     public boolean isModuleActive() {
-        return translatorPlugin.getTranslatorService().getTranslationConfiguration().getModules().get(ServerConfiguration.Module.PLUGIN_CHAT
-                .getModuleName());
+        return translatorService.getTranslationConfiguration().getModules().getOrDefault(ServerConfiguration.Module.PLUGIN_CHAT.getModuleName(), false);
     }
+
 
 }

@@ -1,34 +1,30 @@
 package org.pytenix.listener;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.pytenix.TranslatorPlugin;
-import org.pytenix.placeholder.protect.PlayerNameProtector;
-import org.pytenix.translation.TranslatorService;
+import org.omni.placeholder.protector.PlayerNameProtector;
 
+@Singleton
 public class PlayerJoinQuitListener implements Listener {
 
-    final TranslatorPlugin translatorPlugin;
-    final TranslatorService translatorService;
-    final PlayerNameProtector playernameProtector;
+    private final PlayerNameProtector playerNameProtector;
 
-
-    public PlayerJoinQuitListener(TranslatorPlugin plugin) {
-        this.translatorPlugin = plugin;
-        this.translatorService = plugin.getTranslatorService();
-        this.playernameProtector = translatorService.getPlaceholderService().getPlayerNameProtector();
-
+    @Inject
+    public PlayerJoinQuitListener(PlayerNameProtector playerNameProtector) {
+        this.playerNameProtector = playerNameProtector;
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        this.playernameProtector.addPlayer(event.getPlayer().getName());
+        this.playerNameProtector.addPlayer(event.getPlayer().getName());
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        this.playernameProtector.removePlayer(event.getPlayer().getName());
+        this.playerNameProtector.removePlayer(event.getPlayer().getName());
     }
 }

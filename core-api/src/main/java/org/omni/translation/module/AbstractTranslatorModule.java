@@ -21,7 +21,12 @@ public abstract class AbstractTranslatorModule {
     final String moduleName;
 
 
-    public AbstractTranslatorModule(ProfileService profileService, TranslatorService translatorService, String moduleName, PlayerLocaleProcessor playerLocaleProcessor) {
+    public AbstractTranslatorModule(
+            ProfileService profileService,
+            TranslatorService translatorService,
+            PlayerLocaleProcessor playerLocaleProcessor,
+            String moduleName
+    ) {
 
         this.profileService = profileService;
         this.translatorService = translatorService;
@@ -29,6 +34,8 @@ public abstract class AbstractTranslatorModule {
         this.moduleName = moduleName;
     }
 
+
+    public void init() { }
 
     public boolean isActive() {
         return getServerConfiguration().getModules().getOrDefault(moduleName, true);

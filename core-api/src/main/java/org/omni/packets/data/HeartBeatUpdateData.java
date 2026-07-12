@@ -12,6 +12,6 @@ public record HeartBeatUpdateData(
         int consent_explicit,
         int consent_auto,
         int consent_declined,
-        Map<String,Integer> language_distribution
+        Map<String, Integer> language_distribution
 ) {
 }

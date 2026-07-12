@@ -1,61 +1,54 @@
 package org.pytenix.network.listener;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.pytenix.TranslatorPlugin;
-import org.pytenix.event.annotation.OmniSubscribe;
-import org.pytenix.event.register.ConsentUpdateEvent;
-import org.pytenix.network.SpigotTransport;
-import org.pytenix.packets.impl.ConsentRefreshRequestMapper;
-import org.pytenix.proto.generated.NetworkPackets;
+import org.omni.event.annotation.OmniSubscribe;
+import org.omni.event.register.ConsentUpdateEvent;
+import org.omni.packets.data.ConsentRefreshRequestData;
+import org.omni.proto.generated.Protobuf;
+import org.pytenix.service.TaskScheduler;
 
+@Singleton
 public class ConsentUpdateListener {
 
-    final TranslatorPlugin translatorPlugin;
-    final SpigotTransport spigotTransport;
+    private final TaskScheduler taskScheduler;
 
-    public ConsentUpdateListener(TranslatorPlugin translatorPlugin) {
-        this.translatorPlugin = translatorPlugin;
-        this.spigotTransport = translatorPlugin.getSpigotTransport();
+    @Inject
+    public ConsentUpdateListener(TaskScheduler taskScheduler) {
+        this.taskScheduler = taskScheduler;
     }
 
     @OmniSubscribe(priority = 90)
     public void onConsentUpdate(ConsentUpdateEvent event) {
-        Player player = Bukkit.getPlayer(event.profilePacket().playerId());
+        Player player = Bukkit.getPlayer(event.refreshRequestData().playerId());
+        if (player == null) return;
 
-        final ConsentRefreshRequestMapper.Data profileData = event.profilePacket();
+        final ConsentRefreshRequestData profileData = event.refreshRequestData();
         final Location originalLocation = player.getLocation().clone();
 
-
-        translatorPlugin.getTaskScheduler().runForEntity(player, () -> {
-
+        taskScheduler.runForEntity(player, () -> {
             Location refreshLocation = originalLocation.clone().add(0, 0, 200);
             final double hearts = player.getHealth();
             player.teleport(refreshLocation);
 
-            translatorPlugin.getTaskScheduler().runSyncLater(() -> {
-
+            taskScheduler.runSyncLater(() -> {
                 player.teleport(originalLocation);
                 player.setHealth(hearts);
                 ComponentLike component = Component.text("§cUnknown value");
 
-                if (profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.EXPLICIT))
+                if (profileData.consentType().equals(Protobuf.ConsentType.EXPLICIT))
                     component = Component.text("§aYou turned translations on");
 
-
-                if (profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.DECLINED))
+                if (profileData.consentType().equals(Protobuf.ConsentType.DECLINED))
                     component = Component.text("§cYou turned translations off");
 
-
-
                 player.sendMessage(component);
-               //player.sendMessage("§a[Omni] §7Consent updated!");
-
             }, 5);
         });
     }
-
 }

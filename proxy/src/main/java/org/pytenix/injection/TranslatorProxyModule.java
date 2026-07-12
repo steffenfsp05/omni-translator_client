@@ -2,10 +2,12 @@ package org.pytenix.injection;
 
 import com.google.inject.*;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import org.omni.cache.CacheProvider;
 import org.omni.cache.CaffeineCacheProvider;
 import org.omni.config.ConfigService;
 import org.omni.config.ConfigurationFile;
+import org.omni.packets.registry.PacketRegistrar;
 import org.omni.profile.AbstractAnalyticsSecret;
 import org.omni.profile.ProfileService;
 import org.omni.translation.TranslationProcessor;
@@ -14,10 +16,20 @@ import org.pytenix.TranslatorPlugin;
 import org.pytenix.backend.GeoSocketEndpoint;
 import org.pytenix.backend.OmniConnectionService;
 import org.pytenix.backend.TranslationSocketEndpoint;
+import org.pytenix.backend.consumer.BackendGeoResultConsumer;
+import org.pytenix.backend.consumer.BackendProfileResultConsumer;
+import org.pytenix.backend.consumer.BackendServerConfigConsumer;
+import org.pytenix.backend.consumer.BackendTranslationResultConsumer;
 import org.pytenix.chat.MessageSequencer;
 import org.pytenix.chat.SystemChatModule;
 import org.pytenix.limbo.LimboService;
+import org.pytenix.limbo.command.TranslateCommand;
+import org.pytenix.limbo.listener.ServerPreConnectListener;
+import org.pytenix.network.InternPacketRegistrar;
 import org.pytenix.network.ProxyTransport;
+import org.pytenix.network.consumer.InternConfigRequestConsumer;
+import org.pytenix.network.consumer.InternProfileConsumer;
+import org.pytenix.network.consumer.InternTranslationRequestConsumer;
 import org.pytenix.tracking.ExternProfileService;
 import org.pytenix.tracking.ProxyAnalyticsSecret;
 import org.pytenix.tracking.ROIService;
@@ -39,18 +51,30 @@ public class TranslatorProxyModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        // Kern-Komponenten binden
-        bind(TranslatorPlugin.class).toInstance(plugin);
 
-        // 2. Velocity-spezifische Caches und Services
-        bind(new TypeLiteral<CacheProvider<String, String>>(){}).to(new TypeLiteral<CaffeineCacheProvider<String, String>>(){}).in(Scopes.SINGLETON);
-
+        bind(new TypeLiteral<CacheProvider<String, String>>() {
+        }).to(new TypeLiteral<CaffeineCacheProvider<String, String>>() {
+        }).in(Scopes.SINGLETON);
         bind(ProfileService.class).to(ExternProfileService.class).in(Scopes.SINGLETON);
 
         bind(MessageSequencer.class).in(Scopes.SINGLETON);
         bind(ROIService.class).in(Scopes.SINGLETON);
         bind(SystemChatModule.class).in(Scopes.SINGLETON);
         bind(GeoSocketEndpoint.class).in(Scopes.SINGLETON);
+        bind(TranslationSocketEndpoint.class).in(Scopes.SINGLETON);
+        bind(OmniConnectionService.class).in(Scopes.SINGLETON);
+
+        bind(InternConfigRequestConsumer.class).in(Scopes.SINGLETON);
+        bind(InternTranslationRequestConsumer.class).in(Scopes.SINGLETON);
+        bind(InternProfileConsumer.class).in(Scopes.SINGLETON);
+
+        bind(new TypeLiteral<PacketRegistrar<RegisteredServer>>() {
+        }).to(InternPacketRegistrar.class).in(Scopes.SINGLETON);
+
+        bind(BackendServerConfigConsumer.class).in(Scopes.SINGLETON);
+        bind(BackendTranslationResultConsumer.class).in(Scopes.SINGLETON);
+        bind(BackendGeoResultConsumer.class).in(Scopes.SINGLETON);
+        bind(BackendProfileResultConsumer.class).in(Scopes.SINGLETON);
 
     }
 
@@ -73,7 +97,11 @@ public class TranslatorProxyModule extends AbstractModule {
     @Provides
     @Singleton
     public PlayerLocaleProcessor providePlayerLocaleProcessor(Provider<ROIService> roiServiceProvider) {
-        return uuid -> roiServiceProvider.get().getLanguageCache().get(uuid, uuid1 -> "en_en");
+        return uuid ->
+        {
+            System.out.println("LOCALE: " + roiServiceProvider.get().getLanguageCache().get(uuid, uuid1 -> "en_en"));
+            return roiServiceProvider.get().getLanguageCache().get(uuid, uuid1 -> "en_en");
+        };
     }
 
     @Provides
@@ -82,29 +110,20 @@ public class TranslatorProxyModule extends AbstractModule {
         return (id, text, targetLang, module) -> endpointProvider.get().sendTranslationRequest(id, text, targetLang, module);
     }
 
+
+
     @Provides
     @Singleton
-    public ProxyTransport provideProxyTransport() {
-        return new ProxyTransport(plugin, forwardingSecret);
+    public ProxyTransport provideProxyTransport(  ProxyServer proxyServer, PacketRegistrar<RegisteredServer> registrar) {
+        return new ProxyTransport(plugin, proxyServer, forwardingSecret, registrar);
     }
 
     @Provides
     @Singleton
-    public LimboService provideLimboService(ProxyServer proxyServer) {
-        return new LimboService(plugin, proxyServer, 25588, forwardingSecret);
-    }
-
-    @Provides
-    @Singleton
-    public OmniConnectionService provideOmniConnectionService(
+    public LimboService provideLimboService(
             ProxyServer proxyServer,
-            ConfigurationFile config,
-            Provider<TranslationSocketEndpoint> translationProvider,
-            Provider<GeoSocketEndpoint> geoProvider,
-            Provider<ProfileService> profileProvider) {
-
-        OmniConnectionService service = new OmniConnectionService(plugin, config.getLicenseKey(), proxyServer);
-        service.setServices(translationProvider.get(), geoProvider.get(), profileProvider.get());
-        return service;
+            ServerPreConnectListener preConnectListener,
+            TranslateCommand translateCommand) {
+        return new LimboService(plugin, proxyServer, 25588, forwardingSecret, preConnectListener, translateCommand);
     }
 }

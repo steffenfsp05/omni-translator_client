@@ -18,7 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Singleton
-public class DefaultTextComponentService implements TextComponentService{
+public class DefaultTextComponentService implements TextComponentService {
 
     private static final Pattern SANITIZE_PATTERN = Pattern.compile("§(?![0-9a-fA-Fk-oK-OrRxX#])");
     private static final Pattern TAG_PATTERN = Pattern.compile("(?s)<([AH])(\\d+)>((?:(?!<[AH]\\d+>).)*?)</\\1\\2>");

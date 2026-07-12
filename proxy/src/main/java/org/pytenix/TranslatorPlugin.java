@@ -12,10 +12,10 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.Getter;
 import org.omni.injection.CoreModule;
-import org.omni.profile.AbstractAnalyticsSecret;
+import org.omni.profile.ProfileService;
 import org.pytenix.backend.OmniConnectionService;
-import org.pytenix.chat.SystemChatModule;
 import org.pytenix.chat.MessageSequencer;
+import org.pytenix.chat.SystemChatModule;
 import org.pytenix.chat.listener.SystemChatPacketListener;
 import org.pytenix.injection.TranslatorProxyModule;
 import org.pytenix.limbo.LimboService;
@@ -91,9 +91,10 @@ public class TranslatorPlugin {
 
         PacketEvents.getAPI().getEventManager().registerListener(
                 new SystemChatPacketListener(
-                        injector.getInstance(AbstractAnalyticsSecret.class),
                         injector.getInstance(SystemChatModule.class),
-                        injector.getInstance(MessageSequencer.class)
+                        injector.getInstance(MessageSequencer.class),
+                        injector.getInstance(ProxyServer.class),
+                        injector.getInstance(ProfileService.class)
                 ),
                 PacketListenerPriority.HIGHEST
         );

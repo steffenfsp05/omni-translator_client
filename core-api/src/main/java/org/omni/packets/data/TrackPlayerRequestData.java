@@ -9,8 +9,7 @@ public record TrackPlayerRequestData(
         long timestamp,
         int playtimeSeconds,
         boolean is_translated,
-        String language)
-{
+        String language) {
 
 
 }

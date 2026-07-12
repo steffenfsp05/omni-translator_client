@@ -1,27 +1,33 @@
 package org.pytenix.network.consumer;
 
-import lombok.AllArgsConstructor;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.bukkit.Bukkit;
-import org.pytenix.TranslatorPlugin;
-import org.pytenix.event.register.ConsentUpdateEvent;
-import org.pytenix.packets.MappedPacketReceiveConsumer;
-import org.pytenix.packets.impl.ConsentRefreshRequestMapper;
-import org.pytenix.proto.generated.NetworkPackets;
-import org.pytenix.translation.TranslatorService;
+import org.omni.event.EventService;
+import org.omni.event.register.ConsentUpdateEvent;
+import org.omni.packets.MappedPacketReceiveConsumer;
+import org.omni.packets.data.ConsentRefreshRequestData;
+import org.omni.profile.ProfileService;
+import org.omni.proto.generated.Protobuf;
 import org.transport.service.PacketContext;
 
-@AllArgsConstructor
-public class ConsentRefreshConsumer implements MappedPacketReceiveConsumer<String, NetworkPackets.ConsentRefreshRequest, ConsentRefreshRequestMapper.Data> {
-    final TranslatorPlugin translatorPlugin;
-    final TranslatorService translatorService;
+@Singleton
+public class ConsentRefreshConsumer extends MappedPacketReceiveConsumer<String, Protobuf.ConsentRefreshRequest, ConsentRefreshRequestData> {
+
+    private final ProfileService profileService;
+    private final EventService eventService;
+
+    @Inject
+    public ConsentRefreshConsumer(ProfileService profileService, EventService eventService) {
+        this.profileService = profileService;
+        this.eventService = eventService;
+    }
 
     @Override
-    public void handle(PacketContext<String> context, ConsentRefreshRequestMapper.Data javaPacket) {
-
-
-        translatorPlugin.getProfileService().cacheProvider().invalidate(javaPacket.playerId());
-
-        if (Bukkit.getPlayer(javaPacket.playerId()) != null)
-            translatorService.getEventService().callEvent(new ConsentUpdateEvent(javaPacket));
+    public void handle(PacketContext<String> context, ConsentRefreshRequestData javaPacket) {
+        profileService.cacheProvider().invalidate(javaPacket.playerId());
+        if (Bukkit.getPlayer(javaPacket.playerId()) != null) {
+            eventService.callEvent(new ConsentUpdateEvent(javaPacket));
+        }
     }
 }

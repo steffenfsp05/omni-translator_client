@@ -4,38 +4,50 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import org.omni.profile.ProfileService;
+import org.omni.translation.TranslatorService;
+import org.omni.translation.locale.PlayerLocaleProcessor;
+import org.omni.translation.module.AbstractTranslatorModule;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.hologram.listener.EntityPacketListener;
-import org.pytenix.profile.ProfileService;
-import org.pytenix.translation.AbstractTranslatorModule;
-import org.pytenix.translation.TranslatorService;
-import org.pytenix.translation.locale.PlayerLocaleProcessor;
 
 import java.util.concurrent.TimeUnit;
 
 @Getter
+@Singleton
 public class HologramModule extends AbstractTranslatorModule {
 
+    private final Cache<String, Cache<Component, Component>> playerTranslationCache;
+    private final TranslatorPlugin translatorPlugin;
 
-    //TODO: REFACTORING
-    public final Cache<String, Cache<Component, Component>> playerTranslationCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(30, TimeUnit.MINUTES)
-            .build();
+    final EntityPacketListener entityPacketListener;
 
-    @Getter
-    final TranslatorPlugin translatorPlugin;
-
-
-    public HologramModule(TranslatorPlugin translatorPlugin, ProfileService profileService, TranslatorService translatorService, PlayerLocaleProcessor playerLocaleProcessor) {
-        super(profileService, translatorService, "hologram", playerLocaleProcessor);
+    @Inject
+    public HologramModule(
+            ProfileService profileService,
+            TranslatorService translatorService,
+            PlayerLocaleProcessor playerLocaleProcessor,
+            TranslatorPlugin translatorPlugin,
+            EntityPacketListener entityPacketListener
+    ) {
+        super(profileService, translatorService, playerLocaleProcessor, "hologram");
 
         this.translatorPlugin = translatorPlugin;
+        this.playerTranslationCache = CacheBuilder.newBuilder()
+                .expireAfterAccess(30, TimeUnit.MINUTES)
+                .build();
 
-        PacketEvents.getAPI().getEventManager().registerListener(new EntityPacketListener(this),
-                PacketListenerPriority.HIGHEST);
+        this.entityPacketListener = entityPacketListener;
     }
 
-
+    @Override
+    public void init() {
+        PacketEvents.getAPI().getEventManager().registerListener(
+                entityPacketListener,
+                PacketListenerPriority.HIGHEST);
+    }
 }

@@ -18,6 +18,22 @@ public class DefaultServerConfigMapper extends AbstractPacketMapper<Protobuf.Ser
         super(Protobuf.ServerConfiguration.class, ServerConfiguration.class);
     }
 
+    private static @NotNull HashMap<String, Boolean> getMappedModules(Protobuf.ServerConfiguration serverConfiguration) {
+        HashMap<String, Boolean> mappedModules = new HashMap<>();
+
+        for (ServerConfiguration.Module module : ServerConfiguration.Module.values()) {
+            mappedModules.put(module.name().toLowerCase(), false);
+        }
+
+        for (Protobuf.Module protoModule : serverConfiguration.getActiveModulesList()) {
+            if (protoModule != Protobuf.Module.MODULE_UNKNOWN && protoModule != Protobuf.Module.UNRECOGNIZED) {
+                String javaModuleName = protoModule.name().replace("MODULE_", "").toLowerCase();
+                mappedModules.put(javaModuleName, true);
+            }
+        }
+        return mappedModules;
+    }
+
     @Override
     public Protobuf.ServerConfiguration to(ServerConfiguration javaConfig) {
         Protobuf.ServerConfiguration.Builder builder = Protobuf.ServerConfiguration.newBuilder();
@@ -65,21 +81,5 @@ public class DefaultServerConfigMapper extends AbstractPacketMapper<Protobuf.Ser
         update.setLicenseKey(serverConfiguration.getLicenseKey());
 
         return update;
-    }
-
-    private static @NotNull HashMap<String, Boolean> getMappedModules(Protobuf.ServerConfiguration serverConfiguration) {
-        HashMap<String, Boolean> mappedModules = new HashMap<>();
-
-        for (ServerConfiguration.Module module : ServerConfiguration.Module.values()) {
-            mappedModules.put(module.name().toLowerCase(), false);
-        }
-
-        for (Protobuf.Module protoModule : serverConfiguration.getActiveModulesList()) {
-            if (protoModule != Protobuf.Module.MODULE_UNKNOWN && protoModule != Protobuf.Module.UNRECOGNIZED) {
-                String javaModuleName = protoModule.name().replace("MODULE_", "").toLowerCase();
-                mappedModules.put(javaModuleName, true);
-            }
-        }
-        return mappedModules;
     }
 }

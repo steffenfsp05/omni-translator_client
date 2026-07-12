@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.omni.config.ConfigurationFile;
 import org.omni.packets.PacketMapperRegistry;
 import org.omni.packets.PacketRegistry;
 import org.omni.packets.data.ProfileExternRequestData;
@@ -21,40 +22,36 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 @Singleton
 public class ExternProfileService extends ProfileService {
 
-    private final Supplier<String> licenseKey;
-
+    final TranslatorPlugin translatorPlugin;
+    final AbstractAnalyticsSecret abstractAnalyticsSecret;
+    final PacketMapperRegistry packetMapperRegistry;
+    private final ConfigurationFile configurationFile;
     private final ConcurrentHashMap<AnalyticsKey, CompletableFuture<ProfileResultData>> inFlightFetches = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, CompletableFuture<ProfileResultData>> queue = new ConcurrentHashMap<>();
-
     private final Cache<UUID, ProfileResultData> cacheProvider = Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(10))
             .maximumSize(3000)
             .build();
-
     private final Cache<AnalyticsKey, Boolean> deduplicationCache = Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofMillis(500))
             .build();
-
-    final TranslatorPlugin translatorPlugin;
-    final AbstractAnalyticsSecret abstractAnalyticsSecret;
-    final PacketMapperRegistry packetMapperRegistry;
 
     @Inject
     public ExternProfileService(
             TranslatorPlugin translatorPlugin,
             AbstractAnalyticsSecret abstractAnalyticsSecret,
-            Supplier<String> licenseKey,
+            ConfigurationFile configurationFile,
             PacketMapperRegistry packetMapperRegistry
     ) {
         this.packetMapperRegistry = packetMapperRegistry;
         this.translatorPlugin = translatorPlugin;
-        this.licenseKey = licenseKey;
+        this.configurationFile = configurationFile;
         this.abstractAnalyticsSecret = abstractAnalyticsSecret;
+
 
     }
 
@@ -67,8 +64,6 @@ public class ExternProfileService extends ProfileService {
     public Cache<UUID, ProfileResultData> cacheProvider() {
         return cacheProvider;
     }
-
-
 
 
     @Override
@@ -87,11 +82,10 @@ public class ExternProfileService extends ProfileService {
             UUID requestId = UUID.randomUUID();
 
             ProfileExternRequestData externProfileRequestData = new ProfileExternRequestData(
-                    licenseKey.get(),
+                    configurationFile.getLicenseKey(),
                     analyticsKey.bytes(),
                     requestId
             );
-
 
 
             queue.put(requestId, future);

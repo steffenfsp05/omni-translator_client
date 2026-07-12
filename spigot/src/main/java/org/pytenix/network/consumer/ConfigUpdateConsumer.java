@@ -1,29 +1,37 @@
 package org.pytenix.network.consumer;
 
-import lombok.AllArgsConstructor;
-import org.pytenix.TranslatorPlugin;
-import org.pytenix.entity.ServerConfiguration;
-import org.pytenix.event.register.ConfigUpdateEvent;
-import org.pytenix.packets.MappedPacketReceiveConsumer;
-import org.pytenix.proto.generated.NetworkPackets;
-import org.pytenix.translation.TranslatorService;
+import com.google.gson.Gson;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import org.omni.entity.ServerConfiguration;
+import org.omni.event.EventService;
+import org.omni.event.register.ConfigUpdateEvent;
+import org.omni.packets.MappedPacketReceiveConsumer;
+import org.omni.proto.generated.Protobuf;
+import org.omni.translation.TranslatorService;
+import org.pytenix.network.SpigotTransport;
 import org.transport.service.PacketContext;
 
+@Singleton
+public class ConfigUpdateConsumer extends MappedPacketReceiveConsumer<String, Protobuf.ServerConfiguration, ServerConfiguration> {
 
-@AllArgsConstructor
-public class ConfigUpdateConsumer implements MappedPacketReceiveConsumer<String, NetworkPackets.ServerConfiguration, ServerConfiguration> {
+    private final TranslatorService translatorService;
+    private final Provider<SpigotTransport> spigotTransportProvider;
+    private final EventService eventService;
 
-
-    final TranslatorPlugin translatorPlugin;
-    final TranslatorService translatorService;
+    @Inject
+    public ConfigUpdateConsumer(TranslatorService translatorService, Provider<SpigotTransport> spigotTransportProvider, EventService eventService) {
+        this.translatorService = translatorService;
+        this.spigotTransportProvider = spigotTransportProvider;
+        this.eventService = eventService;
+    }
 
     @Override
     public void handle(PacketContext<String> context, ServerConfiguration serverConfiguration) {
-
-        translatorPlugin.getTranslatorService().setTranslationConfiguration(serverConfiguration);
-
-        translatorPlugin.getSpigotTransport().setHasConfiguration(true);
-
-        translatorService.getEventService().callEvent(new ConfigUpdateEvent(serverConfiguration));
+        System.out.println("RECIEVED CONFIG!!" + new Gson().toJson(serverConfiguration));
+        translatorService.setTranslationConfiguration(serverConfiguration);
+        spigotTransportProvider.get().setHasConfiguration(true);
+        eventService.callEvent(new ConfigUpdateEvent(serverConfiguration));
     }
 }

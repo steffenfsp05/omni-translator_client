@@ -2,11 +2,15 @@ package org.pytenix.network.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import org.pytenix.entity.ServerConfiguration;
-import org.pytenix.network.SpigotTransport;
-import org.pytenix.packets.PacketMapperRegistry;
-import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.TranslationRequestMapper;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import org.omni.entity.ServerConfiguration;
+import org.omni.packets.PacketMapperRegistry;
+import org.omni.packets.PacketRegistry;
+import org.omni.packets.data.TranslationRequestData;
+import org.transport.TransportService;
 
 import java.time.Duration;
 import java.util.List;
@@ -15,8 +19,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
+@Singleton
 public class TranslationRequestService {
-    public final com.github.benmanes.caffeine.cache.Cache<UUID, List<CompletableFuture<String>>> pendingRequests = Caffeine.newBuilder()
+    public final Cache<UUID, List<CompletableFuture<String>>> pendingRequests = Caffeine.newBuilder()
             .maximumSize(10_000)
             .expireAfterWrite(Duration.ofSeconds(20))
             .build();
@@ -24,12 +29,20 @@ public class TranslationRequestService {
             .maximumSize(10_000)
             .expireAfterWrite(Duration.ofSeconds(20))
             .build();
-    private final SpigotTransport transport;
-    private final String channel;
 
-    public TranslationRequestService(SpigotTransport transport, String channel) {
-        this.transport = transport;
+    private final String channel;
+    private final Provider<TransportService<String>> transportServiceProvider;
+    private final PacketMapperRegistry packetMapperRegistry;
+
+    @Inject
+    public TranslationRequestService(
+            @Named("pluginMessagingChannel") String channel,
+            Provider<TransportService<String>> transportServiceProvider,
+            PacketMapperRegistry packetMapperRegistry
+    ) {
         this.channel = channel;
+        this.transportServiceProvider = transportServiceProvider;
+        this.packetMapperRegistry = packetMapperRegistry;
     }
 
     public CompletableFuture<String> translate(UUID id, String text, String targetLang, String module) {
@@ -50,10 +63,8 @@ public class TranslationRequestService {
         pendingRequests.get(masterId, k -> new CopyOnWriteArrayList<>()).add(future);
 
         if (masterId.equals(id)) {
-
-
-            transport.getTransportService().send(channel, PacketRegistry.TRANSLATION_REQUEST,
-                    PacketMapperRegistry.toProto(new TranslationRequestMapper.RequestData(
+            transportServiceProvider.get().send(channel, PacketRegistry.TRANSLATION_REQUEST,
+                    packetMapperRegistry.toProto(new TranslationRequestData(
                             masterId,
                             text,
                             targetLang,
@@ -65,7 +76,6 @@ public class TranslationRequestService {
     }
 
     public void completeRequest(UUID id, String result) {
-
         List<CompletableFuture<String>> futures = pendingRequests.getIfPresent(id);
         if (futures != null) {
             for (CompletableFuture<String> future : futures) {

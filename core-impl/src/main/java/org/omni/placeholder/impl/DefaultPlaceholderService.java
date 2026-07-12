@@ -7,8 +7,6 @@ import com.google.inject.Singleton;
 import lombok.Getter;
 import org.omni.placeholder.BasePlaceholder;
 import org.omni.placeholder.normalizer.PlaceholderNormalizer;
-import org.omni.placeholder.protect.impl.DefaultPlayerNameProtector;
-import org.omni.placeholder.protect.impl.DefaultWordProtector;
 import org.omni.placeholder.protector.PlayerNameProtector;
 import org.omni.placeholder.protector.ProtectionResult;
 import org.omni.placeholder.protector.WordProtector;
@@ -73,7 +71,6 @@ public class DefaultPlaceholderService implements PlaceholderService {
         registerPlaceholder(1, new ExtendedPlaceholder("C", () -> COLOR_PATTERN));
         registerPlaceholder(10, new ExtendedPlaceholder("N", () -> PRICE_PATTERN));
     }
-
 
 
     public void updateProtectedWords(Set<String> words) {

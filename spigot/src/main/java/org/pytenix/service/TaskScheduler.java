@@ -1,5 +1,7 @@
 package org.pytenix.service;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -7,11 +9,13 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.concurrent.TimeUnit;
 
+@Singleton
 public class TaskScheduler {
 
     private final Plugin plugin;
     private final boolean isFolia;
 
+    @Inject
     public TaskScheduler(Plugin plugin) {
         this.plugin = plugin;
 

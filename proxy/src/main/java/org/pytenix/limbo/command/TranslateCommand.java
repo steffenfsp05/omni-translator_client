@@ -1,23 +1,32 @@
 package org.pytenix.limbo.command;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.Component;
+import org.omni.packets.PacketMapperRegistry;
+import org.omni.packets.PacketRegistry;
+import org.omni.packets.data.ConsentRefreshRequestData;
+import org.omni.profile.ProfileService;
+import org.omni.proto.generated.Protobuf;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.packets.PacketMapperRegistry;
-import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.ConsentRefreshRequestMapper;
-import org.pytenix.proto.generated.NetworkPackets;
 
 import java.util.UUID;
 
+@Singleton
 public class TranslateCommand implements SimpleCommand {
 
     private final TranslatorPlugin translatorPlugin;
+    private final ProfileService profileService;
+    private final PacketMapperRegistry packetMapperRegistry;
 
-    public TranslateCommand(TranslatorPlugin translatorPlugin) {
+    @Inject
+    public TranslateCommand(TranslatorPlugin translatorPlugin, ProfileService profileService, PacketMapperRegistry packetMapperRegistry) {
         this.translatorPlugin = translatorPlugin;
+        this.profileService = profileService;
+        this.packetMapperRegistry = packetMapperRegistry;
     }
 
 
@@ -26,7 +35,7 @@ public class TranslateCommand implements SimpleCommand {
         if (!(invocation.source() instanceof Player)) return;
         Player player = (Player) invocation.source();
 
-        translatorPlugin.getProfileService().retrieveProfile(player.getUniqueId())
+        profileService.retrieveProfile(player.getUniqueId())
                 .thenAcceptAsync(profileData ->
                 {
 
@@ -40,8 +49,8 @@ public class TranslateCommand implements SimpleCommand {
                             if (args[0].equalsIgnoreCase("accept")) {
                                 player.sendMessage(Component.text("§aYou accepted!"));
 
-                                translatorPlugin.getProfileService().updateProfile(
-                                        profileData.withConsentType(NetworkPackets.ProfilePacket.ConsentType.EXPLICIT)
+                                profileService.updateProfile(
+                                        profileData.withConsentType(Protobuf.ConsentType.EXPLICIT)
                                 );
 
                                 sendToLobby(player);
@@ -49,24 +58,23 @@ public class TranslateCommand implements SimpleCommand {
                             } else if (args[0].equalsIgnoreCase("decline")) {
                                 player.sendMessage(Component.text("§cYou declined!"));
 
-                                translatorPlugin.getProfileService().updateProfile(
-                                        profileData.withConsentType(NetworkPackets.ProfilePacket.ConsentType.DECLINED)
+                                profileService.updateProfile(
+                                        profileData.withConsentType(Protobuf.ConsentType.DECLINED)
                                 );
 
                                 sendToLobby(player);
                                 return;
 
                             } else if (args[0].equalsIgnoreCase("toggle")) {
-                                NetworkPackets.ProfilePacket.ConsentType newConsent = NetworkPackets.ProfilePacket.ConsentType.DECLINED;
+                                Protobuf.ConsentType newConsent = Protobuf.ConsentType.DECLINED;
 
-                              //  if (profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.EXPLICIT)) {
-                            //    }
+                                //  if (profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.EXPLICIT)) {
+                                //    }
 
                                 //TODO: IMPLEMENT FOR AUTO_OPT LOGIC
 
-                                if (profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.DECLINED))
-                                    newConsent = NetworkPackets.ProfilePacket.ConsentType.EXPLICIT;
-
+                                if (profileData.consentType().equals(Protobuf.ConsentType.DECLINED))
+                                    newConsent = Protobuf.ConsentType.EXPLICIT;
 
 
                                 RegisteredServer registeredServer = null;
@@ -74,7 +82,7 @@ public class TranslateCommand implements SimpleCommand {
                                     registeredServer = player.getCurrentServer().get().getServer();
 
 
-                                translatorPlugin.getProfileService().updateProfile(
+                                profileService.updateProfile(
                                         profileData.withConsentType(newConsent)
                                 );
 
@@ -83,8 +91,8 @@ public class TranslateCommand implements SimpleCommand {
                                     translatorPlugin.getProxyTransport().getTransportService().send(
                                             registeredServer,
                                             PacketRegistry.CONSENT_REFRESH,
-                                            PacketMapperRegistry.toProto(
-                                                    new ConsentRefreshRequestMapper.Data(
+                                            packetMapperRegistry.toProto(
+                                                    new ConsentRefreshRequestData(
                                                             UUID.randomUUID(),
                                                             player.getUniqueId(),
                                                             newConsent

@@ -1,37 +1,43 @@
 package org.pytenix.network.listener;
 
-import org.pytenix.TranslatorPlugin;
-import org.pytenix.event.annotation.OmniSubscribe;
-import org.pytenix.event.register.ConfigUpdateEvent;
-import org.pytenix.network.SpigotTransport;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import org.omni.event.annotation.OmniSubscribe;
+import org.omni.event.register.ConfigUpdateEvent;
+import org.pytenix.service.TaskScheduler;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 
+@Singleton
 public class ConfigUpdateListener {
 
-    final TranslatorPlugin translatorPlugin;
-    final SpigotTransport spigotTransport;
+    private final TaskScheduler taskScheduler;
+    private final ObjectMapper mapper;
+    private final File configFile;
+    private final Logger logger;
 
-    public ConfigUpdateListener(TranslatorPlugin translatorPlugin) {
-        this.translatorPlugin = translatorPlugin;
-        this.spigotTransport = translatorPlugin.getSpigotTransport();
+    @Inject
+    public ConfigUpdateListener(TaskScheduler taskScheduler, ObjectMapper mapper, @Named("configFile") File configFile, Logger logger) {
+        this.taskScheduler = taskScheduler;
+        this.mapper = mapper;
+        this.configFile = configFile;
+        this.logger = logger;
     }
 
     @OmniSubscribe(priority = 90)
     public void onConfigUpdate(ConfigUpdateEvent event) {
-
-
-        translatorPlugin.getTaskScheduler().runAsync(() -> {
-
-
+        taskScheduler.runAsync(() -> {
             try {
-                if (!translatorPlugin.getDataFolder().exists()) translatorPlugin.getDataFolder().mkdirs();
-                translatorPlugin.getMapper().writeValue(translatorPlugin.getConfigFile(), event.translationConfiguration());
+                if (!configFile.getParentFile().exists()) configFile.getParentFile().mkdirs();
+                mapper.writeValue(configFile, event.translationConfiguration());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
-
-        translatorPlugin.getLogger().info("Config-Update vom Proxy empfangen und angewendet.");
+        logger.info("Config-Update vom Proxy empfangen und angewendet.");
     }
 }

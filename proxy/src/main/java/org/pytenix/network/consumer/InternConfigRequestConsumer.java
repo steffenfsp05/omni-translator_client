@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import org.omni.packets.MappedPacketReceiveConsumer;
-import org.omni.packets.PacketMapperRegistry;
 import org.omni.packets.PacketRegistry;
 import org.omni.packets.data.ConfigurationRequestData;
 import org.omni.proto.generated.Protobuf;
@@ -12,15 +11,13 @@ import org.omni.translation.TranslatorService;
 import org.transport.service.PacketContext;
 
 @Singleton
-public class ConfigRequestConsumer extends MappedPacketReceiveConsumer<RegisteredServer, Protobuf.ConfigRequestPacket, ConfigurationRequestData> {
+public class InternConfigRequestConsumer extends MappedPacketReceiveConsumer<RegisteredServer, Protobuf.ConfigRequestPacket, ConfigurationRequestData> {
 
     private final TranslatorService translatorService;
-    private final PacketMapperRegistry packetMapperRegistry;
 
     @Inject
-    public ConfigRequestConsumer(TranslatorService translatorService, PacketMapperRegistry packetMapperRegistry) {
+    public InternConfigRequestConsumer(TranslatorService translatorService) {
         this.translatorService = translatorService;
-        this.packetMapperRegistry = packetMapperRegistry;
     }
 
     @Override
@@ -34,8 +31,9 @@ public class ConfigRequestConsumer extends MappedPacketReceiveConsumer<Registere
 
 
         System.out.println("REPLYING WITH: " + PacketRegistry.SERVER_CONFIG.id() + " " + context.getConnection().getServerInfo().getName());
-        System.out.println("RESULT:: " + context.reply(PacketRegistry.SERVER_CONFIG,
-                packetMapperRegistry.toProto(translatorService.getTranslationConfiguration())));
+
+
+        reply(context, PacketRegistry.SERVER_CONFIG, translatorService.getTranslationConfiguration());
     }
 
 

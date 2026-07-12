@@ -115,7 +115,6 @@ message ProfileInternRequest
 message ProfilePacket {
 
 
-
   string license = 1;
   fixed64 request_id_most_sig = 3;
   fixed64 request_id_least_sig = 4;

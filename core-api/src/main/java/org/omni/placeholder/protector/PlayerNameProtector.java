@@ -6,6 +6,7 @@ import java.util.Map;
 public interface PlayerNameProtector {
 
     void addPlayer(String name);
+
     void removePlayer(String name);
 
     ProtectionResult maskNames(String text);

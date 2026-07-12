@@ -3,8 +3,8 @@ package org.omni.packets.registry;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.omni.packets.*;
-import org.omni.packets.impl.*;
+import org.omni.packets.AbstractPacketMapper;
+import org.omni.packets.PacketMapperRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,7 @@ public class DefaultPacketMapperRegistry implements PacketMapperRegistry {
     public <P, J> P toProto(J javaObject) {
         AbstractPacketMapper<P, J> mapper = (AbstractPacketMapper<P, J>) javaToProto.get(javaObject.getClass());
         if (mapper == null)
-            throw new IllegalArgumentException("Kein Mapper für " + javaObject.getClass().getSimpleName());
+            throw new IllegalArgumentException("Kein Mapper für " + javaObject.getClass().getSimpleName() + " in Method toProto.");
         return mapper.to(javaObject);
     }
 
@@ -40,7 +40,7 @@ public class DefaultPacketMapperRegistry implements PacketMapperRegistry {
     public <P, J> J fromProto(P protoObject) {
         AbstractPacketMapper<P, J> mapper = (AbstractPacketMapper<P, J>) protoToJava.get(protoObject.getClass());
         if (mapper == null)
-            throw new IllegalArgumentException("Kein Mapper für " + protoObject.getClass().getSimpleName());
+            throw new IllegalArgumentException("Kein Mapper für " + protoObject.getClass().getSimpleName() + " in Method fromProto");
         return mapper.from(protoObject);
     }
 }

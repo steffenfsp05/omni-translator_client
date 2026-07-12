@@ -1,130 +1,62 @@
 package org.pytenix;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import lombok.Getter;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.pytenix.cache.CacheProvider;
-import org.pytenix.cache.impl.CaffeineCacheProvider;
-import org.pytenix.config.ConfigService;
-import org.pytenix.config.ConfigurationFile;
-import org.pytenix.entity.ServerConfiguration;
-import org.pytenix.event.EventService;
-import org.pytenix.event.impl.DefaultEventService;
+import org.omni.entity.ServerConfiguration;
+import org.omni.injection.CoreModule;
+import org.omni.translation.TranslatorService;
+import org.pytenix.injection.TranslatorSpigotModule;
 import org.pytenix.listener.PlayerJoinQuitListener;
 import org.pytenix.listener.PlayerLocaleChangeListener;
 import org.pytenix.network.SpigotTransport;
 import org.pytenix.network.VelocitySecretReader;
-import org.pytenix.placeholder.GradientService;
-import org.pytenix.placeholder.PlaceholderService;
-import org.pytenix.placeholder.impl.DefaultGradientService;
-import org.pytenix.placeholder.impl.DefaultPlaceholderService;
-import org.pytenix.profile.ProfileService;
-import org.pytenix.service.InternProfileService;
+import org.pytenix.network.service.ChannelCarrierService;
+import org.pytenix.network.service.TranslationRequestService;
 import org.pytenix.service.ModuleService;
-import org.pytenix.service.TaskScheduler;
-import org.pytenix.translation.TranslationProcessor;
-import org.pytenix.translation.TranslatorService;
-import org.pytenix.translation.impl.DefaultTranslationService;
-import org.pytenix.translation.locale.PlayerLocaleProcessor;
-import org.pytenix.util.TextComponentUtil;
 
 import java.io.File;
 import java.io.IOException;
 
-
 @Getter
+@Singleton
 public class TranslatorPlugin extends JavaPlugin {
 
     @Getter
-    public static LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.builder()
+    public static final LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.builder()
             .character('§')
             .extractUrls()
             .hexColors()
             .flattener(ComponentFlattener.basic())
             .build();
-
-    public String pluginMessagingChannel;
-    @Getter
-    TextComponentUtil textComponentUtil;
-    CacheProvider<String, String> caffeineCache;
-    ConfigService configService;
-    ConfigurationFile configurationFile;
-
-    private String serverName;
-    private TranslatorService translatorService;
+    @Inject
+    TranslatorService translatorService;
 
 
-    private ModuleService moduleService;
-    private TaskScheduler taskScheduler;
+    @Inject
+    @Named("pluginMessagingChannel")
+    private String pluginMessagingChannel;
+    @Inject
+    @Named("configFile")
     private File configFile;
+    @Inject
     private SpigotTransport spigotTransport;
-    private final ObjectMapper mapper = new ObjectMapper();
-
-
-    private TranslationProcessor translationProcessor;
-    private PlaceholderService placeholderService;
-    private GradientService gradientService;
-    private EventService eventService;
-
-    private ProfileService profileService;
-    private PlayerLocaleProcessor playerLocaleProcessor;
+    @Inject
+    private ObjectMapper mapper;
+    private String serverName;
 
     @Override
     public void onEnable() {
-
-
-        this.pluginMessagingChannel = "translator:main";
-
-        this.caffeineCache = new CaffeineCacheProvider<>();
-
-        this.configService = new ConfigService();
-
-
-        if (!configService.exists("config.json")) {
-            configService.saveConfig("config.json", new ConfigurationFile("DEIN-LIZENZ-SCHLÜSSEL"));
-            System.out.println("[AITranslator] Please check in config.json for the license key!");
-        }
-        this.configurationFile = configService.loadConfig("config.json", ConfigurationFile.class);
-
-        this.playerLocaleProcessor = uuid -> {
-            final Player player = Bukkit.getPlayer(uuid);
-            if (player == null)
-                return "en-en";
-            else
-                return player.getLocale();
-
-        };
-
         this.serverName = this.getServer().getName();
-        this.taskScheduler = new TaskScheduler(this);
-        this.configFile = new File(getDataFolder(), "proxy_sync_config.json");
-
-        this.translationProcessor = (id, text, targetLang, module) -> getSpigotTransport().translate(id, text, targetLang, module);
-        this.placeholderService = new DefaultPlaceholderService();
-        this.gradientService = new DefaultGradientService();
-        this.eventService = new DefaultEventService();
-
-        this.profileService = new InternProfileService(
-                (definition, o) -> getSpigotTransport().getTransportService().send(pluginMessagingChannel, definition, o),
-                () -> getTranslatorService().getTranslationConfiguration().getLicenseKey()
-        );
-
-        this.translatorService = new DefaultTranslationService(
-                translationProcessor,
-                placeholderService,
-                gradientService,
-                eventService,
-                playerLocaleProcessor,
-                profileService
-
-        );
-
-
 
         final VelocitySecretReader secretReader = new VelocitySecretReader();
         final String secret = secretReader.loadVelocitySecret();
@@ -134,45 +66,49 @@ public class TranslatorPlugin extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-
         System.out.println("READING SECRET: " + secret);
 
+        Injector injector = Guice.createInjector(
+                new CoreModule(),
+                new TranslatorSpigotModule(this, secret, getDataFolder().toPath())
+        );
 
-        this.spigotTransport = new SpigotTransport(this, secret, pluginMessagingChannel);
+        injector.injectMembers(this);
 
         loadConfigFromDisk();
 
-        this.textComponentUtil = new TextComponentUtil(translatorService);
+        injector.getInstance(ModuleService.class);
 
+        registerListeners(injector);
 
-        Bukkit.getPluginManager().registerEvents(new PlayerJoinQuitListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerLocaleChangeListener(this), this);
+        registerTestCommand(injector);
 
-        moduleService = new ModuleService(profileService, this, translatorService, playerLocaleProcessor);
+        getLogger().info("AITranslator Test-Modul geladen!");
+    }
 
+    private void registerListeners(Injector injector) {
+        Bukkit.getPluginManager().registerEvents(injector.getInstance(PlayerJoinQuitListener.class), this);
+        Bukkit.getPluginManager().registerEvents(injector.getInstance(PlayerLocaleChangeListener.class), this);
+
+    }
+
+    private void registerTestCommand(Injector injector) {
         getServer().getCommandMap().register("translator", new org.bukkit.command.Command("testmsg") {
-
-            private final TestMessageCommand executor = new TestMessageCommand();
+            private final TestMessageCommand executor = injector.getInstance(TestMessageCommand.class);
 
             @Override
             public boolean execute(CommandSender sender, String commandLabel, String[] args) {
                 return executor.onCommand(sender, this, commandLabel, args);
             }
         });
-
-        getLogger().info("AITranslator Test-Modul geladen!");
-
     }
-
 
     private void loadConfigFromDisk() {
         if (!configFile.exists()) {
-
             getLogger().info("Keine lokale Config gefunden. Nutze Default bis Proxy sendet.");
             resetConfiguration();
             return;
         }
-
         try {
             translatorService.setTranslationConfiguration(mapper.readValue(configFile, ServerConfiguration.class));
         } catch (IOException e) {
@@ -183,13 +119,12 @@ public class TranslatorPlugin extends JavaPlugin {
 
     private void resetConfiguration() {
         translatorService.setTranslationConfiguration(ServerConfiguration.createDefault("DEIN-LIZENZ-SCHLÜSSEL"));
-
-
     }
-
 
     @Override
     public void onDisable() {
-        spigotTransport.getTransportService().close();
+        if (spigotTransport != null && spigotTransport.getTransportService() != null) {
+            spigotTransport.getTransportService().close();
+        }
     }
 }

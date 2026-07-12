@@ -38,7 +38,6 @@ public class DefaultTranslatorService implements TranslatorService {
     final ProfileService profileService;
 
 
-
     private final Cache<UUID, List<UUID>> cachedReferences = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .build();
@@ -97,7 +96,7 @@ public class DefaultTranslatorService implements TranslatorService {
         return profileService.retrieveProfile(playerUUID)
                 .thenApply(profileData -> {
                     System.out.println("REQUIRING TRANSLATION - " + profileData.consentType());
-                    if(translationConfiguration.getConsentMode().equals(ServerConfiguration.ConsentMode.AUTO_OPT) &&
+                    if (translationConfiguration.getConsentMode().equals(ServerConfiguration.ConsentMode.AUTO_OPT) &&
                             profileData.consentType().equals(Protobuf.ConsentType.AUTO))
                         return true;
 

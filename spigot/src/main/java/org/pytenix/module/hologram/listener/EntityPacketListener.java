@@ -10,12 +10,15 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnLivingEntity;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.hologram.HologramModule;
+import org.pytenix.service.TaskScheduler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,20 +30,18 @@ import java.util.concurrent.TimeUnit;
 
 public class EntityPacketListener implements PacketListener, Listener {
 
+    private final Provider<HologramModule> hologramModuleProvider;
+    private final TaskScheduler taskScheduler;
 
-    final HologramModule hologramModule;
-
-
-    public EntityPacketListener(HologramModule hologramModule) {
-        this.hologramModule = hologramModule;
-
-
+    @Inject
+    public EntityPacketListener(Provider<HologramModule> hologramModuleProvider, TaskScheduler taskScheduler) {
+        this.hologramModuleProvider = hologramModuleProvider;
+        this.taskScheduler = taskScheduler;
     }
-
 
     private Cache<Component, Component> getHologramCache(String locale) {
         try {
-            return hologramModule.getPlayerTranslationCache().get(locale, () -> CacheBuilder.newBuilder()
+            return hologramModuleProvider.get().getPlayerTranslationCache().get(locale, () -> CacheBuilder.newBuilder()
                     .expireAfterWrite(2, TimeUnit.MINUTES)
                     .maximumSize(1000)
                     .build());
@@ -50,36 +51,32 @@ public class EntityPacketListener implements PacketListener, Listener {
         }
     }
 
-
     @Override
     public void onPacketSend(PacketSendEvent event) {
-
-        if (!hologramModule.isActive())
-            return;
+        HologramModule hologramModule = hologramModuleProvider.get();
+        if (!hologramModule.isActive()) return;
 
         if (event.getPacketType() == PacketType.Play.Server.ENTITY_METADATA) {
             WrapperPlayServerEntityMetadata wrapper = new WrapperPlayServerEntityMetadata(event);
-            processHologram(event, event.getUser(), wrapper.getEntityId(), wrapper.getEntityMetadata());
+            processHologram(event, event.getUser(), wrapper.getEntityId(), wrapper.getEntityMetadata(), hologramModule);
         } else if (event.getPacketType() == PacketType.Play.Server.SPAWN_ENTITY) {
-            //   WrapperPlayServerSpawnEntity wrapper = new WrapperPlayServerSpawnEntity(event);
-            //TODO:
+            // WrapperPlayServerSpawnEntity wrapper = new WrapperPlayServerSpawnEntity(event);
+            // TODO:
         } else if (event.getPacketType() == PacketType.Play.Server.SPAWN_LIVING_ENTITY) {
             WrapperPlayServerSpawnLivingEntity wrapper = new WrapperPlayServerSpawnLivingEntity(event);
-            processHologram(event, event.getUser(), wrapper.getEntityId(), wrapper.getEntityMetadata());
+            processHologram(event, event.getUser(), wrapper.getEntityId(), wrapper.getEntityMetadata(), hologramModule);
         }
     }
 
-    private void processHologram(PacketSendEvent event, com.github.retrooper.packetevents.protocol.player.User user, int entityId, List<EntityData<?>> dataList) {
+    private void processHologram(PacketSendEvent event, User user, int entityId, List<EntityData<?>> dataList, HologramModule hologramModule) {
         if (dataList == null || dataList.isEmpty()) return;
 
         final UUID playerUuid = user.getUUID();
         final List<EntityData<?>> snapshotDataList = new ArrayList<>(dataList);
 
         hologramModule.requiresTranslation(event.getUser().getUUID())
-                .thenAcceptAsync(aBoolean ->
-                {
-                    if(!aBoolean)
-                        return;
+                .thenAcceptAsync(requiresTranslation -> {
+                    if (!requiresTranslation) return;
 
                     Player player = Bukkit.getPlayer(playerUuid);
                     if (player == null) return;
@@ -93,7 +90,6 @@ public class EntityPacketListener implements PacketListener, Listener {
                         Component originalComponent = null;
                         boolean wasOptional = false;
 
-                        // Extrahiere die Component
                         if (value instanceof Optional<?> opt) {
                             if (opt.isPresent() && opt.get() instanceof Component comp) {
                                 originalComponent = comp;
@@ -108,7 +104,6 @@ public class EntityPacketListener implements PacketListener, Listener {
                             Component cachedTranslation = personalCache.getIfPresent(originalComponent);
 
                             if (cachedTranslation != null) {
-                                // 🎯 CACHE HIT: Paket sofort austauschen!
                                 Object newValue = wasOptional ? Optional.of(cachedTranslation) : cachedTranslation;
                                 instantUpdatesToSend.add(new EntityData(data.getIndex(), data.getType(), newValue));
                             } else {
@@ -118,7 +113,7 @@ public class EntityPacketListener implements PacketListener, Listener {
                                     final Component keyComponent = originalComponent;
                                     final boolean isOptionalFinal = wasOptional;
 
-                                    translateHologramLine(player, legacyText)
+                                    translateHologramLine(player, legacyText, hologramModule)
                                             .thenAccept(translatedComponent -> {
                                                 if (translatedComponent == null) return;
 
@@ -127,8 +122,7 @@ public class EntityPacketListener implements PacketListener, Listener {
                                                 Object updatedValue = isOptionalFinal ? Optional.of(translatedComponent) : translatedComponent;
                                                 EntityData<?> newDataUpdate = new EntityData<>(data.getIndex(), data.getType(), updatedValue);
 
-                                                // Schicke das frische Update-Paket einzeln raus
-                                                sendUpdatePacket(user, entityId, List.of(newDataUpdate));
+                                                sendUpdatePacket(user, entityId, List.of(newDataUpdate), hologramModule);
                                             });
                                 }
                             }
@@ -136,14 +130,12 @@ public class EntityPacketListener implements PacketListener, Listener {
                     }
 
                     if (!instantUpdatesToSend.isEmpty()) {
-                        sendUpdatePacket(user, entityId, instantUpdatesToSend);
+                        sendUpdatePacket(user, entityId, instantUpdatesToSend, hologramModule);
                     }
                 });
-
-
     }
 
-    private CompletableFuture<Component> translateHologramLine(Player player, String text) {
+    private CompletableFuture<Component> translateHologramLine(Player player, String text, HologramModule hologramModule) {
         if (player == null) return CompletableFuture.completedFuture(null);
         String lang = hologramModule.getPlayerLocaleProcessor().retrieveLocale(player.getUniqueId());
 
@@ -151,26 +143,16 @@ public class EntityPacketListener implements PacketListener, Listener {
                 .thenApply(translatedString -> TranslatorPlugin.getLegacyComponentSerializer().deserialize(translatedString));
     }
 
-    private void sendUpdatePacket(User user, int entityId, List<EntityData<?>> newData) {
+    private void sendUpdatePacket(User user, int entityId, List<EntityData<?>> newData, HologramModule hologramModule) {
         if (newData.isEmpty()) return;
 
+        Player player = Bukkit.getPlayer(user.getUUID());
+        if (player == null) return;
 
-        if (Bukkit.getPlayer(user.getUUID()) == null) return;
+        WrapperPlayServerEntityMetadata updatePacket = new WrapperPlayServerEntityMetadata(entityId, newData);
 
-        WrapperPlayServerEntityMetadata updatePacket = new WrapperPlayServerEntityMetadata(
-
-                entityId,
-                newData
-        );
-
-
-        hologramModule.getTranslatorPlugin().getTaskScheduler().runForEntity(Bukkit.getPlayer(user.getUUID()), () ->
-        {
-            PacketEvents.getAPI().getPlayerManager().sendPacketSilently(Bukkit.getPlayer(user.getUUID()), updatePacket);
+        taskScheduler.runForEntity(player, () -> {
+            PacketEvents.getAPI().getPlayerManager().sendPacketSilently(player, updatePacket);
         });
-
-
     }
-
-
 }

@@ -14,15 +14,21 @@ public class LimboService {
 
     private Process nanoLimboProcess;
 
-    public LimboService(TranslatorPlugin plugin, ProxyServer proxyServer, int port, String secret) {
+    public LimboService(
+            TranslatorPlugin plugin,
+            ProxyServer proxyServer,
+            int port,
+            String secret,
+            ServerPreConnectListener listener,
+            TranslateCommand translateCommand) {
 
-        proxyServer.getEventManager().register(plugin, new ServerPreConnectListener(plugin));
+        proxyServer.getEventManager().register(plugin, listener);
 
         CommandMeta meta = proxyServer.getCommandManager().metaBuilder("translate")
                 .plugin(plugin)
                 .build();
 
-        proxyServer.getCommandManager().register(meta, new TranslateCommand(plugin));
+        proxyServer.getCommandManager().register(meta, translateCommand);
 
         final String limboDir = "plugins/nanolimbo";
         LimboDownloadService.checkAndDownload(limboDir);

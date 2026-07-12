@@ -18,10 +18,12 @@ import org.omni.translation.TranslatorService;
 import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.backend.OmniConnectionService;
-import org.pytenix.tracking.mock.MockROIService;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -36,24 +38,19 @@ public class ROIService {
     final PlayerLocaleProcessor playerLocaleProcessor;
     final ProfileService profileService;
     final PacketMapperRegistry packetMapperRegistry;
-    final MockROIService mockROIService;
     final ConfigurationFile configurationFile;
     final TranslatorService translatorService;
     final AbstractAnalyticsSecret abstractAnalyticsSecret;
 
 
-    final Cache<UUID,Long> trackCache = Caffeine.newBuilder()
+    final Cache<UUID, Long> trackCache = Caffeine.newBuilder()
             .maximumSize(3_000)
             .build();
 
     @Getter
-    final Cache<UUID,String> languageCache = Caffeine.newBuilder()
+    final Cache<UUID, String> languageCache = Caffeine.newBuilder()
             .maximumSize(3_000)
             .build();
-
-    final boolean isMock = false;
-
-
 
 
     @Inject
@@ -77,12 +74,6 @@ public class ROIService {
         this.translatorService = translatorService;
         this.abstractAnalyticsSecret = abstractAnalyticsSecret;
 
-        if(isMock) {
-            this.mockROIService = new MockROIService(translatorPlugin, this);
-        } else {
-            mockROIService = null;
-        }
-
         translatorPlugin.getProxyServer().getScheduler()
                 .buildTask(translatorPlugin, this::sendHeartbeat)
                 .repeat(Duration.ofSeconds(20))
@@ -94,60 +85,43 @@ public class ROIService {
         Map<String, Integer> langDistribution;
         List<CompletableFuture<ProfileResultData>> futures;
 
-            if(isMock)
-            {
-           /*     langDistribution = mockROIService.getVirtualPlayers().keySet().stream()
-                        .collect(Collectors.toMap(
-                                uuid -> translatorPlugin.getPlayerLocaleProcessor().retrieveLocale(uuid),
-                                profile -> 1,
-                                Integer::sum
-                        ));
-                futures = mockROIService.getVirtualPlayers().keySet().stream()
-                        .map(uuid -> translatorPlugin.getProfileService().retrieveProfile(uuid))
-                        .toList();
 
-            */
-            } else {
-                langDistribution = translatorPlugin.getProxyServer().getAllPlayers().stream()
-                        .collect(Collectors.toMap(
-                                player -> playerLocaleProcessor.retrieveLocale(player.getUniqueId()),
-                                profile -> 1,
-                                Integer::sum
-                        ));
+        langDistribution = translatorPlugin.getProxyServer().getAllPlayers().stream()
+                .collect(Collectors.toMap(
+                        player -> playerLocaleProcessor.retrieveLocale(player.getUniqueId()),
+                        profile -> 1,
+                        Integer::sum
+                ));
 
-                futures = translatorPlugin.getProxyServer().getAllPlayers().stream()
-                        .map(player -> profileService.retrieveProfile(player.getUniqueId()))
-                        .toList();
-            }
-
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                    .thenAccept(unused -> {
-
-                        List<ProfileResultData> data = futures.stream()
-                                .map(CompletableFuture::join)
-                                .filter(Objects::nonNull)
-                                .toList();
-
-                        omniConnectionService.sendPacket(PacketRegistry.HEART_BEAT,
-                                packetMapperRegistry.toProto(
-                                        new HeartBeatUpdateData(
-                                                configurationFile.getLicenseKey(),
-                                                UUID.randomUUID(),
-                                                System.currentTimeMillis(),
-                                                data.size(),
-                                                filterByConsent(data, Protobuf.ConsentType.UNKNOWN),
-                                                filterByConsent(data, Protobuf.ConsentType.EXPLICIT),
-                                                filterByConsent(data, Protobuf.ConsentType.AUTO),
-                                                filterByConsent(data, Protobuf.ConsentType.DECLINED),
-                                                langDistribution
-                                        )
-                                ));
-                    });
-        }
+        futures = translatorPlugin.getProxyServer().getAllPlayers().stream()
+                .map(player -> profileService.retrieveProfile(player.getUniqueId()))
+                .toList();
 
 
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenAccept(unused -> {
 
+                    List<ProfileResultData> data = futures.stream()
+                            .map(CompletableFuture::join)
+                            .filter(Objects::nonNull)
+                            .toList();
 
+                    omniConnectionService.sendPacket(PacketRegistry.HEART_BEAT,
+                            packetMapperRegistry.toProto(
+                                    new HeartBeatUpdateData(
+                                            configurationFile.getLicenseKey(),
+                                            UUID.randomUUID(),
+                                            System.currentTimeMillis(),
+                                            data.size(),
+                                            filterByConsent(data, Protobuf.ConsentType.UNKNOWN),
+                                            filterByConsent(data, Protobuf.ConsentType.EXPLICIT),
+                                            filterByConsent(data, Protobuf.ConsentType.AUTO),
+                                            filterByConsent(data, Protobuf.ConsentType.DECLINED),
+                                            langDistribution
+                                    )
+                            ));
+                });
+    }
 
 
     private int filterByConsent(List<ProfileResultData> profileDataList, Protobuf.ConsentType consentType) {
@@ -156,11 +130,9 @@ public class ROIService {
                 .count();
     }
 
-    public void initTrackingProcess(UUID uuid)
-    {
-
-            trackCache.put(uuid, System.nanoTime());
-            System.out.println("TRACK CACHE PUT: " + trackCache.getIfPresent(uuid));
+    public void initTrackingProcess(UUID uuid) {
+        trackCache.put(uuid, System.nanoTime());
+        System.out.println("TRACK CACHE PUT: " + trackCache.getIfPresent(uuid));
     }
 
     public void stopTrackingProcess(UUID uuid) {

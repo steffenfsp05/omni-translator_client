@@ -1,26 +1,33 @@
 package org.pytenix.backend;
 
-import org.pytenix.packets.PacketMapperRegistry;
-import org.pytenix.packets.PacketRegistry;
-import org.pytenix.packets.impl.GeoRequestMapper;
-import org.pytenix.packets.impl.GeoResultMapper;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import org.omni.packets.PacketMapperRegistry;
+import org.omni.packets.PacketRegistry;
+import org.omni.packets.data.GeoRequestData;
+import org.omni.packets.data.GeoResultData;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+@Singleton
 public class GeoSocketEndpoint {
 
-    private final OmniConnectionService connectionManager;
+    private final Provider<OmniConnectionService> connectionManagerProvider;
+    private final PacketMapperRegistry packetMapperRegistry;
+
     private final ConcurrentHashMap<UUID, CompletableFuture<String>> queue = new ConcurrentHashMap<>();
 
-    public GeoSocketEndpoint(OmniConnectionService connectionManager) {
-        this.connectionManager = connectionManager;
+    @Inject
+    public GeoSocketEndpoint(Provider<OmniConnectionService> connectionManagerProvider, PacketMapperRegistry packetMapperRegistry) {
+        this.connectionManagerProvider = connectionManagerProvider;
+        this.packetMapperRegistry = packetMapperRegistry;
     }
 
-    public void handleGeoResult(GeoResultMapper.ResultData resultData) {
-
+    public void handleGeoResult(GeoResultData resultData) {
         CompletableFuture<String> future = queue.remove(resultData.requestId());
         if (future != null) future.complete(resultData.language());
     }
@@ -31,11 +38,8 @@ public class GeoSocketEndpoint {
 
         queue.put(id, future);
 
-        connectionManager.sendPacket(PacketRegistry.GEO_REQUEST, PacketMapperRegistry.toProto(
-                new GeoRequestMapper.RequestData(
-                        id,
-                        ipAddress
-                )
+        connectionManagerProvider.get().sendPacket(PacketRegistry.GEO_REQUEST, packetMapperRegistry.toProto(
+                new GeoRequestData(id, ipAddress)
         ));
 
         return future.orTimeout(60, TimeUnit.SECONDS).exceptionally(ex -> {

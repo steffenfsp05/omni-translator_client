@@ -12,8 +12,6 @@ import org.omni.placeholder.protect.impl.DefaultWordProtector;
 import org.omni.placeholder.protector.PlayerNameProtector;
 import org.omni.placeholder.protector.WordProtector;
 import org.omni.placeholder.service.PlaceholderService;
-import org.omni.translation.DefaultTranslatorService;
-import org.omni.translation.TranslatorService;
 
 public class PlaceholderModule extends AbstractModule {
 

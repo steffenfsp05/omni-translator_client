@@ -4,22 +4,35 @@ import com.github.retrooper.packetevents.event.PacketListener;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSystemChatMessage;
+import com.google.inject.Inject;
 import com.velocitypowered.api.proxy.Player;
-import lombok.RequiredArgsConstructor;
+import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.omni.profile.ProfileService;
 import org.pytenix.chat.MessageSequencer;
 import org.pytenix.chat.SystemChatModule;
-import org.pytenix.profile.AbstractAnalyticsSecret;
 
 import java.util.UUID;
 
-@RequiredArgsConstructor
 public class SystemChatPacketListener implements PacketListener {
 
-    private final AbstractAnalyticsSecret abstractAnalyticsSecret;
     private final SystemChatModule systemChatService;
     private final MessageSequencer messageSequencer;
+    private final ProxyServer proxyServer;
+    private final ProfileService profileService;
+
+    @Inject
+    public SystemChatPacketListener(
+            SystemChatModule systemChatService,
+            MessageSequencer messageSequencer,
+            ProxyServer proxyServer,
+            ProfileService profileService) {
+        this.systemChatService = systemChatService;
+        this.messageSequencer = messageSequencer;
+        this.proxyServer = proxyServer;
+        this.profileService = profileService;
+    }
 
     @Override
     public void onPacketSend(PacketSendEvent event) {
@@ -29,7 +42,7 @@ public class SystemChatPacketListener implements PacketListener {
         UUID uuid = event.getUser().getUUID();
         if (uuid == null) return;
 
-        Player player = systemChatService.getTranslatorPlugin().getProxyServer().getPlayer(uuid).orElse(null);
+        Player player = proxyServer.getPlayer(uuid).orElse(null);
         if (player == null) return;
 
         WrapperPlayServerSystemChatMessage packet = new WrapperPlayServerSystemChatMessage(event);
@@ -55,14 +68,13 @@ public class SystemChatPacketListener implements PacketListener {
 
         systemChatService.requiresTranslation(uuid).thenAcceptAsync(aBoolean ->
         {
-            if(!aBoolean)
-            {
+            if (!aBoolean) {
                 messageSequencer.ignoreNextMessage(uuid, messageComponent);
                 player.sendMessage(messageComponent);
                 return;
             }
 
-            systemChatService.getTranslatorPlugin().getProfileService().retrieveProfile(player.getUniqueId())
+            profileService.retrieveProfile(player.getUniqueId())
                     .thenAcceptAsync(profileData -> {
 
                         messageSequencer.translateWithOrder(
@@ -75,7 +87,6 @@ public class SystemChatPacketListener implements PacketListener {
                     });
 
         });
-
 
 
     }

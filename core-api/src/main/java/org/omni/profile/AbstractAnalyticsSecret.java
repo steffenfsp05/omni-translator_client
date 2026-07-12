@@ -10,15 +10,17 @@ import java.security.SecureRandom;
 import java.util.UUID;
 
 public abstract class AbstractAnalyticsSecret {
-    private String serverSalt;
-
     private final Cache<AnalyticsKey, UUID> reverseLookupMap = Caffeine.newBuilder()
             .maximumSize(10000)
             .build();
+    private String serverSalt;
 
     protected abstract String getStoredSalt();
+
     protected abstract void saveSaltToConfig(String salt);
+
     protected abstract void logInfo(String message);
+
     protected abstract void logError(String message, Throwable throwable);
 
     public AnalyticsKey getAnalyticsKey(UUID uuid) {

@@ -2,13 +2,15 @@ package org.pytenix.chat;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.pytenix.TranslatorPlugin;
-import org.pytenix.entity.ServerConfiguration;
-import org.pytenix.util.TextComponentUtil;
+import org.omni.entity.ServerConfiguration;
+import org.omni.translation.component.TextComponentService;
 
 import java.util.ArrayDeque;
 import java.util.Map;
@@ -19,10 +21,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
+@Singleton
 public class MessageSequencer {
 
-    private final TranslatorPlugin translatorPlugin;
-    private final TextComponentUtil textComponentUtil;
+    private final ProxyServer proxyServer;
+    private final TextComponentService textComponentService;
+
 
     private final Map<UUID, UserQueue> userQueues = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -31,12 +35,28 @@ public class MessageSequencer {
             .expireAfterWrite(10, TimeUnit.SECONDS)
             .build();
 
-    public MessageSequencer(
-            TranslatorPlugin translatorPlugin,
-            TextComponentUtil textComponentUtil
-    ) {
-        this.translatorPlugin = translatorPlugin;
-        this.textComponentUtil = textComponentUtil;
+    @Inject
+    public MessageSequencer(ProxyServer proxyServer, TextComponentService textComponentService) {
+        this.proxyServer = proxyServer;
+        this.textComponentService = textComponentService;
+    }
+
+    private boolean sendPacket(UUID uuid, Component comp, boolean isOverlay) {
+        Player player = this.proxyServer.getPlayer(uuid).orElse(null);
+        if (player == null) return false;
+
+        try {
+            ignoreNextMessage(uuid, comp);
+            if (isOverlay) {
+                player.sendActionBar(comp);
+            } else {
+                player.sendMessage(comp);
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return true;
+        }
     }
 
 
@@ -56,20 +76,20 @@ public class MessageSequencer {
             if (msg.translatedComponent.compareAndSet(null, component)) {
                 System.out.println("[Sequencer] API Hard-Timeout (4s)! Sende Original: " +
                         LegacyComponentSerializer.legacySection().serialize(component));
-                processQueue(uuid,startTime);
+                processQueue(uuid, startTime);
             }
         }, 4, TimeUnit.SECONDS);
 
-        textComponentUtil.translateComplexMessage(component, locale, ServerConfiguration.Module.PLUGIN_CHAT.getModuleName())
+        textComponentService.translateComplexMessage(component, locale, ServerConfiguration.Module.PLUGIN_CHAT.getModuleName())
                 .whenComplete((translatedComponent, throwable) -> {
                     timeoutTask.cancel(false);
 
                     if (throwable != null) {
                         System.err.println("[Sequencer] Interner Fehler bei der Übersetzung! Stau wird verhindert.");
                         throwable.printStackTrace();
-                        completeMessage(startTime,uuid, msg, component);
+                        completeMessage(startTime, uuid, msg, component);
                     } else {
-                        completeMessage(startTime,uuid, msg, translatedComponent);
+                        completeMessage(startTime, uuid, msg, translatedComponent);
                     }
                 });
     }
@@ -103,7 +123,7 @@ public class MessageSequencer {
 
     private void completeMessage(final long startTime, UUID uuid, QueuedMessage msg, Component translatedComponent) {
         if (msg.translatedComponent.compareAndSet(null, translatedComponent)) {
-            processQueue(uuid,startTime);
+            processQueue(uuid, startTime);
         }
     }
 
@@ -123,7 +143,7 @@ public class MessageSequencer {
                         System.out.println("MessageSequencer took " + ((System.nanoTime() - startTime) / 1000000) + " ms for " + compToSend.toString().substring(0, Math.min(compToSend.toString().length(), 15)));
                         uq.queue.poll();
                     } else {
-                        scheduler.schedule(() -> processQueue(uuid,startTime), 500, TimeUnit.MILLISECONDS);
+                        scheduler.schedule(() -> processQueue(uuid, startTime), 500, TimeUnit.MILLISECONDS);
                         break;
                     }
                 } else {
@@ -135,24 +155,6 @@ public class MessageSequencer {
         }
     }
 
-    private boolean sendPacket(UUID uuid, Component comp, boolean isOverlay) {
-        Player player = this.translatorPlugin.getProxyServer().getPlayer(uuid).orElse(null);
-        if (player == null) return false;
-
-        try {
-            ignoreNextMessage(uuid, comp);
-
-            if (isOverlay) {
-                player.sendActionBar(comp);
-            } else {
-                player.sendMessage(comp);
-            }
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return true;
-        }
-    }
 
     public void cleanup(UUID uuid) {
         userQueues.remove(uuid);

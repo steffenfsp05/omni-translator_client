@@ -1,12 +1,16 @@
 package org.pytenix.network.service;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRegisterChannelEvent;
 import org.bukkit.event.player.PlayerUnregisterChannelEvent;
-import org.pytenix.network.SpigotTransport;
+import org.transport.TransportService;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -14,15 +18,20 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Singleton
 public class ChannelCarrierService implements Listener {
 
     private final String channel;
-    private final SpigotTransport spigotTransport;
+    private final Provider<TransportService<String>> transportServiceProvider;
     private final Set<UUID> availableCarriers = ConcurrentHashMap.newKeySet();
 
-    public ChannelCarrierService(String channel, SpigotTransport spigotTransport) {
+    @Inject
+    public ChannelCarrierService(
+            @Named("pluginMessagingChannel") String channel,
+            Provider<TransportService<String>> transportServiceProvider
+    ) {
         this.channel = channel;
-        this.spigotTransport = spigotTransport;
+        this.transportServiceProvider = transportServiceProvider;
     }
 
     public Optional<Player> getRandomCarrier() {
@@ -35,9 +44,9 @@ public class ChannelCarrierService implements Listener {
     @EventHandler
     public void onChannelRegister(PlayerRegisterChannelEvent event) {
         if (event.getChannel().equalsIgnoreCase(channel)) {
+            System.out.println("CHANNEL READY");
             availableCarriers.add(event.getPlayer().getUniqueId());
-
-            spigotTransport.getTransportService().ready(channel);
+            transportServiceProvider.get().ready(channel);
         }
     }
 
@@ -45,10 +54,11 @@ public class ChannelCarrierService implements Listener {
     public void onChannelUnregister(PlayerUnregisterChannelEvent event) {
         if (event.getChannel().equalsIgnoreCase(channel)) {
             availableCarriers.remove(event.getPlayer().getUniqueId());
-
+            System.out.println("CHANNEL UNREADY");
             if (isEmpty()) {
-                spigotTransport.getTransportService().disconnect(channel);
-                spigotTransport.getTransportService().connect(channel);
+                TransportService<String> transport = transportServiceProvider.get();
+                transport.disconnect(channel);
+                transport.connect(channel);
             }
         }
     }
@@ -56,5 +66,4 @@ public class ChannelCarrierService implements Listener {
     public boolean isEmpty() {
         return availableCarriers.isEmpty();
     }
-
 }

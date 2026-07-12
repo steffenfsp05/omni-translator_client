@@ -1,5 +1,7 @@
 package org.pytenix.module.player.listener;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -7,9 +9,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.pytenix.TranslatorPlugin;
+import org.omni.translation.component.TextComponentService;
 import org.pytenix.module.player.LiveChatModule;
-import org.pytenix.service.TaskScheduler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,37 +20,38 @@ import java.util.concurrent.TimeUnit;
 
 public class AsyncPlayerChatListener implements Listener {
 
+    private final Provider<LiveChatModule> liveChatModuleProvider;
+    private final TextComponentService textComponentUtil;
 
-    final LiveChatModule liveChatModule;
-    final TranslatorPlugin translatorPlugin;
-    final TaskScheduler taskScheduler;
-
-    public AsyncPlayerChatListener(LiveChatModule liveChatModule, TranslatorPlugin translatorPlugin) {
-        this.liveChatModule = liveChatModule;
-        this.translatorPlugin = translatorPlugin;
-        this.taskScheduler = translatorPlugin.getTaskScheduler();
+    @Inject
+    public AsyncPlayerChatListener(Provider<LiveChatModule> liveChatModuleProvider, TextComponentService textComponentUtil) {
+        this.liveChatModuleProvider = liveChatModuleProvider;
+        this.textComponentUtil = textComponentUtil;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerChat(AsyncChatEvent event) {
+
+        LiveChatModule liveChatModule = liveChatModuleProvider.get();
+
         if (!liveChatModule.isActive()) return;
 
         Player sender = event.getPlayer();
         Component originalMessage = event.message();
 
 
-        //TODO: WIRD EHRLICH _ BEIM LOCALE ENTHALTEN??
-        String senderLang = liveChatModule.getPlayerLocaleProcessor().retrieveLocale(sender.getUniqueId()).split("_")[0].toLowerCase();
+        String locale = liveChatModule.getPlayerLocaleProcessor().retrieveLocale(sender.getUniqueId());
+        String senderLang = locale.contains("_") ? locale.split("_")[0].toLowerCase() : locale.toLowerCase();
 
         Map<String, List<Player>> languageGroups = new HashMap<>();
 
         for (Audience audience : event.viewers()) {
             if (audience instanceof Player p && !p.getUniqueId().equals(sender.getUniqueId())) {
 
-                String targetLang = liveChatModule.getPlayerLocaleProcessor().retrieveLocale(p.getUniqueId()).split("_")[0].toLowerCase();
+                String targetLocale = liveChatModule.getPlayerLocaleProcessor().retrieveLocale(p.getUniqueId());
+                String targetLang = targetLocale.contains("_") ? targetLocale.split("_")[0].toLowerCase() : targetLocale.toLowerCase();
 
-                // 2. DER KOSTEN-KILLER: Gleiche Sprache? -> Direkt senden, kein API Call!
-                //HIER AMBESTEN NICHT AUF DEFAULTLANGUAGE VERLASSEN!!
+
                 if (targetLang.equals(senderLang)) {
                     Component rendered = event.renderer().render(sender, sender.displayName(), originalMessage, p);
                     liveChatModule.sendSystemMessage(p, rendered);
@@ -67,7 +69,7 @@ public class AsyncPlayerChatListener implements Listener {
 
         languageGroups.forEach((targetLang, groupMembers) -> {
 
-            translatorPlugin.getTextComponentUtil().translateComplexMessage(originalMessage, targetLang, liveChatModule.getModuleName())
+            textComponentUtil.translateComplexMessage(originalMessage, targetLang, liveChatModule.getModuleName())
                     .orTimeout(5, TimeUnit.SECONDS)
                     .whenComplete((translatedText, ex) -> {
 
@@ -82,78 +84,4 @@ public class AsyncPlayerChatListener implements Listener {
                     });
         });
     }
-
-
-    private Component replaceContent(Component base, String original, Component translated) {
-
-        if (translated == null) return base;
-
-        try {
-            return base.replaceText(config -> {
-                config.matchLiteral(original);
-                config.replacement(translated);
-                config.once();
-            });
-        } catch (Exception e) {
-
-            return base.append(translated);
-        }
-    }
-         /*
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPlayerChat(AsyncChatEvent event) {
-
-
-        if(!liveChatModule.isActive())
-            return;
-
-        ChatRendererCache.set(event.getPlayer().getUniqueId(), event.renderer());
-
-         */
-/*
-
-if(!liveChatModule.isActive())
-            return;
-        Player sender = event.getPlayer();
-
-        Set<Player> actualRecipients = Bukkit.getOnlinePlayers().stream()
-                .filter(p -> event.viewers().contains(p))
-                .filter(p -> !p.getUniqueId().equals(sender.getUniqueId()))
-                .collect(Collectors.toSet());
-
-        event.setCancelled(true);
-
-        Component originalMessage = event.message();
-        String rawText = translatorPlugin.getLegacyComponentSerializer().serialize(originalMessage);
-        ChatRenderer currentRenderer = event.renderer();
-
-
-
-        liveChatModule.deliverToOne(sender, currentRenderer.render(sender, sender.displayName(), originalMessage, sender));
-
-        if (actualRecipients.isEmpty()) return;
-
-        Map<String, List<Player>> languageGroups = actualRecipients.stream()
-                .collect(Collectors.groupingBy(Player::getLocale));
-
-
-        languageGroups.forEach((locale, recipients) -> liveChatModule.translate(rawText, locale)
-                .orTimeout(5, TimeUnit.SECONDS)
-                .handle((translatedText, ex) -> {
-                     if (ex != null || translatedText == null) {
-                         liveChatModule.deliver(sender, originalMessage, originalMessage, recipients, currentRenderer);
-                    } else {
-
-                         Component translated = translatorPlugin.getLegacyComponentSerializer().deserialize(translatedText);
-
-                         liveChatModule.deliver(sender, originalMessage, translated, recipients, currentRenderer);
-                    }
-
-                    return null;
-                }));
-
-
-    }
- */
-
 }

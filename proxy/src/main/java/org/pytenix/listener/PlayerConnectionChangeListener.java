@@ -5,8 +5,6 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import org.omni.placeholder.protector.PlayerNameProtector;
-import org.omni.translation.TranslatorService;
-import org.pytenix.TranslatorPlugin;
 
 public class PlayerConnectionChangeListener {
 

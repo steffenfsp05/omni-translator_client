@@ -1,47 +1,41 @@
 package org.pytenix.network;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import lombok.Getter;
+import org.omni.packets.PacketRegistry;
+import org.omni.packets.registry.PacketRegistrar;
+import org.omni.proto.generated.Protobuf;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.network.consumer.ConfigRequestConsumer;
-import org.pytenix.network.consumer.ProfileConsumer;
-import org.pytenix.network.consumer.TranslationRequestConsumer;
-import org.pytenix.packets.PacketRegistry;
-import org.pytenix.proto.generated.NetworkPackets;
 import org.transport.TransportOptions;
 import org.transport.TransportService;
 import org.transport.io.minecraft.PluginMessageReceiver;
 import org.transport.io.minecraft.PluginMessageSender;
 import org.transport.service.impl.DefaultPacketService;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
+@Singleton
 public class ProxyTransport {
 
-    final TranslatorPlugin translatorPlugin;
-
+    private final ProxyServer proxyServer;
     @Getter
-    final TransportService<RegisteredServer> transportService;
+    private final TransportService<RegisteredServer> transportService;
     private final ChannelIdentifier identifier = MinecraftChannelIdentifier.from("translator:main");
-    private final ExecutorService apiExecutor = Executors.newFixedThreadPool(4, runnable -> {
-        Thread thread = new Thread(runnable);
-        thread.setName("Translation-API-Worker");
-        thread.setDaemon(true);
-        return thread;
-    });
 
+    @Inject
+    public ProxyTransport(TranslatorPlugin translatorPlugin, ProxyServer proxyServer, String secret, PacketRegistrar<RegisteredServer> packetRegistrar) {
 
-    public ProxyTransport(TranslatorPlugin translatorPlugin, String secret) {
+        this.proxyServer = proxyServer;
 
-        this.translatorPlugin = translatorPlugin;
-
-        translatorPlugin.getProxyServer().getChannelRegistrar().register(identifier);
+        proxyServer.getChannelRegistrar().register(identifier);
 
         this.transportService = TransportService.<RegisteredServer>builder()
                 .packetService(new DefaultPacketService<>())
@@ -58,9 +52,11 @@ public class ProxyTransport {
                 .networkSender((PluginMessageSender<RegisteredServer>) (registeredServer, bytes) -> registeredServer.sendPluginMessage(identifier, bytes))
                 .build();
 
+        packetRegistrar.register(transportService);
+
         PluginMessageReceiver<RegisteredServer> receiver = PluginMessageReceiver.autoConnectBridge(transportService);
 
-        translatorPlugin.getProxyServer().getEventManager().register(translatorPlugin, new Object() {
+        proxyServer.getEventManager().register(translatorPlugin, new Object() {
             @Subscribe
             public void onPluginMessage(PluginMessageEvent event) {
 
@@ -73,18 +69,13 @@ public class ProxyTransport {
             }
         });
 
-        this.transportService.registerPacket(PacketRegistry.TRANSLATION_RESULT, (stringPacketContext, translationResult) -> {
-        });
-
-        this.transportService.registerPacket(PacketRegistry.CONFIG_REQUEST, new ConfigRequestConsumer(translatorPlugin.getTranslatorService()));
-        this.transportService.registerPacket(PacketRegistry.TRANSLATION_REQUEST, new TranslationRequestConsumer(translatorPlugin, apiExecutor));
-        this.transportService.registerPacket(PacketRegistry.PROFILE_REQUEST_INTERN, new ProfileConsumer(translatorPlugin));
-        this.transportService.registerPacket(PacketRegistry.CONSENT_REFRESH, (registeredServerPacketContext, consentRefreshRequest) -> {});
 
     }
 
-    public void broadcastConfigurationUpdate(NetworkPackets.ServerConfiguration packet) {
-        for (RegisteredServer server : translatorPlugin.getProxyServer().getAllServers()) {
+
+    public void broadcastConfigurationUpdate(Protobuf.ServerConfiguration packet) {
+        System.out.println("SENDING ALL CFGS");
+        for (RegisteredServer server : proxyServer.getAllServers()) {
 
             if (!server.getPlayersConnected().isEmpty()) {
 
@@ -95,7 +86,6 @@ public class ProxyTransport {
 
     public void shutdown() {
         transportService.close();
-        apiExecutor.shutdown();
     }
 
 }
