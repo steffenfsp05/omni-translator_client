@@ -4,9 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import lombok.Getter;
 import org.omni.translation.module.AbstractTranslatorModule;
-import org.pytenix.module.gui.InventoryModule;
-import org.pytenix.module.hologram.HologramModule;
-import org.pytenix.module.player.LiveChatModule;
 
 import java.util.ArrayList;
 import java.util.List;

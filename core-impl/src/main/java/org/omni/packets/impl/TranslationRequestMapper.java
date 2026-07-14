@@ -1,7 +1,6 @@
 package org.omni.packets.impl;
 
 import com.google.inject.Singleton;
-import org.omni.entity.ServerConfiguration;
 import org.omni.entity.TranslationModule;
 import org.omni.packets.AbstractPacketMapper;
 import org.omni.packets.data.TranslationRequestData;

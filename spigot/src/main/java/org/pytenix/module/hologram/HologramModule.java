@@ -22,10 +22,9 @@ import java.util.concurrent.TimeUnit;
 @Singleton
 public class HologramModule extends AbstractTranslatorModule {
 
+    final EntityPacketListener entityPacketListener;
     private final Cache<String, Cache<Component, Component>> playerTranslationCache;
     private final TranslatorPlugin translatorPlugin;
-
-    final EntityPacketListener entityPacketListener;
 
     @Inject
     public HologramModule(

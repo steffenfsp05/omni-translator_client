@@ -20,8 +20,6 @@ import org.pytenix.listener.PlayerJoinQuitListener;
 import org.pytenix.listener.PlayerLocaleChangeListener;
 import org.pytenix.network.SpigotTransport;
 import org.pytenix.network.VelocitySecretReader;
-import org.pytenix.network.service.ChannelCarrierService;
-import org.pytenix.network.service.TranslationRequestService;
 import org.pytenix.service.ModuleService;
 
 import java.io.File;

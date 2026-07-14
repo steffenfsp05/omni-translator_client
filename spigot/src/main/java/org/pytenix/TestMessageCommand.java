@@ -14,12 +14,11 @@ public class TestMessageCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage("Nur für Spieler!");
             return true;
         }
 
-        Player player = (Player) sender;
         net.kyori.adventure.text.minimessage.MiniMessage mm = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage();
 
         // Der Root-Node, an den wir alles anhängen

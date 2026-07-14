@@ -1,19 +1,14 @@
 package org.pytenix.backend.socket;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.omni.entity.TranslationModule;
 import org.omni.event.EventService;
 import org.omni.event.register.BackendConnectionCloseEvent;
 import org.omni.event.register.BackendConnectionConnectEvent;
 import org.omni.event.register.BackendMessageReceiveEvent;
-import org.pytenix.backend.OmniConnectionService;
-import org.pytenix.backend.listener.BackendConnectListener;
 import org.pytenix.util.FastByteArrayOutputStream;
-import org.transport.TransportService;
 
 import java.io.IOException;
 import java.net.http.WebSocket;
@@ -29,8 +24,7 @@ public class WebSocketListener implements WebSocket.Listener {
     private final EventService eventService;
 
     @Inject
-    public WebSocketListener(EventService eventService)
-    {
+    public WebSocketListener(EventService eventService) {
         this.eventService = eventService;
     }
 

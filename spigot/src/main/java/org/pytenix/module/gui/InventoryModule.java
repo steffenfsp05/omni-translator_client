@@ -28,10 +28,9 @@ import java.util.stream.Collectors;
 public class InventoryModule extends AbstractTranslatorModule {
 
     private static final Pattern COLOR_PATTERN = Pattern.compile("^§[0-9a-fk-or]+$");
-    private final LegacyComponentSerializer legacyComponentSerializer;
-
     final PacketListener inventoryPacketListener;
     final ItemStackCache itemStackCache;
+    private final LegacyComponentSerializer legacyComponentSerializer;
 
     @Inject
     public InventoryModule(

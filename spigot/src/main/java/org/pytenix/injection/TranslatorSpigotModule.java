@@ -10,31 +10,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.omni.cache.CacheProvider;
 import org.omni.cache.CaffeineCacheProvider;
-import org.omni.event.EventService;
-import org.omni.event.impl.DefaultEventService;
 import org.omni.packets.registry.PacketRegistrar;
 import org.omni.profile.ProfileService;
 import org.omni.translation.TranslationProcessor;
 import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.omni.translation.module.AbstractTranslatorModule;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.listener.PlayerJoinQuitListener;
-import org.pytenix.listener.PlayerLocaleChangeListener;
 import org.pytenix.module.gui.InventoryModule;
-import org.pytenix.module.gui.cache.ItemStackCache;
-import org.pytenix.module.gui.listener.PacketListener;
 import org.pytenix.module.hologram.HologramModule;
-import org.pytenix.module.hologram.listener.EntityPacketListener;
 import org.pytenix.module.player.LiveChatModule;
-import org.pytenix.module.player.listener.AsyncPlayerChatListener;
 import org.pytenix.network.DefaultPacketRegistrar;
 import org.pytenix.network.SpigotTransport;
-import org.pytenix.network.listener.ConfigUpdateListener;
-import org.pytenix.network.listener.ConsentUpdateListener;
 import org.pytenix.network.service.ChannelCarrierService;
-import org.pytenix.network.service.TranslationRequestService;
 import org.pytenix.service.InternProfileService;
-import org.pytenix.service.ModuleService;
 import org.pytenix.service.TaskScheduler;
 import org.transport.TransportOptions;
 import org.transport.TransportService;
@@ -80,7 +68,6 @@ public class TranslatorSpigotModule extends AbstractModule {
         moduleBinder.addBinding().to(HologramModule.class);
 
 
-
     }
 
     @Provides
@@ -89,7 +76,6 @@ public class TranslatorSpigotModule extends AbstractModule {
     public File provideProxySyncConfigFile() {
         return new File(plugin.getDataFolder(), "proxy_sync_config.json");
     }
-
 
 
     @Provides

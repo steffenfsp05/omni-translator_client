@@ -14,15 +14,13 @@ public class BackendMessageReceiveListener {
     final TransportService<WebSocket> transportService;
 
     @Inject
-    public BackendMessageReceiveListener(TransportService<WebSocket> transportService)
-    {
+    public BackendMessageReceiveListener(TransportService<WebSocket> transportService) {
         this.transportService = transportService;
     }
 
 
-    @OmniSubscribe(priority =  99)
-    public void onMessageReceive(WebSocket webSocket, ByteBuf byteBuf)
-    {
+    @OmniSubscribe(priority = 99)
+    public void onMessageReceive(WebSocket webSocket, ByteBuf byteBuf) {
         transportService.onReceiveRaw(webSocket, byteBuf);
     }
 }

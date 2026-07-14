@@ -3,8 +3,6 @@ package org.pytenix.chat;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import lombok.Getter;
-import net.kyori.adventure.text.Component;
-import org.omni.entity.ServerConfiguration;
 import org.omni.entity.TranslationModule;
 import org.omni.profile.ProfileService;
 import org.omni.translation.TranslatorService;

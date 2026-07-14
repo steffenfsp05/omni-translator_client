@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import org.omni.entity.ServerConfiguration;
 import org.omni.entity.TranslationModule;
 import org.omni.packets.PacketMapperRegistry;
 import org.omni.packets.PacketRegistry;

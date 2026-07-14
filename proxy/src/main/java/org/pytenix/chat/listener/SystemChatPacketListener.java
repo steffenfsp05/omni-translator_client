@@ -9,7 +9,6 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.omni.profile.ProfileService;
 import org.omni.translation.TranslatorService;
 import org.pytenix.chat.MessageSequencer;
 import org.pytenix.chat.SystemChatModule;
@@ -53,7 +52,7 @@ public class SystemChatPacketListener implements PacketListener {
 
         Component messageComponent = packet.getMessage();
 
-        if(translatorService.isWaterMarked(messageComponent))
+        if (translatorService.isWaterMarked(messageComponent))
             return;
 
         String rawText = LegacyComponentSerializer.legacySection().serialize(messageComponent);
@@ -79,14 +78,14 @@ public class SystemChatPacketListener implements PacketListener {
                 return;
             }
 
-                 messageSequencer.translateWithOrder(
-                         uuid,
-                         messageComponent,
-                         rawText,
-                         systemChatService.getPlayerLocaleProcessor().retrieveLocale(uuid),
-                         isOverlay
-                 );
-             });
+            messageSequencer.translateWithOrder(
+                    uuid,
+                    messageComponent,
+                    rawText,
+                    systemChatService.getPlayerLocaleProcessor().retrieveLocale(uuid),
+                    isOverlay
+            );
+        });
 
 
     }

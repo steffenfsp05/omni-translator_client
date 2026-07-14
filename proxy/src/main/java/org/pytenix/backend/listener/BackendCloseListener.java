@@ -16,15 +16,13 @@ public class BackendCloseListener {
     final TransportService<WebSocket> transportService;
 
     @Inject
-    public BackendCloseListener(WebSocketService webSocketService, TransportService<WebSocket> transportService)
-    {
+    public BackendCloseListener(WebSocketService webSocketService, TransportService<WebSocket> transportService) {
         this.webSocketService = webSocketService;
         this.transportService = transportService;
     }
 
     @OmniSubscribe(priority = 99)
-    public void onBackendClose(WebSocket webSocket, int statusCode, String reason)
-    {
+    public void onBackendClose(WebSocket webSocket, int statusCode, String reason) {
         webSocketService.getConnectionStatus().set(false);
         transportService.disconnect(webSocket);
 

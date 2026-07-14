@@ -32,8 +32,7 @@ public class TranslateCommand implements SimpleCommand {
 
     @Override
     public void execute(Invocation invocation) {
-        if (!(invocation.source() instanceof Player)) return;
-        Player player = (Player) invocation.source();
+        if (!(invocation.source() instanceof Player player)) return;
 
         profileService.retrieveProfile(player.getUniqueId())
                 .thenAcceptAsync(profileData ->
@@ -109,8 +108,6 @@ public class TranslateCommand implements SimpleCommand {
                                     §c/translate accept
                                     §c/translate decline"""));
 
-
-                            return;
 
                         }
 

@@ -36,7 +36,8 @@ public abstract class AbstractTranslatorModule {
     }
 
 
-    public void init() { }
+    public void init() {
+    }
 
     public boolean isModuleActive() {
         return getServerConfiguration().getModules().getOrDefault(translationModule, true);

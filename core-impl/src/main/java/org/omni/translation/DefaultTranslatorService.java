@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.adventure.key.Key;
 import org.omni.entity.ServerConfiguration;
 import org.omni.entity.ServerConsentMode;
 import org.omni.entity.TranslationModule;

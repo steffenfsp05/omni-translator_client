@@ -1,7 +1,6 @@
 package org.pytenix.backend.listener;
 
 import com.google.inject.Inject;
-import org.pytenix.backend.socket.WebSocketListener;
 import org.pytenix.backend.socket.WebSocketService;
 import org.transport.TransportService;
 
@@ -14,14 +13,12 @@ public class BackendConnectListener {
 
 
     @Inject
-    public BackendConnectListener(WebSocketService webSocketService, TransportService<WebSocket> transportService)
-    {
+    public BackendConnectListener(WebSocketService webSocketService, TransportService<WebSocket> transportService) {
         this.webSocketService = webSocketService;
         this.transportService = transportService;
     }
 
-    public void onBackendConnect(WebSocket webSocket)
-    {
+    public void onBackendConnect(WebSocket webSocket) {
         webSocketService.setWebSocket(webSocket);
         webSocketService.getConnectionStatus().set(true);
         transportService.connect(webSocket);

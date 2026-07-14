@@ -13,7 +13,6 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.Getter;
 import org.omni.event.EventService;
 import org.omni.injection.CoreModule;
-import org.omni.profile.ProfileService;
 import org.omni.translation.TranslatorService;
 import org.pytenix.backend.OmniConnectionService;
 import org.pytenix.backend.listener.BackendCloseListener;

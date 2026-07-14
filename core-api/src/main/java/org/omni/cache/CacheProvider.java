@@ -3,13 +3,13 @@ package org.omni.cache;
 public interface CacheProvider<K, V> {
 
 
-    public void set(K key, V value);
+    void set(K key, V value);
 
-    public V get(K key);
+    V get(K key);
 
-    public void invalidate(K key);
+    void invalidate(K key);
 
-    public boolean exists(K key);
+    boolean exists(K key);
 
 
 }

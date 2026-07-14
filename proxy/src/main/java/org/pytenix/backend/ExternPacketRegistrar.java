@@ -2,16 +2,12 @@ package org.pytenix.backend;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import org.omni.packets.PacketRegistry;
 import org.omni.packets.registry.PacketRegistrar;
 import org.pytenix.backend.consumer.BackendGeoResultConsumer;
 import org.pytenix.backend.consumer.BackendProfileResultConsumer;
 import org.pytenix.backend.consumer.BackendServerConfigConsumer;
 import org.pytenix.backend.consumer.BackendTranslationResultConsumer;
-import org.pytenix.network.consumer.InternConfigRequestConsumer;
-import org.pytenix.network.consumer.InternProfileConsumer;
-import org.pytenix.network.consumer.InternTranslationRequestConsumer;
 import org.transport.TransportService;
 
 import java.net.http.WebSocket;
@@ -45,9 +41,12 @@ public class ExternPacketRegistrar implements PacketRegistrar<WebSocket> {
         transport.registerPacket(PacketRegistry.GEO_RESULT, backendGeoResultConsumer);
         transport.registerPacket(PacketRegistry.PROFILE, backendProfileResultConsumer);
 
-        transport.registerPacket(PacketRegistry.GEO_REQUEST, (ctx, req) -> {});
-        transport.registerPacket(PacketRegistry.TRANSLATION_REQUEST, (ctx, req) -> {});
-        transport.registerPacket(PacketRegistry.PROFILE_UPDATE_EXTERN, (ctx, req) -> {});
+        transport.registerPacket(PacketRegistry.GEO_REQUEST, (ctx, req) -> {
+        });
+        transport.registerPacket(PacketRegistry.TRANSLATION_REQUEST, (ctx, req) -> {
+        });
+        transport.registerPacket(PacketRegistry.PROFILE_UPDATE_EXTERN, (ctx, req) -> {
+        });
     }
 
 

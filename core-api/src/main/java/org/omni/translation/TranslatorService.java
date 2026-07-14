@@ -5,8 +5,6 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.omni.entity.ServerConfiguration;
 import org.omni.entity.TranslationModule;
-import org.omni.event.EventService;
-import org.omni.placeholder.service.PlaceholderService;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;

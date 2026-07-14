@@ -48,12 +48,16 @@ public class TranslatorProxyModule extends AbstractModule {
 
         bind(String.class).annotatedWith(Names.named("backendRemoteAddress")).toInstance(backendRemoteAddress);
 
-        bind(new TypeLiteral<CacheProvider<String, String>>() {}).to(new TypeLiteral<CaffeineCacheProvider<String, String>>() {}).in(Scopes.SINGLETON);
+        bind(new TypeLiteral<CacheProvider<String, String>>() {
+        }).to(new TypeLiteral<CaffeineCacheProvider<String, String>>() {
+        }).in(Scopes.SINGLETON);
 
         bind(ProfileService.class).to(ExternProfileService.class).in(Scopes.SINGLETON);
 
-        bind(new TypeLiteral<PacketRegistrar<RegisteredServer>>() {}).to(InternPacketRegistrar.class).in(Scopes.SINGLETON);
-        bind(new TypeLiteral<PacketRegistrar<WebSocket>>() {}).to(ExternPacketRegistrar.class).in(Scopes.SINGLETON);
+        bind(new TypeLiteral<PacketRegistrar<RegisteredServer>>() {
+        }).to(InternPacketRegistrar.class).in(Scopes.SINGLETON);
+        bind(new TypeLiteral<PacketRegistrar<WebSocket>>() {
+        }).to(ExternPacketRegistrar.class).in(Scopes.SINGLETON);
 
     }
 
@@ -90,10 +94,9 @@ public class TranslatorProxyModule extends AbstractModule {
     }
 
 
-
     @Provides
     @Singleton
-    public ProxyTransport provideProxyTransport(  ProxyServer proxyServer, PacketRegistrar<RegisteredServer> registrar) {
+    public ProxyTransport provideProxyTransport(ProxyServer proxyServer, PacketRegistrar<RegisteredServer> registrar) {
         return new ProxyTransport(plugin, proxyServer, forwardingSecret, registrar);
     }
 

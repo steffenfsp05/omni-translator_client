@@ -9,19 +9,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public enum TranslationModule {
 
-        LIVE_CHAT("live_chat"),
-        GUI("gui"),
-        HOLOGRAM("hologram"),
-        PLUGIN_CHAT("plugin_chat"),
-        SIGNS("signs"),
-        MOTD("motd");
+    LIVE_CHAT("live_chat"),
+    GUI("gui"),
+    HOLOGRAM("hologram"),
+    PLUGIN_CHAT("plugin_chat"),
+    SIGNS("signs"),
+    MOTD("motd");
 
 
-        String moduleName;
+    String moduleName;
 
 
-        public static TranslationModule getModule(String name) {
-            return valueOf(name.toUpperCase());
-        }
+    public static TranslationModule getModule(String name) {
+        return valueOf(name.toUpperCase());
+    }
 
 }

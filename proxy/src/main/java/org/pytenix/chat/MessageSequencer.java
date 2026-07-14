@@ -9,7 +9,6 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.omni.entity.ServerConfiguration;
 import org.omni.entity.TranslationModule;
 import org.omni.translation.component.TextComponentService;
 
@@ -45,7 +44,6 @@ public class MessageSequencer {
     private boolean sendPacket(UUID uuid, Component comp, boolean isOverlay) {
         Player player = this.proxyServer.getPlayer(uuid).orElse(null);
         if (player == null) return false;
-
 
 
         try {  //TODO: NOT NEEDED IF OMNI_WATERMARK IMPLEMENTED

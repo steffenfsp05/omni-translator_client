@@ -4,7 +4,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.buffer.ByteBuf;
-import jdk.jfr.Name;
 import lombok.Getter;
 import lombok.Setter;
 import org.omni.config.ConfigurationFile;
@@ -26,16 +25,13 @@ public class WebSocketService {
 
     final AtomicBoolean connectionStatus = new AtomicBoolean(false);
     final AtomicInteger reconnectAttempts = new AtomicInteger(0);
-
-    private WebSocket webSocket;
-
-    private final String apiKey;
-    private final String url;
-    private final HttpClient httpClient;
-
     final TranslatorPlugin translatorPlugin;
     final ProxyServer proxyServer;
     final WebSocketListener webSocketListener;
+    private final String apiKey;
+    private final String url;
+    private final HttpClient httpClient;
+    private WebSocket webSocket;
 
     public WebSocketService(
             TranslatorPlugin translatorPlugin,

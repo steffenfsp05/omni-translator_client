@@ -27,10 +27,9 @@ public class SpigotTransport {
     @Getter
     private final TransportService<String> transportService;
     private final TranslatorPlugin plugin;
+    private final TranslationRequestService translationRequestService;
     @Setter
     public boolean hasConfiguration;
-
-    private final TranslationRequestService translationRequestService;
 
     @Inject
     public SpigotTransport(
