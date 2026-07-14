@@ -16,6 +16,7 @@ import org.omni.injection.CoreModule;
 import org.omni.translation.TranslatorService;
 import org.pytenix.backend.OmniConnectionService;
 import org.pytenix.backend.listener.BackendCloseListener;
+import org.pytenix.backend.listener.BackendConfigUpdateListener;
 import org.pytenix.backend.listener.BackendConnectListener;
 import org.pytenix.backend.listener.BackendMessageReceiveListener;
 import org.pytenix.chat.MessageSequencer;
@@ -115,6 +116,7 @@ public class TranslatorPlugin {
         eventService.register(injector.getInstance(BackendCloseListener.class));
         eventService.register(injector.getInstance(BackendConnectListener.class));
         eventService.register(injector.getInstance(BackendMessageReceiveListener.class));
+        eventService.register(injector.getInstance(BackendConfigUpdateListener.class));
     }
 
     @Subscribe

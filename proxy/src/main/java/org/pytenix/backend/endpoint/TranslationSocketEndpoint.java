@@ -24,35 +24,17 @@ import java.util.concurrent.TimeUnit;
 public class TranslationSocketEndpoint {
 
     private final Provider<OmniConnectionService> connectionManagerProvider;
-    private final TranslatorService translatorService;
-    private final EventService eventService;
-    private final Provider<ProxyTransport> proxyTransportProvider;
-    private final PacketMapperRegistry packetMapperRegistry;
 
     private final ConcurrentHashMap<UUID, CompletableFuture<String>> queue = new ConcurrentHashMap<>();
 
     @Inject
     public TranslationSocketEndpoint(
-            Provider<OmniConnectionService> connectionManagerProvider,
-            TranslatorService translatorService,
-            EventService eventService,
-            Provider<ProxyTransport> proxyTransportProvider,
-            PacketMapperRegistry packetMapperRegistry) {
-        this.connectionManagerProvider = connectionManagerProvider;
-        this.translatorService = translatorService;
-        this.eventService = eventService;
-        this.proxyTransportProvider = proxyTransportProvider;
-        this.packetMapperRegistry = packetMapperRegistry;
+            Provider<OmniConnectionService> connectionManagerProvider
+    ) {
+        this.connectionManagerProvider = connectionManagerProvider;;
     }
 
-    public void handleConfigUpdate(ServerConfiguration config) {
-        System.out.println("[OmniTranslator] New Config received!");
 
-        translatorService.setTranslationConfiguration(config);
-        eventService.callEvent(new ConfigUpdateEvent(config));
-
-        proxyTransportProvider.get().broadcastConfigurationUpdate(packetMapperRegistry.toProto(config));
-    }
 
     public void handleTranslationResult(TranslationResultData resultData) {
         UUID id = resultData.requestId();
