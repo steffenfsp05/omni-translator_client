@@ -3,6 +3,7 @@ package org.pytenix.backend.listener;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.omni.event.annotation.OmniSubscribe;
+import org.omni.event.register.BackendConnectionCloseEvent;
 import org.pytenix.backend.socket.WebSocketService;
 import org.transport.TransportService;
 
@@ -22,7 +23,10 @@ public class BackendCloseListener {
     }
 
     @OmniSubscribe(priority = 99)
-    public void onBackendClose(WebSocket webSocket, int statusCode, String reason) {
+    public void onBackendClose(BackendConnectionCloseEvent event) {
+        final WebSocket webSocket = event.webSocket();
+        final int statusCode = event.statusCode();
+
         webSocketService.getConnectionStatus().set(false);
         transportService.disconnect(webSocket);
 

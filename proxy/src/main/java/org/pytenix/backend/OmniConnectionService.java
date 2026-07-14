@@ -3,6 +3,7 @@ package org.pytenix.backend;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.protobuf.MessageLite;
+import org.omni.packets.PacketMapperRegistry;
 import org.omni.packets.registry.PacketRegistrar;
 import org.pytenix.backend.socket.WebSocketService;
 import org.transport.TransportOptions;
@@ -16,18 +17,20 @@ import java.net.http.WebSocket;
 public class OmniConnectionService {
 
     private final TransportService<WebSocket> transportService;
-
     private final WebSocketService webSocketService;
+    private final PacketMapperRegistry packetMapperRegistry;
 
 
     @Inject
     public OmniConnectionService(
             WebSocketService webSocketService,
-            PacketRegistrar<WebSocket> packetRegistrar) {
+            PacketRegistrar<WebSocket> packetRegistrar,
+            PacketMapperRegistry packetMapperRegistry) {
 
         System.out.println("OMNICONNECTIONSERVIUCE INIT!!!!!!!!");
 
 
+        this.packetMapperRegistry = packetMapperRegistry;
         this.webSocketService = webSocketService;
 
 
@@ -52,12 +55,12 @@ public class OmniConnectionService {
         webSocketService.connect();
     }
 
-    public <A extends MessageLite> void sendPacket(PacketDefinition<A> packetDefinition, MessageLite packet) {
+    public <A extends MessageLite> void sendPacket(PacketDefinition<A> packetDefinition, Object o) {
 
         if (webSocketService == null) return;
         if (!webSocketService.getConnectionStatus().get()) return;
 
-        transportService.send(webSocketService.getWebSocket(), packetDefinition.id(), packet);
+        transportService.send(webSocketService.getWebSocket(), packetDefinition.id(), packetMapperRegistry.toProto(o));
     }
 
 

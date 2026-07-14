@@ -1,6 +1,7 @@
 package org.pytenix.backend.listener;
 
 import com.google.inject.Inject;
+import org.omni.event.register.BackendConnectionConnectEvent;
 import org.pytenix.backend.socket.WebSocketService;
 import org.transport.TransportService;
 
@@ -18,7 +19,9 @@ public class BackendConnectListener {
         this.transportService = transportService;
     }
 
-    public void onBackendConnect(WebSocket webSocket) {
+    public void onBackendConnect(BackendConnectionConnectEvent event) {
+        final WebSocket webSocket = event.webSocket();
+
         webSocketService.setWebSocket(webSocket);
         webSocketService.getConnectionStatus().set(true);
         transportService.connect(webSocket);

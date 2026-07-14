@@ -47,8 +47,10 @@ public class TranslationSocketEndpoint {
 
     public void handleConfigUpdate(ServerConfiguration config) {
         System.out.println("[OmniTranslator] New Config received!");
+
         translatorService.setTranslationConfiguration(config);
         eventService.callEvent(new ConfigUpdateEvent(config));
+
         proxyTransportProvider.get().broadcastConfigurationUpdate(packetMapperRegistry.toProto(config));
     }
 
@@ -65,9 +67,8 @@ public class TranslationSocketEndpoint {
         queue.put(id, future);
 
         connectionManagerProvider.get().sendPacket(PacketRegistry.TRANSLATION_REQUEST,
-                packetMapperRegistry.toProto(new TranslationRequestData(
-                        id, text, lang, translationModule
-                )));
+                new TranslationRequestData(id, text, lang, translationModule)
+        );
 
         return future.orTimeout(60, TimeUnit.SECONDS).exceptionally(ex -> {
             queue.remove(id);

@@ -18,14 +18,12 @@ import java.util.concurrent.TimeUnit;
 public class GeoSocketEndpoint {
 
     private final Provider<OmniConnectionService> connectionManagerProvider;
-    private final PacketMapperRegistry packetMapperRegistry;
 
     private final ConcurrentHashMap<UUID, CompletableFuture<String>> queue = new ConcurrentHashMap<>();
 
     @Inject
-    public GeoSocketEndpoint(Provider<OmniConnectionService> connectionManagerProvider, PacketMapperRegistry packetMapperRegistry) {
+    public GeoSocketEndpoint(Provider<OmniConnectionService> connectionManagerProvider) {
         this.connectionManagerProvider = connectionManagerProvider;
-        this.packetMapperRegistry = packetMapperRegistry;
     }
 
     public void handleGeoResult(GeoResultData resultData) {
@@ -39,9 +37,7 @@ public class GeoSocketEndpoint {
 
         queue.put(id, future);
 
-        connectionManagerProvider.get().sendPacket(PacketRegistry.GEO_REQUEST, packetMapperRegistry.toProto(
-                new GeoRequestData(id, ipAddress)
-        ));
+        connectionManagerProvider.get().sendPacket(PacketRegistry.GEO_REQUEST, new GeoRequestData(id, ipAddress));
 
         return future.orTimeout(60, TimeUnit.SECONDS).exceptionally(ex -> {
             queue.remove(id);
