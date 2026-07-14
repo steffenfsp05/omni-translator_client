@@ -27,31 +27,22 @@ public class ProxyTransport {
     private final ProxyServer proxyServer;
     @Getter
     private final TransportService<RegisteredServer> transportService;
-    private final ChannelIdentifier identifier = MinecraftChannelIdentifier.from("translator:main");
+
 
     @Inject
-    public ProxyTransport(TranslatorPlugin translatorPlugin, ProxyServer proxyServer, String secret, PacketRegistrar<RegisteredServer> packetRegistrar) {
+    public ProxyTransport(
+            TranslatorPlugin translatorPlugin,
+            TransportService<RegisteredServer> transportService,
+            ChannelIdentifier channelIdentifier,
+            ProxyServer proxyServer
+    ) {
 
         this.proxyServer = proxyServer;
 
-        proxyServer.getChannelRegistrar().register(identifier);
+        proxyServer.getChannelRegistrar().register(channelIdentifier);
 
-        this.transportService = TransportService.<RegisteredServer>builder()
-                .packetService(new DefaultPacketService<>())
-                .secret(secret)
-                .encryptionEnabled(true)
-                .options(
-                        TransportOptions.builder()
-                                .batchingEnabled(true)
-                                .maxBatchSize(100)
-                                .batchingIntervalMs(5)
-                                .maxPayloadSize(20000)
-                                .build()
-                )
-                .networkSender((PluginMessageSender<RegisteredServer>) (registeredServer, bytes) -> registeredServer.sendPluginMessage(identifier, bytes))
-                .build();
+        this.transportService = transportService;
 
-        packetRegistrar.register(transportService);
 
         PluginMessageReceiver<RegisteredServer> receiver = PluginMessageReceiver.autoConnectBridge(transportService);
 
@@ -60,7 +51,7 @@ public class ProxyTransport {
             public void onPluginMessage(PluginMessageEvent event) {
 
                 if (event.getSource() instanceof ServerConnection serverConnection) {
-                    if (event.getIdentifier().getId().equalsIgnoreCase(identifier.getId())) {
+                    if (event.getIdentifier().getId().equalsIgnoreCase(channelIdentifier.getId())) {
                         RegisteredServer server = serverConnection.getServer();
                         receiver.handle(server, event.getData());
                     }

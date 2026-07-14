@@ -4,12 +4,15 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.name.Named;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import lombok.Getter;
 import org.omni.event.EventService;
 import org.omni.injection.CoreModule;
@@ -37,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
 
 @Plugin(
         id = "translator",
@@ -55,6 +59,12 @@ public class TranslatorPlugin {
     private ProxyTransport proxyTransport;
     private OmniConnectionService connectionService;
     private LimboService limboService;
+
+    @Inject @Named("velocityListeners")
+    private Set<Object> velocityListeners;
+
+    @Inject @Named("omniListeners")
+    private Set<Object> omniListeners;
 
     @Inject
     public TranslatorPlugin(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory, Injector velocityInjector) {
@@ -76,9 +86,15 @@ public class TranslatorPlugin {
         }
         System.out.println("READING SECRET: " + secret);
 
+
         Injector appInjector = velocityInjector.createChildInjector(
                 new CoreModule(),
-                new TranslatorProxyModule(this, secret, dataDirectory)
+                new TranslatorProxyModule(
+                        this,
+                        secret,
+                        dataDirectory,
+                        "ws://192.168.178.121:8083/ws/omni",
+                        MinecraftChannelIdentifier.from("translator:main"))
         );
 
         this.proxyTransport = appInjector.getInstance(ProxyTransport.class);
@@ -95,28 +111,20 @@ public class TranslatorPlugin {
     private void registerListeners(Injector injector) {
 
         PacketEvents.getAPI().getEventManager().registerListener(
-                new SystemChatPacketListener(
-                        injector.getInstance(TranslatorService.class),
-                        injector.getInstance(SystemChatModule.class),
-                        injector.getInstance(MessageSequencer.class),
-                        injector.getInstance(ProxyServer.class)
-                ),
+                injector.getInstance(SystemChatPacketListener.class),
                 PacketListenerPriority.HIGHEST
         );
 
 
-        proxyServer.getEventManager().register(this, injector.getInstance(org.pytenix.chat.listener.PlayerDisconnectListener.class));
-        proxyServer.getEventManager().register(this, injector.getInstance(ProxyPingListener.class));
-        proxyServer.getEventManager().register(this, injector.getInstance(PlayerConnectionChangeListener.class));
-        proxyServer.getEventManager().register(this, injector.getInstance(PlayerConnectListener.class));
-        proxyServer.getEventManager().register(this, injector.getInstance(PlayerDisconnectListener.class));
-        proxyServer.getEventManager().register(this, injector.getInstance(PlayerSettingsChangeListener.class));
-
         EventService eventService = injector.getInstance(EventService.class);
-        eventService.register(injector.getInstance(BackendCloseListener.class));
-        eventService.register(injector.getInstance(BackendConnectListener.class));
-        eventService.register(injector.getInstance(BackendMessageReceiveListener.class));
-        eventService.register(injector.getInstance(BackendConfigUpdateListener.class));
+
+        for (Object listener : velocityListeners) {
+            proxyServer.getEventManager().register(this, listener);
+        }
+
+        for (Object listener : omniListeners) {
+            eventService.register(listener);
+        }
     }
 
     @Subscribe

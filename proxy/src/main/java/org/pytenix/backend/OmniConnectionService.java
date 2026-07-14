@@ -23,8 +23,8 @@ public class OmniConnectionService {
 
     @Inject
     public OmniConnectionService(
+            TransportService<WebSocket> transportService,
             WebSocketService webSocketService,
-            PacketRegistrar<WebSocket> packetRegistrar,
             PacketMapperRegistry packetMapperRegistry) {
 
         System.out.println("OMNICONNECTIONSERVIUCE INIT!!!!!!!!");
@@ -32,21 +32,8 @@ public class OmniConnectionService {
 
         this.packetMapperRegistry = packetMapperRegistry;
         this.webSocketService = webSocketService;
+        this.transportService = transportService;
 
-
-        this.transportService = TransportService.<WebSocket>builder()
-                .packetService(new DefaultPacketService<>())
-                .options(TransportOptions.builder()
-                        .batchingEnabled(true)
-                        .maxBatchSize(500)
-                        .batchingIntervalMs(5)
-                        .maxPayloadSize(50000)
-                        .build())
-                .encryptionEnabled(false)
-                .networkSender(webSocketService::sendToWebSocket)
-                .build();
-
-        packetRegistrar.register(transportService);
 
         System.out.println("OMNICONNECTIONSERVIUCE INIT!!!!!!!! REGUSTERED PACKEST");
     }

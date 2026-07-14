@@ -26,7 +26,6 @@ public class TranslationSocketEndpoint {
             Provider<OmniConnectionService> connectionManagerProvider
     ) {
         this.connectionManagerProvider = connectionManagerProvider;
-        ;
     }
 
 
