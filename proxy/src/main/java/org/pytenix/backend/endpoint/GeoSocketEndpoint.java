@@ -3,7 +3,6 @@ package org.pytenix.backend.endpoint;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import org.omni.packets.PacketMapperRegistry;
 import org.omni.packets.PacketRegistry;
 import org.omni.packets.data.GeoRequestData;
 import org.omni.packets.data.GeoResultData;

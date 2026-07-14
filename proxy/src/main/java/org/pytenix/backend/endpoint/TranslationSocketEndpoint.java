@@ -3,17 +3,11 @@ package org.pytenix.backend.endpoint;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import org.omni.entity.ServerConfiguration;
 import org.omni.entity.TranslationModule;
-import org.omni.event.EventService;
-import org.omni.event.register.ConfigUpdateEvent;
-import org.omni.packets.PacketMapperRegistry;
 import org.omni.packets.PacketRegistry;
 import org.omni.packets.data.TranslationRequestData;
 import org.omni.packets.data.TranslationResultData;
-import org.omni.translation.TranslatorService;
 import org.pytenix.backend.OmniConnectionService;
-import org.pytenix.network.ProxyTransport;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -31,9 +25,9 @@ public class TranslationSocketEndpoint {
     public TranslationSocketEndpoint(
             Provider<OmniConnectionService> connectionManagerProvider
     ) {
-        this.connectionManagerProvider = connectionManagerProvider;;
+        this.connectionManagerProvider = connectionManagerProvider;
+        ;
     }
-
 
 
     public void handleTranslationResult(TranslationResultData resultData) {

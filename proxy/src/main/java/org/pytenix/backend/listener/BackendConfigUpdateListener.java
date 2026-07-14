@@ -5,14 +5,9 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import org.omni.entity.ServerConfiguration;
 import org.omni.event.annotation.OmniSubscribe;
-import org.omni.event.register.BackendConnectionCloseEvent;
 import org.omni.event.register.ConfigUpdateEvent;
 import org.omni.packets.PacketMapperRegistry;
-import org.pytenix.backend.socket.WebSocketService;
 import org.pytenix.network.ProxyTransport;
-import org.transport.TransportService;
-
-import java.net.http.WebSocket;
 
 @Singleton
 public class BackendConfigUpdateListener {

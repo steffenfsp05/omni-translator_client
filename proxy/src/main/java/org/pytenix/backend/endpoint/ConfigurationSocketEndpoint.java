@@ -1,18 +1,10 @@
 package org.pytenix.backend.endpoint;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.omni.entity.ServerConfiguration;
 import org.omni.event.EventService;
 import org.omni.event.register.ConfigUpdateEvent;
-import org.omni.packets.PacketMapperRegistry;
 import org.omni.translation.TranslatorService;
-import org.pytenix.backend.OmniConnectionService;
-import org.pytenix.network.ProxyTransport;
-
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ConfigurationSocketEndpoint {
 
