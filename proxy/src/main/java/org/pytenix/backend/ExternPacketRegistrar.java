@@ -3,7 +3,7 @@ package org.pytenix.backend;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.omni.packets.PacketRegistry;
-import org.omni.packets.registry.PacketRegistrar;
+import org.omni.packets.PacketRegistrar;
 import org.pytenix.backend.consumer.BackendGeoResultConsumer;
 import org.pytenix.backend.consumer.BackendProfileResultConsumer;
 import org.pytenix.backend.consumer.BackendServerConfigConsumer;

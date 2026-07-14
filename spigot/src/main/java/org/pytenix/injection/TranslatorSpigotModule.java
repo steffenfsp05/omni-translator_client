@@ -8,9 +8,7 @@ import com.google.inject.name.Names;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.omni.cache.CacheProvider;
-import org.omni.cache.CaffeineCacheProvider;
-import org.omni.packets.registry.PacketRegistrar;
+import org.omni.packets.PacketRegistrar;
 import org.omni.profile.ProfileService;
 import org.omni.translation.TranslationProcessor;
 import org.omni.translation.locale.PlayerLocaleProcessor;
@@ -52,9 +50,7 @@ public class TranslatorSpigotModule extends AbstractModule {
         bind(ObjectMapper.class).in(Scopes.SINGLETON);
 
 
-        bind(new TypeLiteral<CacheProvider<String, String>>() {
-        }).to(new TypeLiteral<CaffeineCacheProvider<String, String>>() {
-        }).in(Scopes.SINGLETON);
+
 
 
         bind(ProfileService.class).to(InternProfileService.class).in(Scopes.SINGLETON);

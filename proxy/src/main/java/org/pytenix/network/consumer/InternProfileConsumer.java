@@ -24,7 +24,6 @@ public class InternProfileConsumer extends MappedPacketReceiveConsumer<Registere
     @Override
     public void handle(PacketContext<RegisteredServer> context, ProfileInternRequestData javaPacket) {
 
-        System.out.println("INCOMING REQUEST FOR PROFILEDATE: " + javaPacket);
 
         profileService.retrieveProfile(javaPacket.playerId()).thenAccept(profileData ->
                 reply(context, PacketRegistry.PROFILE, profileData.withRequestId(javaPacket.requestId())));

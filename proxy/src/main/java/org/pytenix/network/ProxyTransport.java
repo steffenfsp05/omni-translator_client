@@ -7,18 +7,13 @@ import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
-import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import lombok.Getter;
 import org.omni.packets.PacketRegistry;
-import org.omni.packets.registry.PacketRegistrar;
 import org.omni.proto.generated.Protobuf;
 import org.pytenix.TranslatorPlugin;
-import org.transport.TransportOptions;
 import org.transport.TransportService;
 import org.transport.io.minecraft.PluginMessageReceiver;
-import org.transport.io.minecraft.PluginMessageSender;
-import org.transport.service.impl.DefaultPacketService;
 
 
 @Singleton
@@ -64,7 +59,6 @@ public class ProxyTransport {
 
 
     public void broadcastConfigurationUpdate(Protobuf.ServerConfiguration packet) {
-        System.out.println("SENDING ALL CFGS");
         for (RegisteredServer server : proxyServer.getAllServers()) {
 
             if (!server.getPlayersConnected().isEmpty()) {

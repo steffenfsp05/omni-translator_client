@@ -3,7 +3,7 @@ package org.pytenix.network;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.omni.packets.PacketRegistry;
-import org.omni.packets.registry.PacketRegistrar;
+import org.omni.packets.PacketRegistrar;
 import org.pytenix.network.consumer.ConfigUpdateConsumer;
 import org.pytenix.network.consumer.ConsentRefreshConsumer;
 import org.pytenix.network.consumer.ProfileResultConsumer;

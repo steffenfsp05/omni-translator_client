@@ -1,5 +1,6 @@
 package org.pytenix.backend.socket;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -33,6 +34,7 @@ public class WebSocketService {
     private final HttpClient httpClient;
     private WebSocket webSocket;
 
+    @Inject
     public WebSocketService(
             TranslatorPlugin translatorPlugin,
             ProxyServer proxyServer,
@@ -53,7 +55,6 @@ public class WebSocketService {
 
 
     public void connect() {
-        System.out.println("CONNECTING!!!!!!! ");
         httpClient.newWebSocketBuilder()
                 .header("X-API-KEY", apiKey)
                 .buildAsync(URI.create(url), webSocketListener)

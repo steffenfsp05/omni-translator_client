@@ -23,15 +23,9 @@ public class InternConfigRequestConsumer extends MappedPacketReceiveConsumer<Reg
     @Override
     public void handle(PacketContext<RegisteredServer> context, ConfigurationRequestData requestData) {
 
-        System.out.println("CONFIG REGUEST");
         if (translatorService.getTranslationConfiguration() == null) {
-            System.out.println("CONFIG REGUEST ABORTED");
             return;
         }
-
-
-        System.out.println("REPLYING WITH: " + PacketRegistry.SERVER_CONFIG.id() + " " + context.getConnection().getServerInfo().getName());
-
 
         reply(context, PacketRegistry.SERVER_CONFIG, translatorService.getTranslationConfiguration());
     }

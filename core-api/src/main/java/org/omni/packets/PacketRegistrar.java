@@ -1,4 +1,4 @@
-package org.omni.packets.registry;
+package org.omni.packets;
 
 import org.transport.TransportService;
 

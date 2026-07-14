@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.omni.entity.TranslationModule;
+import org.omni.translation.TranslatorService;
 import org.omni.translation.component.TextComponentService;
 
 import java.util.ArrayDeque;
@@ -26,7 +27,7 @@ public class MessageSequencer {
 
     private final ProxyServer proxyServer;
     private final TextComponentService textComponentService;
-
+    private final TranslatorService translatorService;
 
     private final Map<UUID, UserQueue> userQueues = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -36,9 +37,10 @@ public class MessageSequencer {
             .build();
 
     @Inject
-    public MessageSequencer(ProxyServer proxyServer, TextComponentService textComponentService) {
+    public MessageSequencer(ProxyServer proxyServer, TextComponentService textComponentService, TranslatorService translatorService) {
         this.proxyServer = proxyServer;
         this.textComponentService = textComponentService;
+        this.translatorService = translatorService;
     }
 
     private boolean sendPacket(UUID uuid, Component comp, boolean isOverlay) {
@@ -48,6 +50,9 @@ public class MessageSequencer {
 
         try {  //TODO: NOT NEEDED IF OMNI_WATERMARK IMPLEMENTED
             ignoreNextMessage(uuid, comp);
+            comp = translatorService.setMarked(comp);
+            System.out.println("MARKED COMP: " + comp);
+
             if (isOverlay) {
                 player.sendActionBar(comp);
             } else {

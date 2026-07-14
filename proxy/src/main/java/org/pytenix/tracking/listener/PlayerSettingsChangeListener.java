@@ -20,8 +20,6 @@ public class PlayerSettingsChangeListener {
         Player player = event.getPlayer();
 
         String newLocale = player.getPlayerSettings().getLocale().toString();
-
-        System.out.println("LOCALE: " + newLocale);
         roiService.getLanguageCache().put(event.getPlayer().getUniqueId(), newLocale.toLowerCase());
     }
 

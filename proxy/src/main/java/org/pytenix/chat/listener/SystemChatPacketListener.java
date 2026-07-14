@@ -4,7 +4,9 @@ import com.github.retrooper.packetevents.event.PacketListener;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSystemChatMessage;
+import com.google.gson.Gson;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.Component;
@@ -15,6 +17,7 @@ import org.pytenix.chat.SystemChatModule;
 
 import java.util.UUID;
 
+ @Singleton
 public class SystemChatPacketListener implements PacketListener {
 
     private final TranslatorService translatorService;
@@ -54,6 +57,7 @@ public class SystemChatPacketListener implements PacketListener {
 
         if (translatorService.isWaterMarked(messageComponent))
             return;
+
 
         String rawText = LegacyComponentSerializer.legacySection().serialize(messageComponent);
 

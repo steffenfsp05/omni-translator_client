@@ -1,7 +1,6 @@
 package org.pytenix.backend.listener;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import org.omni.entity.ServerConfiguration;
 import org.omni.event.annotation.OmniSubscribe;
@@ -12,13 +11,13 @@ import org.pytenix.network.ProxyTransport;
 @Singleton
 public class BackendConfigUpdateListener {
 
-    final Provider<ProxyTransport> proxyTransportProvider;
+    final ProxyTransport proxyTransport;
     final PacketMapperRegistry packetMapperRegistry;
 
 
     @Inject
-    public BackendConfigUpdateListener(Provider<ProxyTransport> proxyTransportProvider, PacketMapperRegistry packetMapperRegistry) {
-        this.proxyTransportProvider = proxyTransportProvider;
+    public BackendConfigUpdateListener(ProxyTransport proxyTransport, PacketMapperRegistry packetMapperRegistry) {
+        this.proxyTransport = proxyTransport;
         this.packetMapperRegistry = packetMapperRegistry;
     }
 
@@ -28,7 +27,7 @@ public class BackendConfigUpdateListener {
 
         System.out.println("[OmniTranslator] New Config received!");
 
-        proxyTransportProvider.get().broadcastConfigurationUpdate(
+        proxyTransport.broadcastConfigurationUpdate(
                 packetMapperRegistry.toProto(serverConfiguration)
         );
     }

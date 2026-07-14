@@ -23,7 +23,6 @@ public class ModuleService {
     }
 
     public void registerModule(AbstractTranslatorModule module) {
-        System.out.println("ADDED MODULE: " + module.getTranslationModule());
         modules.add(module);
         module.init();
     }

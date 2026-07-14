@@ -29,7 +29,6 @@ public class ConfigUpdateConsumer extends MappedPacketReceiveConsumer<String, Pr
 
     @Override
     public void handle(PacketContext<String> context, ServerConfiguration serverConfiguration) {
-        System.out.println("RECIEVED CONFIG!!" + new Gson().toJson(serverConfiguration));
         translatorService.setTranslationConfiguration(serverConfiguration);
         spigotTransportProvider.get().setHasConfiguration(true);
         eventService.callEvent(new ConfigUpdateEvent(serverConfiguration));

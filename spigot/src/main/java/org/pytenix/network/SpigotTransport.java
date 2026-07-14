@@ -8,7 +8,7 @@ import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.omni.entity.TranslationModule;
 import org.omni.event.EventService;
-import org.omni.packets.registry.PacketRegistrar;
+import org.omni.packets.PacketRegistrar;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.network.listener.ConfigUpdateListener;
 import org.pytenix.network.listener.ConsentUpdateListener;
@@ -62,7 +62,6 @@ public class SpigotTransport {
 
         registerChannels();
         transportService.connect(pluginMessagingChannel);
-        System.out.println("ABABABBDBASHDABSDA SDHJASBDAIKSBJDHJAKBSDJHABSDA");
     }
 
 

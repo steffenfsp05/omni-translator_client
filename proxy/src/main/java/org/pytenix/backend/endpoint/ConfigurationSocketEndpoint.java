@@ -1,11 +1,13 @@
 package org.pytenix.backend.endpoint;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.omni.entity.ServerConfiguration;
 import org.omni.event.EventService;
 import org.omni.event.register.ConfigUpdateEvent;
 import org.omni.translation.TranslatorService;
 
+@Singleton
 public class ConfigurationSocketEndpoint {
 
 

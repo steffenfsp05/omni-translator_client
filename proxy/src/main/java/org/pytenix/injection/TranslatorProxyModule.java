@@ -6,15 +6,12 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
-import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
-import com.velocitypowered.api.proxy.messages.PluginMessageEncoder;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import io.netty.channel.ChannelId;
 import org.omni.cache.CacheProvider;
 import org.omni.cache.CaffeineCacheProvider;
 import org.omni.config.ConfigService;
 import org.omni.config.ConfigurationFile;
-import org.omni.packets.registry.PacketRegistrar;
+import org.omni.packets.PacketRegistrar;
 import org.omni.profile.AbstractAnalyticsSecret;
 import org.omni.profile.ProfileService;
 import org.omni.translation.TranslationProcessor;
@@ -75,9 +72,6 @@ public class TranslatorProxyModule extends AbstractModule {
 
         bind(ChannelIdentifier.class).annotatedWith(Names.named("channelIdentifier")).toInstance(channelIdentifier);
 
-        bind(new TypeLiteral<CacheProvider<String, String>>() {
-        }).to(new TypeLiteral<CaffeineCacheProvider<String, String>>() {
-        }).in(Scopes.SINGLETON);
 
         bind(ProfileService.class).to(ExternProfileService.class).in(Scopes.SINGLETON);
 
@@ -188,7 +182,10 @@ public class TranslatorProxyModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public ProxyTransport provideProxyTransport(ProxyServer proxyServer, TransportService<RegisteredServer> transportService, ChannelIdentifier channelIdentifier) {
+    public ProxyTransport provideProxyTransport(
+            ProxyServer proxyServer,
+            TransportService<RegisteredServer> transportService,
+            @Named("channelIdentifier") ChannelIdentifier channelIdentifier) {
         return new ProxyTransport(plugin, transportService, channelIdentifier, proxyServer);
     }
 

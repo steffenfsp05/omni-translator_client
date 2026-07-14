@@ -44,7 +44,6 @@ public class ChannelCarrierService implements Listener {
     @EventHandler
     public void onChannelRegister(PlayerRegisterChannelEvent event) {
         if (event.getChannel().equalsIgnoreCase(channel)) {
-            System.out.println("CHANNEL READY");
             availableCarriers.add(event.getPlayer().getUniqueId());
             transportServiceProvider.get().ready(channel);
         }
@@ -54,7 +53,6 @@ public class ChannelCarrierService implements Listener {
     public void onChannelUnregister(PlayerUnregisterChannelEvent event) {
         if (event.getChannel().equalsIgnoreCase(channel)) {
             availableCarriers.remove(event.getPlayer().getUniqueId());
-            System.out.println("CHANNEL UNREADY");
             if (isEmpty()) {
                 TransportService<String> transport = transportServiceProvider.get();
                 transport.disconnect(channel);

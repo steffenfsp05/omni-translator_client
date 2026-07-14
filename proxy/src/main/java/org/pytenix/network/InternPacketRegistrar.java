@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import org.omni.packets.PacketRegistry;
-import org.omni.packets.registry.PacketRegistrar;
+import org.omni.packets.PacketRegistrar;
 import org.pytenix.network.consumer.InternConfigRequestConsumer;
 import org.pytenix.network.consumer.InternProfileConsumer;
 import org.pytenix.network.consumer.InternTranslationRequestConsumer;

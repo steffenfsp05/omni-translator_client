@@ -22,7 +22,6 @@ public class BackendProfileResultConsumer extends MappedPacketReceiveConsumer<We
 
     @Override
     public void handle(PacketContext<WebSocket> context, ProfileResultData javaPacket) {
-        System.out.println("INCOMING: " + javaPacket);
         profileService.handleProfileResult(javaPacket);
     }
 }

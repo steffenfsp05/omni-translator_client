@@ -107,7 +107,6 @@ public class ROIService {
                             .toList();
 
                     omniConnectionService.sendPacket(PacketRegistry.HEART_BEAT,
-                            packetMapperRegistry.toProto(
                                     new HeartBeatUpdateData(
                                             configurationFile.getLicenseKey(),
                                             UUID.randomUUID(),
@@ -119,7 +118,7 @@ public class ROIService {
                                             filterByConsent(data, Protobuf.ConsentType.DECLINED),
                                             langDistribution
                                     )
-                            ));
+                            );
                 });
     }
 
@@ -132,24 +131,19 @@ public class ROIService {
 
     public void initTrackingProcess(UUID uuid) {
         trackCache.put(uuid, System.nanoTime());
-        System.out.println("TRACK CACHE PUT: " + trackCache.getIfPresent(uuid));
     }
 
     public void stopTrackingProcess(UUID uuid) {
-        System.out.println("ASDASDAAAAAAAAAAAAAAAA");
-        System.out.println("TRACK CACHE: " + trackCache.getIfPresent(uuid));
         final Long nanoTime = trackCache.getIfPresent(uuid);
-        System.out.println("VVVV");
         if (nanoTime != null) {
             trackCache.invalidate(uuid);
 
-            System.out.println("ADASDA");
             long elapsedNanos = System.nanoTime() - nanoTime;
             int playtimeInSeconds = (int) TimeUnit.NANOSECONDS.toSeconds(elapsedNanos);
 
             translatorService.requiresTranslation(uuid).thenAccept(requiresTranslation ->
             {
-                omniConnectionService.sendPacket(PacketRegistry.TRACK_PLAYER, packetMapperRegistry.toProto(
+                omniConnectionService.sendPacket(PacketRegistry.TRACK_PLAYER,
                         new TrackPlayerRequestData(
                                 configurationFile.getLicenseKey(),
                                 UUID.randomUUID(),
@@ -159,8 +153,7 @@ public class ROIService {
                                 requiresTranslation,
                                 playerLocaleProcessor.retrieveLocale(uuid)
                         )
-                ));
-                System.out.println("SENT PACK");
+                );
             });
         }
     }

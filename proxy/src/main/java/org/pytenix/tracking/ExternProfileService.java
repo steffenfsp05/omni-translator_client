@@ -3,6 +3,7 @@ package org.pytenix.tracking;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import org.omni.config.ConfigurationFile;
 import org.omni.packets.PacketMapperRegistry;
@@ -29,6 +30,8 @@ public class ExternProfileService extends ProfileService {
     final TranslatorPlugin translatorPlugin;
     final AbstractAnalyticsSecret abstractAnalyticsSecret;
     final PacketMapperRegistry packetMapperRegistry;
+    final Provider<OmniConnectionService> omniConnectionService;
+
     private final ConfigurationFile configurationFile;
     private final ConcurrentHashMap<AnalyticsKey, CompletableFuture<ProfileResultData>> inFlightFetches = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, CompletableFuture<ProfileResultData>> queue = new ConcurrentHashMap<>();
@@ -45,20 +48,19 @@ public class ExternProfileService extends ProfileService {
             TranslatorPlugin translatorPlugin,
             AbstractAnalyticsSecret abstractAnalyticsSecret,
             ConfigurationFile configurationFile,
-            PacketMapperRegistry packetMapperRegistry
+            PacketMapperRegistry packetMapperRegistry,
+            Provider<OmniConnectionService> omniConnectionService
     ) {
         this.packetMapperRegistry = packetMapperRegistry;
         this.translatorPlugin = translatorPlugin;
         this.configurationFile = configurationFile;
         this.abstractAnalyticsSecret = abstractAnalyticsSecret;
+        this.omniConnectionService = omniConnectionService;
 
 
     }
 
 
-    public OmniConnectionService getConnectionService() {
-        return translatorPlugin.getConnectionService();
-    }
 
     @Override
     public Cache<UUID, ProfileResultData> cacheProvider() {
@@ -90,9 +92,9 @@ public class ExternProfileService extends ProfileService {
 
             queue.put(requestId, future);
 
-            getConnectionService().sendPacket(
+            omniConnectionService.get().sendPacket(
                     PacketRegistry.PROFILE_REQUEST_EXTERN,
-                    packetMapperRegistry.toProto(externProfileRequestData)
+                    externProfileRequestData
             );
 
             return future.orTimeout(5, TimeUnit.SECONDS)
@@ -126,12 +128,11 @@ public class ExternProfileService extends ProfileService {
 
         cacheProvider.put(playerId, profileData);
 
-        getConnectionService().sendPacket(PacketRegistry.PROFILE_UPDATE_EXTERN,
-                packetMapperRegistry.toProto(
+        omniConnectionService.get().sendPacket(PacketRegistry.PROFILE_UPDATE_EXTERN,
                         new ProfileExternUpdateData(
                                 profileData
                         )
-                ));
+                );
     }
 
     @Override

@@ -4,7 +4,10 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
@@ -60,12 +63,6 @@ public class TranslatorPlugin {
     private OmniConnectionService connectionService;
     private LimboService limboService;
 
-    @Inject @Named("velocityListeners")
-    private Set<Object> velocityListeners;
-
-    @Inject @Named("omniListeners")
-    private Set<Object> omniListeners;
-
     @Inject
     public TranslatorPlugin(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory, Injector velocityInjector) {
         this.proxyServer = server;
@@ -117,6 +114,12 @@ public class TranslatorPlugin {
 
 
         EventService eventService = injector.getInstance(EventService.class);
+
+        Set<Object> velocityListeners = injector.getInstance(Key.get(new TypeLiteral<>() {
+        }, Names.named("velocityListeners")));
+        Set<Object> omniListeners = injector.getInstance(Key.get(new TypeLiteral<>() {
+        }, Names.named("omniListeners")));
+
 
         for (Object listener : velocityListeners) {
             proxyServer.getEventManager().register(this, listener);

@@ -43,7 +43,6 @@ public class AsyncPlayerChatListener implements Listener {
 
 
         String locale = liveChatModule.getPlayerLocaleProcessor().retrieveLocale(sender.getUniqueId());
-        String senderLang = locale.contains("_") ? locale.split("_")[0].toLowerCase() : locale.toLowerCase();
 
         Map<String, List<Player>> languageGroups = new HashMap<>();
 
@@ -51,16 +50,15 @@ public class AsyncPlayerChatListener implements Listener {
             if (audience instanceof Player p && !p.getUniqueId().equals(sender.getUniqueId())) {
 
                 String targetLocale = liveChatModule.getPlayerLocaleProcessor().retrieveLocale(p.getUniqueId());
-                String targetLang = targetLocale.contains("_") ? targetLocale.split("_")[0].toLowerCase() : targetLocale.toLowerCase();
 
 
-                if (targetLang.equals(senderLang)) {
+                if (targetLocale.equals(locale)) {
                     Component rendered = event.renderer().render(sender, sender.displayName(), originalMessage, p);
                     liveChatModule.sendSystemMessage(p, rendered);
                     continue;
                 }
 
-                languageGroups.computeIfAbsent(targetLang, k -> new ArrayList<>()).add(p);
+                languageGroups.computeIfAbsent(targetLocale, k -> new ArrayList<>()).add(p);
             }
         }
 
