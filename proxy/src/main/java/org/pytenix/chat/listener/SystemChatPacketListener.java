@@ -82,19 +82,14 @@ public class SystemChatPacketListener implements PacketListener {
                 return;
             }
 
-            profileService.retrieveProfile(player.getUniqueId())
-                    .thenAcceptAsync(profileData -> {
-
-                        messageSequencer.translateWithOrder(
-                                uuid,
-                                messageComponent,
-                                rawText,
-                                systemChatService.getPlayerLocaleProcessor().retrieveLocale(uuid),
-                                isOverlay
-                        );
-                    });
-
-        });
+                 messageSequencer.translateWithOrder(
+                         uuid,
+                         messageComponent,
+                         rawText,
+                         systemChatService.getPlayerLocaleProcessor().retrieveLocale(uuid),
+                         isOverlay
+                 );
+             });
 
 
     }
