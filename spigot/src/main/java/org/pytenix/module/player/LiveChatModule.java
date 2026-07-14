@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSystemChatMessage;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -45,9 +46,12 @@ public class LiveChatModule extends AbstractTranslatorModule {
     }
 
     public void sendSystemMessage(Player player, Component content) {
+
+        Component markedComponent = getTranslatorService().setMarked(content);
+
         WrapperPlayServerSystemChatMessage systemPacket = new WrapperPlayServerSystemChatMessage(
                 false,
-                content
+                markedComponent
         );
 
         PacketEvents.getAPI().getPlayerManager().sendPacketSilently(player, systemPacket);

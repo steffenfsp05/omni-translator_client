@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.key.Key;
 import org.omni.entity.ServerConfiguration;
 import org.omni.entity.ServerConsentMode;
 import org.omni.entity.TranslationModule;
@@ -38,7 +39,6 @@ public class DefaultTranslatorService implements TranslatorService {
 
     final PlayerLocaleProcessor playerLocaleProcessor;
     final ProfileService profileService;
-
 
     private final Cache<UUID, List<UUID>> cachedReferences = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)

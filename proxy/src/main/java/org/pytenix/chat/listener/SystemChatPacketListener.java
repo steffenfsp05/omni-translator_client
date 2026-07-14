@@ -10,6 +10,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.omni.profile.ProfileService;
+import org.omni.translation.TranslatorService;
 import org.pytenix.chat.MessageSequencer;
 import org.pytenix.chat.SystemChatModule;
 
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 public class SystemChatPacketListener implements PacketListener {
 
+    private final TranslatorService translatorService;
     private final SystemChatModule systemChatService;
     private final MessageSequencer messageSequencer;
     private final ProxyServer proxyServer;
@@ -24,10 +26,12 @@ public class SystemChatPacketListener implements PacketListener {
 
     @Inject
     public SystemChatPacketListener(
+            TranslatorService translatorService,
             SystemChatModule systemChatService,
             MessageSequencer messageSequencer,
             ProxyServer proxyServer,
             ProfileService profileService) {
+        this.translatorService = translatorService;
         this.systemChatService = systemChatService;
         this.messageSequencer = messageSequencer;
         this.proxyServer = proxyServer;
@@ -51,6 +55,10 @@ public class SystemChatPacketListener implements PacketListener {
         if (isOverlay) return;
 
         Component messageComponent = packet.getMessage();
+
+        if(translatorService.isWaterMarked(messageComponent))
+            return;
+
         String rawText = LegacyComponentSerializer.legacySection().serialize(messageComponent);
 
         if (rawText.contains("Can't deliver chat message") ||

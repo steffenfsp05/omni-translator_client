@@ -46,7 +46,9 @@ public class MessageSequencer {
         Player player = this.proxyServer.getPlayer(uuid).orElse(null);
         if (player == null) return false;
 
-        try {
+
+
+        try {  //TODO: NOT NEEDED IF OMNI_WATERMARK IMPLEMENTED
             ignoreNextMessage(uuid, comp);
             if (isOverlay) {
                 player.sendActionBar(comp);
