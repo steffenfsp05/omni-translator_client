@@ -1,4 +1,4 @@
-package org.pytenix.backend;
+package org.pytenix.backend.endpoint;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -7,6 +7,7 @@ import org.omni.packets.PacketMapperRegistry;
 import org.omni.packets.PacketRegistry;
 import org.omni.packets.data.GeoRequestData;
 import org.omni.packets.data.GeoResultData;
+import org.pytenix.backend.OmniConnectionService;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;

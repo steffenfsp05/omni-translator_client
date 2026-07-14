@@ -63,7 +63,6 @@ public class TranslatorSpigotModule extends AbstractModule {
         bind(String.class).annotatedWith(Names.named("pluginMessagingChannel")).toInstance(channelName);
         bind(ObjectMapper.class).in(Scopes.SINGLETON);
 
-        bind(EventService.class).to(DefaultEventService.class).in(Scopes.SINGLETON);
 
         bind(new TypeLiteral<CacheProvider<String, String>>() {
         }).to(new TypeLiteral<CaffeineCacheProvider<String, String>>() {

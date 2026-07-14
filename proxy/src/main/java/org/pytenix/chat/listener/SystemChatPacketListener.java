@@ -22,20 +22,17 @@ public class SystemChatPacketListener implements PacketListener {
     private final SystemChatModule systemChatService;
     private final MessageSequencer messageSequencer;
     private final ProxyServer proxyServer;
-    private final ProfileService profileService;
 
     @Inject
     public SystemChatPacketListener(
             TranslatorService translatorService,
             SystemChatModule systemChatService,
             MessageSequencer messageSequencer,
-            ProxyServer proxyServer,
-            ProfileService profileService) {
+            ProxyServer proxyServer) {
         this.translatorService = translatorService;
         this.systemChatService = systemChatService;
         this.messageSequencer = messageSequencer;
         this.proxyServer = proxyServer;
-        this.profileService = profileService;
     }
 
     @Override

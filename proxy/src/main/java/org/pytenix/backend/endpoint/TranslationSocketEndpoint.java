@@ -1,4 +1,4 @@
-package org.pytenix.backend;
+package org.pytenix.backend.endpoint;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -12,6 +12,7 @@ import org.omni.packets.PacketRegistry;
 import org.omni.packets.data.TranslationRequestData;
 import org.omni.packets.data.TranslationResultData;
 import org.omni.translation.TranslatorService;
+import org.pytenix.backend.OmniConnectionService;
 import org.pytenix.network.ProxyTransport;
 
 import java.util.UUID;

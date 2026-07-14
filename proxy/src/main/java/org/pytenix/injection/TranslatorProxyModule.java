@@ -1,6 +1,7 @@
 package org.pytenix.injection;
 
 import com.google.inject.*;
+import com.google.inject.name.Names;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import org.omni.cache.CacheProvider;
@@ -13,28 +14,19 @@ import org.omni.profile.ProfileService;
 import org.omni.translation.TranslationProcessor;
 import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.backend.GeoSocketEndpoint;
-import org.pytenix.backend.OmniConnectionService;
-import org.pytenix.backend.TranslationSocketEndpoint;
-import org.pytenix.backend.consumer.BackendGeoResultConsumer;
-import org.pytenix.backend.consumer.BackendProfileResultConsumer;
-import org.pytenix.backend.consumer.BackendServerConfigConsumer;
-import org.pytenix.backend.consumer.BackendTranslationResultConsumer;
-import org.pytenix.chat.MessageSequencer;
-import org.pytenix.chat.SystemChatModule;
+import org.pytenix.backend.ExternPacketRegistrar;
+import org.pytenix.backend.endpoint.TranslationSocketEndpoint;
 import org.pytenix.limbo.LimboService;
 import org.pytenix.limbo.command.TranslateCommand;
 import org.pytenix.limbo.listener.ServerPreConnectListener;
 import org.pytenix.network.InternPacketRegistrar;
 import org.pytenix.network.ProxyTransport;
-import org.pytenix.network.consumer.InternConfigRequestConsumer;
-import org.pytenix.network.consumer.InternProfileConsumer;
-import org.pytenix.network.consumer.InternTranslationRequestConsumer;
 import org.pytenix.tracking.ExternProfileService;
 import org.pytenix.tracking.ProxyAnalyticsSecret;
 import org.pytenix.tracking.ROIService;
 import org.slf4j.Logger;
 
+import java.net.http.WebSocket;
 import java.nio.file.Path;
 
 public class TranslatorProxyModule extends AbstractModule {
@@ -42,6 +34,8 @@ public class TranslatorProxyModule extends AbstractModule {
     private final TranslatorPlugin plugin;
     private final String forwardingSecret;
     private final Path dataDirectory;
+
+    private final String backendRemoteAddress = "ws://192.168.178.121:8083/ws/omni";
 
     public TranslatorProxyModule(TranslatorPlugin plugin, String forwardingSecret, Path dataDirectory) {
         this.plugin = plugin;
@@ -52,16 +46,14 @@ public class TranslatorProxyModule extends AbstractModule {
     @Override
     protected void configure() {
 
-        bind(new TypeLiteral<CacheProvider<String, String>>() {
-        }).to(new TypeLiteral<CaffeineCacheProvider<String, String>>() {
-        }).in(Scopes.SINGLETON);
+        bind(String.class).annotatedWith(Names.named("backendRemoteAddress")).toInstance(backendRemoteAddress);
+
+        bind(new TypeLiteral<CacheProvider<String, String>>() {}).to(new TypeLiteral<CaffeineCacheProvider<String, String>>() {}).in(Scopes.SINGLETON);
+
         bind(ProfileService.class).to(ExternProfileService.class).in(Scopes.SINGLETON);
 
-
-
-        bind(new TypeLiteral<PacketRegistrar<RegisteredServer>>() {
-        }).to(InternPacketRegistrar.class).in(Scopes.SINGLETON);
-
+        bind(new TypeLiteral<PacketRegistrar<RegisteredServer>>() {}).to(InternPacketRegistrar.class).in(Scopes.SINGLETON);
+        bind(new TypeLiteral<PacketRegistrar<WebSocket>>() {}).to(ExternPacketRegistrar.class).in(Scopes.SINGLETON);
 
     }
 

@@ -8,7 +8,7 @@ import org.omni.entity.ServerConfiguration;
 import org.omni.entity.TranslationModule;
 import org.omni.translation.TranslatorService;
 import org.omni.translation.component.TextComponentService;
-import org.pytenix.backend.GeoSocketEndpoint;
+import org.pytenix.backend.endpoint.GeoSocketEndpoint;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;

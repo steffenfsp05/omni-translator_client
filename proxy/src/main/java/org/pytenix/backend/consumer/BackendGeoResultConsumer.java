@@ -5,7 +5,7 @@ import com.google.inject.Singleton;
 import org.omni.packets.MappedPacketReceiveConsumer;
 import org.omni.packets.data.GeoResultData;
 import org.omni.proto.generated.Protobuf;
-import org.pytenix.backend.GeoSocketEndpoint;
+import org.pytenix.backend.endpoint.GeoSocketEndpoint;
 import org.transport.service.PacketContext;
 
 import java.net.http.WebSocket;

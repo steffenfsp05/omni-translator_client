@@ -11,9 +11,14 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.Getter;
+import org.omni.event.EventService;
 import org.omni.injection.CoreModule;
 import org.omni.profile.ProfileService;
+import org.omni.translation.TranslatorService;
 import org.pytenix.backend.OmniConnectionService;
+import org.pytenix.backend.listener.BackendCloseListener;
+import org.pytenix.backend.listener.BackendConnectListener;
+import org.pytenix.backend.listener.BackendMessageReceiveListener;
 import org.pytenix.chat.MessageSequencer;
 import org.pytenix.chat.SystemChatModule;
 import org.pytenix.chat.listener.SystemChatPacketListener;
@@ -91,10 +96,10 @@ public class TranslatorPlugin {
 
         PacketEvents.getAPI().getEventManager().registerListener(
                 new SystemChatPacketListener(
+                        injector.getInstance(TranslatorService.class),
                         injector.getInstance(SystemChatModule.class),
                         injector.getInstance(MessageSequencer.class),
-                        injector.getInstance(ProxyServer.class),
-                        injector.getInstance(ProfileService.class)
+                        injector.getInstance(ProxyServer.class)
                 ),
                 PacketListenerPriority.HIGHEST
         );
@@ -106,6 +111,11 @@ public class TranslatorPlugin {
         proxyServer.getEventManager().register(this, injector.getInstance(PlayerConnectListener.class));
         proxyServer.getEventManager().register(this, injector.getInstance(PlayerDisconnectListener.class));
         proxyServer.getEventManager().register(this, injector.getInstance(PlayerSettingsChangeListener.class));
+
+        EventService eventService = injector.getInstance(EventService.class);
+        eventService.register(injector.getInstance(BackendCloseListener.class));
+        eventService.register(injector.getInstance(BackendConnectListener.class));
+        eventService.register(injector.getInstance(BackendMessageReceiveListener.class));
     }
 
     @Subscribe

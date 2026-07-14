@@ -9,7 +9,7 @@ import org.omni.packets.PacketRegistry;
 import org.omni.packets.data.TranslationRequestData;
 import org.omni.packets.data.TranslationResultData;
 import org.omni.proto.generated.Protobuf;
-import org.pytenix.backend.TranslationSocketEndpoint;
+import org.pytenix.backend.endpoint.TranslationSocketEndpoint;
 import org.transport.service.PacketContext;
 
 import java.util.UUID;

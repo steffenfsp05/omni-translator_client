@@ -5,7 +5,7 @@ import com.google.inject.Singleton;
 import org.omni.entity.ServerConfiguration;
 import org.omni.packets.MappedPacketReceiveConsumer;
 import org.omni.proto.generated.Protobuf;
-import org.pytenix.backend.TranslationSocketEndpoint;
+import org.pytenix.backend.endpoint.TranslationSocketEndpoint;
 import org.transport.service.PacketContext;
 
 import java.net.http.WebSocket;

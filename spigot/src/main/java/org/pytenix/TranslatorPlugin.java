@@ -43,15 +43,15 @@ public class TranslatorPlugin extends JavaPlugin {
 
 
     @Inject
-    @Named("pluginMessagingChannel")
-    private String pluginMessagingChannel;
-    @Inject
     @Named("configFile")
     private File configFile;
+
     @Inject
     private SpigotTransport spigotTransport;
+
     @Inject
     private ObjectMapper mapper;
+
     private String serverName;
 
     @Override
