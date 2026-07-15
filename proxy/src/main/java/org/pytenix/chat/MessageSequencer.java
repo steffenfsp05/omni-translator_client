@@ -32,9 +32,6 @@ public class MessageSequencer {
     private final Map<UUID, UserQueue> userQueues = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    private final Cache<IgnoreKey, AtomicInteger> ignoredMessagesCache = Caffeine.newBuilder()
-            .expireAfterWrite(10, TimeUnit.SECONDS)
-            .build();
 
     @Inject
     public MessageSequencer(ProxyServer proxyServer, TextComponentService textComponentService, TranslatorService translatorService) {
@@ -49,7 +46,6 @@ public class MessageSequencer {
 
 
         try {  //TODO: NOT NEEDED IF OMNI_WATERMARK IMPLEMENTED
-            ignoreNextMessage(uuid, comp);
             comp = translatorService.setMarked(comp);
 
             if (isOverlay) {
@@ -65,7 +61,7 @@ public class MessageSequencer {
     }
 
 
-    public void translateWithOrder(UUID uuid, Component component, String realMessage, String locale, boolean isOverlay) {
+    public void translateWithOrder(UUID uuid, Component component, String locale, boolean isOverlay) {
         UserQueue uq = userQueues.computeIfAbsent(uuid, k -> new UserQueue());
         QueuedMessage msg = new QueuedMessage(component, isOverlay);
 
@@ -99,32 +95,8 @@ public class MessageSequencer {
                 });
     }
 
-    public void ignoreNextMessage(UUID uuid, Component component) {
-        try {
-            String json = GsonComponentSerializer.gson().serialize(component);
-            IgnoreKey key = new IgnoreKey(uuid, json);
 
-            ignoredMessagesCache.get(key, k -> new AtomicInteger(0)).incrementAndGet();
-        } catch (Exception ignored) {
-        }
-    }
 
-    public boolean isIgnored(UUID uuid, Component component) {
-        try {
-            String json = GsonComponentSerializer.gson().serialize(component);
-            IgnoreKey key = new IgnoreKey(uuid, json);
-
-            AtomicInteger count = ignoredMessagesCache.getIfPresent(key);
-            if (count != null && count.get() > 0) {
-                if (count.decrementAndGet() <= 0) {
-                    ignoredMessagesCache.invalidate(key);
-                }
-                return true;
-            }
-        } catch (Exception ignored) {
-        }
-        return false;
-    }
 
     private void completeMessage(final long startTime, UUID uuid, QueuedMessage msg, Component translatedComponent) {
         if (msg.translatedComponent.compareAndSet(null, translatedComponent)) {

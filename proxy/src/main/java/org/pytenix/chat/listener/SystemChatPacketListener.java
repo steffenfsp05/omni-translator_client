@@ -69,23 +69,22 @@ public class SystemChatPacketListener implements PacketListener {
             return;
         }
 
-        if (messageSequencer.isIgnored(uuid, messageComponent)) return;
-
 
         event.setCancelled(true);
 
-        systemChatService.requiresTranslation(uuid).thenAcceptAsync(aBoolean ->
+        systemChatService.requiresTranslation(uuid).thenAcceptAsync(requiresTranslation ->
         {
-            if (!aBoolean) {
-                messageSequencer.ignoreNextMessage(uuid, messageComponent);
-                player.sendMessage(messageComponent);
+            if (!requiresTranslation) {
+
+                player.sendMessage(
+                        translatorService.setMarked(messageComponent)
+                );
                 return;
             }
 
             messageSequencer.translateWithOrder(
                     uuid,
                     messageComponent,
-                    rawText,
                     systemChatService.getPlayerLocaleProcessor().retrieveLocale(uuid),
                     isOverlay
             );
