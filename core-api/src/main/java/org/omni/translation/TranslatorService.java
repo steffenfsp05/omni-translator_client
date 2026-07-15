@@ -23,17 +23,24 @@ public interface TranslatorService {
 
 
     default boolean isWaterMarked(Component component) {
-        if (component.style().font() != null &&
-                component.style().font().equals(OMNI_WATERMARK)) {
+        var font = component.style().font();
+        if (font != null && font.equals(OMNI_WATERMARK)) {
             return true;
         }
+
         for (Component child : component.children()) {
-            if (isWaterMarked(child)) return true;
+            if (isWaterMarked(child)) {
+                return true;
+            }
         }
+
         return false;
     }
 
     default Component setMarked(Component component) {
+        if (isWaterMarked(component))
+            return component;
+
         return component.append(
                 Component.text("").font(OMNI_WATERMARK)
         );

@@ -51,7 +51,6 @@ public class MessageSequencer {
         try {  //TODO: NOT NEEDED IF OMNI_WATERMARK IMPLEMENTED
             ignoreNextMessage(uuid, comp);
             comp = translatorService.setMarked(comp);
-            System.out.println("MARKED COMP: " + comp);
 
             if (isOverlay) {
                 player.sendActionBar(comp);

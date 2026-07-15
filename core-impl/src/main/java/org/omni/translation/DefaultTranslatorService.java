@@ -83,7 +83,6 @@ public class DefaultTranslatorService implements TranslatorService {
     @Override
     public CompletableFuture<Boolean> requiresTranslation(UUID playerUUID) {
 
-        System.out.println("REQUIRING TRANSLATION");
         if (translationConfiguration == null || translationConfiguration.getDefaultLanguage() == null) {
             return CompletableFuture.completedFuture(true);
         }
@@ -96,7 +95,6 @@ public class DefaultTranslatorService implements TranslatorService {
 
         return profileService.retrieveProfile(playerUUID)
                 .thenApply(profileData -> {
-                    System.out.println("REQUIRING TRANSLATION - " + profileData.consentType());
                     if (translationConfiguration.getConsentMode().equals(ServerConsentMode.AUTO_OPT) &&
                             profileData.consentType().equals(Protobuf.ConsentType.AUTO))
                         return true;
