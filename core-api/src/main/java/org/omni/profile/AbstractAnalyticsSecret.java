@@ -42,7 +42,7 @@ public abstract class AbstractAnalyticsSecret {
         return reverseLookupMap.getIfPresent(key);
     }
 
-    private String getOrCreateSalt() {
+    public String getOrCreateSalt() {
         String existingSalt = getStoredSalt();
 
         if (existingSalt != null && !existingSalt.isEmpty()) {

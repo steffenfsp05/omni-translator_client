@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import lombok.Getter;
 import org.omni.entity.TranslationModule;
-import org.omni.profile.ProfileService;
 import org.omni.translation.TranslatorService;
 import org.omni.translation.component.TextComponentService;
 import org.omni.translation.locale.PlayerLocaleProcessor;
@@ -21,13 +20,12 @@ public class SystemChatModule extends AbstractTranslatorModule {
 
     @Inject
     public SystemChatModule(
-            ProfileService profileService,
             TranslatorService translatorService,
             TextComponentService textComponentService,
             MessageSequencer messageSequencer,
             PlayerLocaleProcessor playerLocaleProcessor
     ) {
-        super(profileService, translatorService, playerLocaleProcessor, TranslationModule.PLUGIN_CHAT);
+        super(translatorService, playerLocaleProcessor, TranslationModule.PLUGIN_CHAT);
         this.translatorService = translatorService;
         this.textComponentService = textComponentService;
         this.messageSequencer = messageSequencer;

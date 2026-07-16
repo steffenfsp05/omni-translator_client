@@ -19,7 +19,6 @@ public class ExternProfileRequestMapper extends AbstractPacketMapper<Protobuf.Pr
     @Override
     public Protobuf.ProfileExternRequest to(ProfileExternRequestData packet) {
         return Protobuf.ProfileExternRequest.newBuilder()
-                .setLicense(packet.license())
                 .setRequestIdMostSig(packet.requestId().getMostSignificantBits())
                 .setRequestIdLeastSig(packet.requestId().getLeastSignificantBits())
                 .setAnalyticsId(ByteString.copyFrom(packet.analyticId()))
@@ -29,9 +28,8 @@ public class ExternProfileRequestMapper extends AbstractPacketMapper<Protobuf.Pr
     @Override
     public ProfileExternRequestData from(Protobuf.ProfileExternRequest packet) {
         return new ProfileExternRequestData(
-                packet.getLicense(),
-                packet.getAnalyticsId().toByteArray(),
-                new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig())
+                new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig()),
+                packet.getAnalyticsId().toByteArray()
         );
     }
 

@@ -12,12 +12,12 @@ import org.omni.packets.data.HeartBeatUpdateData;
 import org.omni.packets.data.ProfileResultData;
 import org.omni.packets.data.TrackPlayerRequestData;
 import org.omni.profile.AbstractAnalyticsSecret;
-import org.omni.profile.ProfileService;
 import org.omni.proto.generated.Protobuf;
 import org.omni.translation.TranslatorService;
 import org.omni.translation.locale.PlayerLocaleProcessor;
+import org.omni.transport.TransportSender;
+import org.omni.transport.endpoint.ProfileEndpoint;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.backend.OmniConnectionService;
 
 import java.time.Duration;
 import java.util.List;
@@ -34,9 +34,9 @@ public class ROIService {
     final TranslatorPlugin translatorPlugin;
 
     @Getter
-    final OmniConnectionService omniConnectionService;
+    final TransportSender transportSender;
     final PlayerLocaleProcessor playerLocaleProcessor;
-    final ProfileService profileService;
+    final ProfileEndpoint profileEndpoint;
     final PacketMapperRegistry packetMapperRegistry;
     final ConfigurationFile configurationFile;
     final TranslatorService translatorService;
@@ -56,9 +56,9 @@ public class ROIService {
     @Inject
     public ROIService(
             TranslatorPlugin translatorPlugin,
-            OmniConnectionService omniConnectionService,
+            TransportSender transportSender,
             PlayerLocaleProcessor playerLocaleProcessor,
-            ProfileService profileService,
+            ProfileEndpoint profileEndpoint,
             PacketMapperRegistry packetMapperRegistry,
             ConfigurationFile configurationFile,
             TranslatorService translatorService,
@@ -66,9 +66,9 @@ public class ROIService {
     ) {
 
         this.translatorPlugin = translatorPlugin;
-        this.omniConnectionService = omniConnectionService;
+        this.transportSender = transportSender;
         this.playerLocaleProcessor = playerLocaleProcessor;
-        this.profileService = profileService;
+        this.profileEndpoint = profileEndpoint;
         this.packetMapperRegistry = packetMapperRegistry;
         this.configurationFile = configurationFile;
         this.translatorService = translatorService;
@@ -94,7 +94,7 @@ public class ROIService {
                 ));
 
         futures = translatorPlugin.getProxyServer().getAllPlayers().stream()
-                .map(player -> profileService.retrieveProfile(player.getUniqueId()))
+                .map(player -> profileEndpoint.sendRequest(player.getUniqueId()))
                 .toList();
 
 
@@ -106,9 +106,8 @@ public class ROIService {
                             .filter(Objects::nonNull)
                             .toList();
 
-                    omniConnectionService.sendPacket(PacketRegistry.HEART_BEAT,
+                    transportSender.sendPacket(PacketRegistry.HEART_BEAT,
                                     new HeartBeatUpdateData(
-                                            configurationFile.getLicenseKey(),
                                             UUID.randomUUID(),
                                             System.currentTimeMillis(),
                                             data.size(),
@@ -143,7 +142,7 @@ public class ROIService {
 
             translatorService.requiresTranslation(uuid).thenAccept(requiresTranslation ->
             {
-                omniConnectionService.sendPacket(PacketRegistry.TRACK_PLAYER,
+                transportSender.sendPacket(PacketRegistry.TRACK_PLAYER,
                         new TrackPlayerRequestData(
                                 configurationFile.getLicenseKey(),
                                 UUID.randomUUID(),

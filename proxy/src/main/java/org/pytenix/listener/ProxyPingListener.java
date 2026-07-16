@@ -6,9 +6,11 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import org.omni.entity.ServerConfiguration;
 import org.omni.entity.TranslationModule;
+import org.omni.packets.data.GeoRequestData;
 import org.omni.translation.TranslatorService;
 import org.omni.translation.component.TextComponentService;
-import org.pytenix.backend.endpoint.GeoSocketEndpoint;
+import org.omni.transport.endpoint.GeoEndpoint;
+import org.pytenix.socket.endpoint.GeoSocketEndpoint;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -17,15 +19,15 @@ import java.util.concurrent.TimeUnit;
 public class ProxyPingListener {
 
 
-    private final GeoSocketEndpoint geoSocketEndpoint;
+    private final GeoEndpoint geoEndpoint;
     private final TranslatorService translatorService;
     private final TextComponentService textComponentService;
 
     private final TranslationModule translationModule;
 
     @Inject
-    public ProxyPingListener(TranslatorService translatorService, GeoSocketEndpoint geoSocketEndpoint, TextComponentService textComponentService) {
-        this.geoSocketEndpoint = geoSocketEndpoint;
+    public ProxyPingListener(TranslatorService translatorService, GeoEndpoint geoEndpoint, TextComponentService textComponentService) {
+        this.geoEndpoint = geoEndpoint;
         this.translatorService = translatorService;
         this.textComponentService = textComponentService;
 
@@ -53,7 +55,7 @@ public class ProxyPingListener {
 
         System.out.println("[MOTD] Starte asynchrone Übersetzung für IP: " + ipAddress);
 
-        CompletableFuture<Void> pingPipeline = geoSocketEndpoint.sendGeoRequest(uuid, ipAddress)
+        CompletableFuture<Void> pingPipeline = geoEndpoint.sendRequest(new GeoRequestData(uuid, ipAddress))
                 .orTimeout(400, TimeUnit.MILLISECONDS)
                 .thenCompose(locale -> {
                     System.out.println("[MOTD] Geo-Location erhalten: " + locale + ". Übersetze Text...");

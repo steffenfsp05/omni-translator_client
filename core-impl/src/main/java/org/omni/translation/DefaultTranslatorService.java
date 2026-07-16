@@ -10,14 +10,16 @@ import org.omni.entity.ServerConfiguration;
 import org.omni.entity.ServerConsentMode;
 import org.omni.entity.TranslationModule;
 import org.omni.event.EventService;
+import org.omni.packets.data.TranslationRequestData;
 import org.omni.placeholder.gradient.ExtractionResult;
 import org.omni.placeholder.gradient.GradientData;
 import org.omni.placeholder.gradient.GradientService;
 import org.omni.placeholder.listener.ConfigUpdateListener;
 import org.omni.placeholder.service.PlaceholderService;
-import org.omni.profile.ProfileService;
 import org.omni.proto.generated.Protobuf;
 import org.omni.translation.locale.PlayerLocaleProcessor;
+import org.omni.transport.endpoint.ProfileEndpoint;
+import org.omni.transport.endpoint.TranslationEndpoint;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,13 +33,13 @@ import java.util.concurrent.TimeUnit;
 public class DefaultTranslatorService implements TranslatorService {
 
 
-    final TranslationProcessor translationProcessor;
+    final TranslationEndpoint translationEndpoint;
     final PlaceholderService placeholderService;
     final GradientService gradientService;
     final EventService eventService;
 
     final PlayerLocaleProcessor playerLocaleProcessor;
-    final ProfileService profileService;
+    final ProfileEndpoint profileEndpoint;
 
     private final Cache<UUID, List<UUID>> cachedReferences = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
@@ -49,19 +51,19 @@ public class DefaultTranslatorService implements TranslatorService {
 
     @Inject
     public DefaultTranslatorService(
-            TranslationProcessor translationProcessor,
+            TranslationEndpoint translationEndpoint,
+            ProfileEndpoint profileEndpoint,
             PlaceholderService placeholderService,
             GradientService gradientService,
             EventService eventService,
-            PlayerLocaleProcessor playerLocaleProcessor,
-            ProfileService profileService) {
+            PlayerLocaleProcessor playerLocaleProcessor) {
 
-        this.translationProcessor = translationProcessor;
+        this.translationEndpoint = translationEndpoint;
         this.placeholderService = placeholderService;
         this.gradientService = gradientService;
 
         this.playerLocaleProcessor = playerLocaleProcessor;
-        this.profileService = profileService;
+        this.profileEndpoint = profileEndpoint;
 
         this.eventService = eventService;
 
@@ -93,7 +95,7 @@ public class DefaultTranslatorService implements TranslatorService {
         }
 
 
-        return profileService.retrieveProfile(playerUUID)
+        return profileEndpoint.sendRequest(playerUUID)
                 .thenApply(profileData -> {
                     if (translationConfiguration.getConsentMode().equals(ServerConsentMode.AUTO_OPT) &&
                             profileData.consentType().equals(Protobuf.ConsentType.AUTO))
@@ -114,7 +116,9 @@ public class DefaultTranslatorService implements TranslatorService {
 
 
     public CompletableFuture<String> process(UUID id, String text, String targetLang, TranslationModule translationModule) {
-        return translationProcessor.endpointTranslation(id, text, targetLang, translationModule);
+        return translationEndpoint.sendRequest(new TranslationRequestData(
+                id, text, targetLang, translationModule
+        ));
     }
 
 

@@ -5,26 +5,23 @@ import org.omni.proto.generated.Protobuf;
 import java.util.UUID;
 
 public record ProfileResultData(
-        String license,
-        byte[] analyticId,
         UUID requestId,
+        byte[] analyticId,
         Protobuf.ConsentType consentType
 ) {
-    public static ProfileResultData createDefault(String license, byte[] analyticId, UUID requestId) {
+    public static ProfileResultData createDefault(byte[] analyticId, UUID requestId) {
 
         return new ProfileResultData(
-                license,
-                analyticId,
                 requestId,
+                analyticId,
                 Protobuf.ConsentType.UNKNOWN
         );
     }
 
     public ProfileResultData withRequestId(UUID newRequestId) {
         return new ProfileResultData(
-                this.license,
-                this.analyticId,
                 newRequestId,
+                this.analyticId,
                 this.consentType
         );
     }
@@ -32,9 +29,8 @@ public record ProfileResultData(
 
     public ProfileResultData withConsentType(Protobuf.ConsentType newConsent) {
         return new ProfileResultData(
-                this.license,
-                this.analyticId,
                 this.requestId,
+                this.analyticId,
                 newConsent
         );
     }

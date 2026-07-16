@@ -13,6 +13,7 @@
         <module>core-impl</module>
         <module>proxy</module>
         <module>spigot</module>
+        <module>common-socket</module>
     </modules>
 
     <properties>

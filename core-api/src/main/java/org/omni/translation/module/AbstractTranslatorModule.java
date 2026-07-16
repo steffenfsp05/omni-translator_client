@@ -4,7 +4,6 @@ package org.omni.translation.module;
 import lombok.Getter;
 import org.omni.entity.ServerConfiguration;
 import org.omni.entity.TranslationModule;
-import org.omni.profile.ProfileService;
 import org.omni.translation.TranslatorService;
 import org.omni.translation.locale.PlayerLocaleProcessor;
 
@@ -15,7 +14,6 @@ import java.util.concurrent.CompletableFuture;
 public abstract class AbstractTranslatorModule {
 
 
-    final ProfileService profileService;
     final TranslatorService translatorService;
     final PlayerLocaleProcessor playerLocaleProcessor;
 
@@ -23,13 +21,11 @@ public abstract class AbstractTranslatorModule {
 
 
     public AbstractTranslatorModule(
-            ProfileService profileService,
             TranslatorService translatorService,
             PlayerLocaleProcessor playerLocaleProcessor,
             TranslationModule translationModule
     ) {
 
-        this.profileService = profileService;
         this.translatorService = translatorService;
         this.playerLocaleProcessor = playerLocaleProcessor;
         this.translationModule = translationModule;

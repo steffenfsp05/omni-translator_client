@@ -1,11 +1,9 @@
 package org.pytenix;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import lombok.Getter;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -13,17 +11,22 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.omni.entity.ServerConfiguration;
+import org.omni.event.EventService;
 import org.omni.injection.CoreModule;
+import org.omni.profile.AbstractAnalyticsSecret;
 import org.omni.translation.TranslatorService;
+import org.omni.transport.TransportConnector;
 import org.pytenix.injection.TranslatorSpigotModule;
 import org.pytenix.listener.PlayerJoinQuitListener;
 import org.pytenix.listener.PlayerLocaleChangeListener;
-import org.pytenix.network.SpigotTransport;
 import org.pytenix.network.VelocitySecretReader;
 import org.pytenix.service.ModuleService;
+import org.pytenix.socket.inject.SocketModule;
+import org.pytenix.socket.socket.WebSocketService;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 @Getter
 @Singleton
@@ -45,9 +48,6 @@ public class TranslatorPlugin extends JavaPlugin {
     private File configFile;
 
     @Inject
-    private SpigotTransport spigotTransport;
-
-    @Inject
     private ObjectMapper mapper;
 
     private String serverName;
@@ -66,9 +66,13 @@ public class TranslatorPlugin extends JavaPlugin {
         }
         System.out.println("READING SECRET: " + secret);
 
+
+        final String remoteAddress = "ws://192.168.178.121:8083/ws/omni";
+
         Injector injector = Guice.createInjector(
                 new CoreModule(),
-                new TranslatorSpigotModule(this, secret, getDataFolder().toPath())
+                new SocketModule(remoteAddress),
+                new TranslatorSpigotModule(this, getDataFolder().toPath())
         );
 
         injector.injectMembers(this);
@@ -76,6 +80,9 @@ public class TranslatorPlugin extends JavaPlugin {
         loadConfigFromDisk();
 
         injector.getInstance(ModuleService.class);
+        injector.getInstance(AbstractAnalyticsSecret.class);
+
+        injector.getInstance(TransportConnector.class).connect();
 
         registerListeners(injector);
 
@@ -85,6 +92,16 @@ public class TranslatorPlugin extends JavaPlugin {
     }
 
     private void registerListeners(Injector injector) {
+
+        EventService eventService = injector.getInstance(EventService.class);
+
+        Set<Object> omniListeners = injector.getInstance(Key.get(new TypeLiteral<>() {
+        }, Names.named("omniListeners")));
+
+        for (Object listener : omniListeners) {
+            eventService.register(listener);
+        }
+
         Bukkit.getPluginManager().registerEvents(injector.getInstance(PlayerJoinQuitListener.class), this);
         Bukkit.getPluginManager().registerEvents(injector.getInstance(PlayerLocaleChangeListener.class), this);
 
@@ -121,8 +138,6 @@ public class TranslatorPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if (spigotTransport != null && spigotTransport.getTransportService() != null) {
-            spigotTransport.getTransportService().close();
-        }
+
     }
 }

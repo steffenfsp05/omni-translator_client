@@ -26,7 +26,6 @@ public class HeartBeatRequestMapper extends AbstractPacketMapper<Protobuf.Heartb
         return Protobuf.HeartbeatPacket.newBuilder()
                 .setRequestIdMostSig(packet.requestId().getMostSignificantBits())
                 .setRequestIdLeastSig(packet.requestId().getLeastSignificantBits())
-                .setLicenseKey(packet.license())
                 .setTimestamp(packet.timestamp())
                 .setTotalOnline(packet.total_online())
                 .setConsentUnknownCount(packet.consent_unknown())
@@ -41,7 +40,6 @@ public class HeartBeatRequestMapper extends AbstractPacketMapper<Protobuf.Heartb
     public HeartBeatUpdateData from(Protobuf.HeartbeatPacket packet) {
 
         return new HeartBeatUpdateData(
-                packet.getLicenseKey(),
                 new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig()),
                 packet.getTimestamp(),
                 packet.getTotalOnline(),

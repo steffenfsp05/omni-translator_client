@@ -38,6 +38,6 @@ public class ConfigUpdateListener {
                 e.printStackTrace();
             }
         });
-        logger.info("Config-Update vom Proxy empfangen und angewendet.");
+        logger.info("Config-Update empfangen und angewendet.");
     }
 }

@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.UUID;
 
 public record HeartBeatUpdateData(
-        String license,
         UUID requestId,
         Long timestamp,
         int total_online,

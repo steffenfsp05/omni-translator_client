@@ -19,7 +19,6 @@ public class ProfileMapper extends AbstractPacketMapper<Protobuf.ProfilePacket, 
     @Override
     public Protobuf.ProfilePacket to(ProfileResultData packet) {
         return Protobuf.ProfilePacket.newBuilder()
-                .setLicense(packet.license())
                 .setConsentType(packet.consentType() == null ? Protobuf.ConsentType.UNKNOWN : packet.consentType())
                 .setRequestIdMostSig(packet.requestId().getMostSignificantBits())
                 .setRequestIdLeastSig(packet.requestId().getLeastSignificantBits())
@@ -30,9 +29,8 @@ public class ProfileMapper extends AbstractPacketMapper<Protobuf.ProfilePacket, 
     @Override
     public ProfileResultData from(Protobuf.ProfilePacket packet) {
         return new ProfileResultData(
-                packet.getLicense(),
-                packet.getAnalyticsId().toByteArray(),
                 new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig()),
+                packet.getAnalyticsId().toByteArray(),
                 packet.getConsentType()
         );
     }

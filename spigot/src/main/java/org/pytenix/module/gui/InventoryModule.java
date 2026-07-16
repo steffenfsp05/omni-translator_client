@@ -10,7 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.omni.entity.TranslationModule;
-import org.omni.profile.ProfileService;
 import org.omni.translation.TranslatorService;
 import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.omni.translation.module.AbstractTranslatorModule;
@@ -34,13 +33,12 @@ public class InventoryModule extends AbstractTranslatorModule {
 
     @Inject
     public InventoryModule(
-            ProfileService profileService,
             TranslatorService translatorService,
             PlayerLocaleProcessor playerLocaleProcessor,
             PacketListener inventoryPacketListener,
             ItemStackCache itemStackCache
     ) {
-        super(profileService, translatorService, playerLocaleProcessor, TranslationModule.GUI);
+        super( translatorService, playerLocaleProcessor, TranslationModule.GUI);
 
         this.itemStackCache = itemStackCache;
         this.legacyComponentSerializer = TranslatorPlugin.getLegacyComponentSerializer();

@@ -7,21 +7,21 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.Component;
-import org.omni.profile.ProfileService;
 import org.omni.proto.generated.Protobuf;
+import org.omni.transport.endpoint.ProfileEndpoint;
 import org.pytenix.limbo.ConsentMessageFactory;
 
 @Singleton
 public class ServerPreConnectListener {
 
     final ProxyServer proxyServer;
-    final ProfileService profileService;
+    final ProfileEndpoint profileEndpoint;
     final Component component = ConsentMessageFactory.build();
 
     @Inject
-    public ServerPreConnectListener(ProxyServer proxyServer, ProfileService profileService) {
+    public ServerPreConnectListener(ProxyServer proxyServer, ProfileEndpoint profileEndpoint) {
         this.proxyServer = proxyServer;
-        this.profileService = profileService;
+        this.profileEndpoint = profileEndpoint;
     }
 
 
@@ -35,7 +35,7 @@ public class ServerPreConnectListener {
         final long nano = System.nanoTime();
 
         return EventTask.resumeWhenComplete(
-                profileService.retrieveProfile(event.getPlayer().getUniqueId())
+                profileEndpoint.sendRequest(event.getPlayer().getUniqueId())
                         .thenAccept(profileData -> {
                             System.out.println("TOOK " + ((System.nanoTime() - nano) / 1000000) + " ms PRECONNECT: " + profileData);
 

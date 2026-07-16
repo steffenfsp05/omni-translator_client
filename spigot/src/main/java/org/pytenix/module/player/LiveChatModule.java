@@ -9,7 +9,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.omni.entity.TranslationModule;
-import org.omni.profile.ProfileService;
 import org.omni.translation.TranslatorService;
 import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.omni.translation.module.AbstractTranslatorModule;
@@ -25,14 +24,13 @@ public class LiveChatModule extends AbstractTranslatorModule {
 
     @Inject
     public LiveChatModule(
-            ProfileService profileService,
             TranslatorService translatorService,
             PlayerLocaleProcessor playerLocaleProcessor,
             TranslatorPlugin translatorPlugin,
             AsyncPlayerChatListener chatListener
     ) {
 
-        super(profileService, translatorService, playerLocaleProcessor, TranslationModule.LIVE_CHAT);
+        super( translatorService, playerLocaleProcessor, TranslationModule.LIVE_CHAT);
 
         this.translatorPlugin = translatorPlugin;
         this.chatListener = chatListener;

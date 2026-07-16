@@ -19,23 +19,12 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import lombok.Getter;
 import org.omni.event.EventService;
 import org.omni.injection.CoreModule;
-import org.omni.translation.TranslatorService;
-import org.pytenix.backend.OmniConnectionService;
-import org.pytenix.backend.listener.BackendCloseListener;
-import org.pytenix.backend.listener.BackendConfigUpdateListener;
-import org.pytenix.backend.listener.BackendConnectListener;
-import org.pytenix.backend.listener.BackendMessageReceiveListener;
-import org.pytenix.chat.MessageSequencer;
-import org.pytenix.chat.SystemChatModule;
+import org.omni.transport.TransportConnector;
 import org.pytenix.chat.listener.SystemChatPacketListener;
 import org.pytenix.injection.TranslatorProxyModule;
 import org.pytenix.limbo.LimboService;
-import org.pytenix.listener.PlayerConnectionChangeListener;
-import org.pytenix.listener.ProxyPingListener;
-import org.pytenix.network.ProxyTransport;
-import org.pytenix.tracking.listener.PlayerConnectListener;
-import org.pytenix.tracking.listener.PlayerDisconnectListener;
-import org.pytenix.tracking.listener.PlayerSettingsChangeListener;
+import org.pytenix.socket.inject.SocketModule;
+import org.pytenix.socket.socket.WebSocketService;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -59,8 +48,7 @@ public class TranslatorPlugin {
     private final Path dataDirectory;
     private final Injector velocityInjector;
 
-    private ProxyTransport proxyTransport;
-    private OmniConnectionService connectionService;
+    private WebSocketService connectionService;
     private LimboService limboService;
 
     @Inject
@@ -83,22 +71,22 @@ public class TranslatorPlugin {
         }
         System.out.println("READING SECRET: " + secret);
 
+        final String remoteAddress = "ws://192.168.178.121:8083/ws/omni";
 
         Injector appInjector = velocityInjector.createChildInjector(
                 new CoreModule(),
+                new SocketModule(remoteAddress),
                 new TranslatorProxyModule(
                         this,
                         secret,
-                        dataDirectory,
-                        "ws://192.168.178.121:8083/ws/omni",
-                        MinecraftChannelIdentifier.from("translator:main"))
+                        dataDirectory
+                        )
         );
 
-        this.proxyTransport = appInjector.getInstance(ProxyTransport.class);
-        this.connectionService = appInjector.getInstance(OmniConnectionService.class);
         this.limboService = appInjector.getInstance(LimboService.class);
 
-        this.connectionService.connect();
+
+        appInjector.getInstance(TransportConnector.class).connect();
 
         registerListeners(appInjector);
 
@@ -131,9 +119,8 @@ public class TranslatorPlugin {
     }
 
     @Subscribe
-    public void onProxyShutdown(ProxyShutdownEvent event) {
-        if (proxyTransport != null) proxyTransport.shutdown();
-        if (connectionService != null) connectionService.shutdown();
+    public void onProxyShutdown(ProxyShutdownEvent event) throws Exception {
+        if (connectionService != null) connectionService.close();
         if (limboService != null) limboService.shutdown();
     }
 

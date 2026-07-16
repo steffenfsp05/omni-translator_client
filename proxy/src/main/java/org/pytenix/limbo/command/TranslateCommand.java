@@ -9,8 +9,8 @@ import net.kyori.adventure.text.Component;
 import org.omni.packets.PacketMapperRegistry;
 import org.omni.packets.PacketRegistry;
 import org.omni.packets.data.ConsentRefreshRequestData;
-import org.omni.profile.ProfileService;
 import org.omni.proto.generated.Protobuf;
+import org.omni.transport.endpoint.ProfileEndpoint;
 import org.pytenix.TranslatorPlugin;
 
 import java.util.UUID;
@@ -19,13 +19,13 @@ import java.util.UUID;
 public class TranslateCommand implements SimpleCommand {
 
     private final TranslatorPlugin translatorPlugin;
-    private final ProfileService profileService;
+    private final ProfileEndpoint profileEndpoint;
     private final PacketMapperRegistry packetMapperRegistry;
 
     @Inject
-    public TranslateCommand(TranslatorPlugin translatorPlugin, ProfileService profileService, PacketMapperRegistry packetMapperRegistry) {
+    public TranslateCommand(TranslatorPlugin translatorPlugin, ProfileEndpoint profileEndpoint, PacketMapperRegistry packetMapperRegistry) {
         this.translatorPlugin = translatorPlugin;
-        this.profileService = profileService;
+        this.profileEndpoint = profileEndpoint;
         this.packetMapperRegistry = packetMapperRegistry;
     }
 
@@ -34,7 +34,7 @@ public class TranslateCommand implements SimpleCommand {
     public void execute(Invocation invocation) {
         if (!(invocation.source() instanceof Player player)) return;
 
-        profileService.retrieveProfile(player.getUniqueId())
+        profileEndpoint.sendRequest(player.getUniqueId())
                 .thenAcceptAsync(profileData ->
                 {
 
@@ -48,7 +48,7 @@ public class TranslateCommand implements SimpleCommand {
                             if (args[0].equalsIgnoreCase("accept")) {
                                 player.sendMessage(Component.text("§aYou accepted!"));
 
-                                profileService.updateProfile(
+                                profileEndpoint.update(
                                         profileData.withConsentType(Protobuf.ConsentType.EXPLICIT)
                                 );
 
@@ -57,7 +57,7 @@ public class TranslateCommand implements SimpleCommand {
                             } else if (args[0].equalsIgnoreCase("decline")) {
                                 player.sendMessage(Component.text("§cYou declined!"));
 
-                                profileService.updateProfile(
+                                profileEndpoint.update(
                                         profileData.withConsentType(Protobuf.ConsentType.DECLINED)
                                 );
 
@@ -81,11 +81,11 @@ public class TranslateCommand implements SimpleCommand {
                                     registeredServer = player.getCurrentServer().get().getServer();
 
 
-                                profileService.updateProfile(
+                                profileEndpoint.update(
                                         profileData.withConsentType(newConsent)
                                 );
 
-
+/* TODO: IMPLEMENT
                                 if (registeredServer != null)
                                     translatorPlugin.getProxyTransport().getTransportService().send(
                                             registeredServer,
@@ -97,6 +97,8 @@ public class TranslateCommand implements SimpleCommand {
                                                             newConsent
                                                     )
                                             ));
+
+ */
 
                                 return;
                             }
