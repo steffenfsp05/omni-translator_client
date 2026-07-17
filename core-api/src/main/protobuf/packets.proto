@@ -133,6 +133,35 @@ message TranslationResult {
 }
 
 
+message CacheInvalidationRequest
+{
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+  oneof payload {
+    ProfileInvalidation profile_invalidation = 3;
+    TranslationInvalidation translation_invalidation = 4;
+  }
+}
+
+message ProfileInvalidation
+{
+  bytes analyticId = 1;
+}
+
+message TranslationInvalidation
+{
+  string text = 1;
+  string language = 2;
+  Module module = 3;
+}
+
+enum CacheInvalidationType
+{
+  CACHE_UNKNOWN = 0;
+  CACHE_PROFILE = 1;
+  CACHE_TRANSLATION = 2;
+}
+
 enum ConsentType
 {
   UNKNOWN = 0;

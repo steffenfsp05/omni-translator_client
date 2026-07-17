@@ -17,3 +17,6 @@ commands:
   testmsg:
     description: Sendet eine komplexe Testnachricht mit Hover und Klick
     usage: /testmsg
+  omni:
+    description: "OmniTranslator Datenschutz-Befehle"
+    usage: "/omni <info|accept|decline|toggle|export|delete>"

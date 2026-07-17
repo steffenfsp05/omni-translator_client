@@ -25,10 +25,10 @@ public class ConsentUpdateListener {
 
     @OmniSubscribe(priority = 90)
     public void onConsentUpdate(ConsentUpdateEvent event) {
+        taskScheduler.runSyncLater(() -> {
         Player player = Bukkit.getPlayer(event.refreshRequestData().playerId());
         if (player == null) return;
 
-        final ConsentRefreshRequestData profileData = event.refreshRequestData();
         final Location originalLocation = player.getLocation().clone();
 
         taskScheduler.runForEntity(player, () -> {
@@ -39,16 +39,9 @@ public class ConsentUpdateListener {
             taskScheduler.runSyncLater(() -> {
                 player.teleport(originalLocation);
                 player.setHealth(hearts);
-                ComponentLike component = Component.text("§cUnknown value");
 
-                if (profileData.consentType().equals(Protobuf.ConsentType.EXPLICIT))
-                    component = Component.text("§aYou turned translations on");
-
-                if (profileData.consentType().equals(Protobuf.ConsentType.DECLINED))
-                    component = Component.text("§cYou turned translations off");
-
-                player.sendMessage(component);
             }, 5);
         });
+        }, 2);
     }
 }

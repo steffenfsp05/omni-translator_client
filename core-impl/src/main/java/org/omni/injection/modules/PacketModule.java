@@ -3,6 +3,7 @@ package org.omni.injection.modules;
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
 import com.google.inject.multibindings.Multibinder;
+import jakarta.inject.Singleton;
 import org.omni.packets.AbstractPacketMapper;
 import org.omni.packets.PacketMapperRegistry;
 import org.omni.packets.impl.*;
@@ -30,6 +31,7 @@ public class PacketModule extends AbstractModule {
         mapperBinder.addBinding().to(InternProfileRequestMapper.class).in(Scopes.SINGLETON);
         mapperBinder.addBinding().to(ExternProfileRequestMapper.class).in(Scopes.SINGLETON);
         mapperBinder.addBinding().to(ExternProfileUpdateMapper.class).in(Scopes.SINGLETON);
+        mapperBinder.addBinding().to(CacheInvalidationRequestMapper.class).in(Scopes.SINGLETON);
 
         bind(PacketMapperRegistry.class).to(DefaultPacketMapperRegistry.class).in(Scopes.SINGLETON);
 

@@ -174,7 +174,29 @@ public class DefaultTextComponentService implements TextComponentService {
         return modified;
     }
 
-    private record TranslationKey(Component component, String lang, TranslationModule translationModule) {
+    @Override
+    public void set(TranslationKey key, Component value) {
+        translationCache.synchronous().put(key, value);
+    }
+
+    @Override
+    public Component get(TranslationKey key) {
+        return translationCache.synchronous().getIfPresent(key);
+    }
+
+    @Override
+    public void invalidate(TranslationKey key) {
+        translationCache.synchronous().invalidate(key);
+    }
+
+    @Override
+    public boolean exists(TranslationKey key) {
+        return translationCache.synchronous().asMap().containsKey(key);
+    }
+
+    @Override
+    public void clear() {
+        translationCache.synchronous().invalidateAll();
     }
 
     private static class TranslationContext {

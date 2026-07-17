@@ -20,13 +20,11 @@ public class TranslateCommand implements SimpleCommand {
 
     private final TranslatorPlugin translatorPlugin;
     private final ProfileEndpoint profileEndpoint;
-    private final PacketMapperRegistry packetMapperRegistry;
 
     @Inject
-    public TranslateCommand(TranslatorPlugin translatorPlugin, ProfileEndpoint profileEndpoint, PacketMapperRegistry packetMapperRegistry) {
+    public TranslateCommand(TranslatorPlugin translatorPlugin, ProfileEndpoint profileEndpoint) {
         this.translatorPlugin = translatorPlugin;
         this.profileEndpoint = profileEndpoint;
-        this.packetMapperRegistry = packetMapperRegistry;
     }
 
 
@@ -64,51 +62,7 @@ public class TranslateCommand implements SimpleCommand {
                                 sendToLobby(player);
                                 return;
 
-                            } else if (args[0].equalsIgnoreCase("toggle")) {
-                                Protobuf.ConsentType newConsent = Protobuf.ConsentType.DECLINED;
-
-                                //  if (profileData.consentType().equals(NetworkPackets.ProfilePacket.ConsentType.EXPLICIT)) {
-                                //    }
-
-                                //TODO: IMPLEMENT FOR AUTO_OPT LOGIC
-
-                                if (profileData.consentType().equals(Protobuf.ConsentType.DECLINED))
-                                    newConsent = Protobuf.ConsentType.EXPLICIT;
-
-
-                                RegisteredServer registeredServer = null;
-                                if (player.getCurrentServer().isPresent())
-                                    registeredServer = player.getCurrentServer().get().getServer();
-
-
-                                profileEndpoint.update(
-                                        profileData.withConsentType(newConsent)
-                                );
-
-/* TODO: IMPLEMENT
-                                if (registeredServer != null)
-                                    translatorPlugin.getProxyTransport().getTransportService().send(
-                                            registeredServer,
-                                            PacketRegistry.CONSENT_REFRESH,
-                                            packetMapperRegistry.toProto(
-                                                    new ConsentRefreshRequestData(
-                                                            UUID.randomUUID(),
-                                                            player.getUniqueId(),
-                                                            newConsent
-                                                    )
-                                            ));
-
- */
-
-                                return;
                             }
-
-
-                            player.sendMessage(Component.text("""
-                                    §cInvalid command.
-                                    §c/translate toggle
-                                    §c/translate accept
-                                    §c/translate decline"""));
 
 
                         }

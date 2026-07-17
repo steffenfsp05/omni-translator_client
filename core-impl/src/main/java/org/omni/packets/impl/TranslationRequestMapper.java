@@ -13,7 +13,9 @@ import java.util.UUID;
 @Singleton
 public class TranslationRequestMapper extends AbstractPacketMapper<Protobuf.TranslationRequest, TranslationRequestData> {
 
+
     private static final Map<Protobuf.Module, TranslationModule> MODULE_MAP = new EnumMap<>(Protobuf.Module.class);
+    private static final Map<TranslationModule, Protobuf.Module> REVERSE_MODULE_MAP = new EnumMap<>(TranslationModule.class);
 
     static {
         for (Protobuf.Module protoMod : Protobuf.Module.values()) {
@@ -22,7 +24,9 @@ public class TranslationRequestMapper extends AbstractPacketMapper<Protobuf.Tran
 
             String javaName = protoMod.name().replace("MODULE_", "");
             try {
-                MODULE_MAP.put(protoMod, TranslationModule.getModule(javaName));
+                TranslationModule javaModule = TranslationModule.valueOf(javaName);
+                MODULE_MAP.put(protoMod, javaModule);
+                REVERSE_MODULE_MAP.put(javaModule, protoMod);
             } catch (IllegalArgumentException e) {
                 System.err.println("Modul gefunden, aber nicht in Java definiert: " + javaName);
             }
@@ -35,7 +39,11 @@ public class TranslationRequestMapper extends AbstractPacketMapper<Protobuf.Tran
 
     @Override
     public Protobuf.TranslationRequest to(TranslationRequestData packet) {
-        Protobuf.Module protoModule = Protobuf.Module.valueOf("MODULE_" + packet.module().name());
+
+        Protobuf.Module protoModule = REVERSE_MODULE_MAP.getOrDefault(
+                packet.module(),
+                Protobuf.Module.MODULE_UNKNOWN
+        );
 
         return Protobuf.TranslationRequest.newBuilder()
                 .setRequestIdMostSig(packet.requestId().getMostSignificantBits())
@@ -50,7 +58,10 @@ public class TranslationRequestMapper extends AbstractPacketMapper<Protobuf.Tran
     public TranslationRequestData from(Protobuf.TranslationRequest packet) {
         UUID requestId = new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig());
 
-        TranslationModule javaModule = MODULE_MAP.getOrDefault(packet.getModule(), TranslationModule.LIVE_CHAT);
+        TranslationModule javaModule = MODULE_MAP.getOrDefault(
+                packet.getModule(),
+                TranslationModule.LIVE_CHAT
+        );
 
         return new TranslationRequestData(requestId, packet.getText(), packet.getTargetLang(), javaModule);
     }

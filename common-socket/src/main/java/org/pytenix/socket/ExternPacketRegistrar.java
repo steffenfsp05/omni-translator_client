@@ -4,10 +4,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.omni.packets.PacketRegistrar;
 import org.omni.packets.PacketRegistry;
-import org.pytenix.socket.consumer.BackendGeoResultConsumer;
-import org.pytenix.socket.consumer.BackendProfileResultConsumer;
-import org.pytenix.socket.consumer.BackendServerConfigConsumer;
-import org.pytenix.socket.consumer.BackendTranslationResultConsumer;
+import org.omni.packets.data.CacheInvalidationRequest;
+import org.pytenix.socket.consumer.*;
 import org.transport.TransportService;
 
 import java.net.http.WebSocket;
@@ -19,19 +17,22 @@ public class ExternPacketRegistrar implements PacketRegistrar<WebSocket> {
     private final BackendTranslationResultConsumer backendTranslationResultConsumer;
     private final BackendGeoResultConsumer backendGeoResultConsumer;
     private final BackendProfileResultConsumer backendProfileResultConsumer;
+    private final BackendCacheInvalidationConsumer cacheInvalidationConsumer;
 
     @Inject
     public ExternPacketRegistrar(
             BackendServerConfigConsumer backendServerConfigConsumer,
             BackendTranslationResultConsumer backendTranslationResultConsumer,
             BackendGeoResultConsumer backendGeoResultConsumer,
-            BackendProfileResultConsumer backendProfileResultConsumer
+            BackendProfileResultConsumer backendProfileResultConsumer,
+            BackendCacheInvalidationConsumer cacheInvalidationConsumer
     ) {
 
         this.backendServerConfigConsumer = backendServerConfigConsumer;
         this.backendTranslationResultConsumer = backendTranslationResultConsumer;
         this.backendGeoResultConsumer = backendGeoResultConsumer;
         this.backendProfileResultConsumer = backendProfileResultConsumer;
+        this.cacheInvalidationConsumer = cacheInvalidationConsumer;
     }
 
     @Override
@@ -40,6 +41,7 @@ public class ExternPacketRegistrar implements PacketRegistrar<WebSocket> {
         transport.registerPacket(PacketRegistry.TRANSLATION_RESULT, backendTranslationResultConsumer);
         transport.registerPacket(PacketRegistry.GEO_RESULT, backendGeoResultConsumer);
         transport.registerPacket(PacketRegistry.PROFILE, backendProfileResultConsumer);
+        transport.registerPacket(PacketRegistry.CACHE_INVALIDATION, cacheInvalidationConsumer);
 
         transport.registerPacket(PacketRegistry.GEO_REQUEST, (ctx, req) -> {
         });

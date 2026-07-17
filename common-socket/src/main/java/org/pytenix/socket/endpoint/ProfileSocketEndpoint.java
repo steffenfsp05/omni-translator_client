@@ -8,6 +8,7 @@ import org.checkerframework.checker.units.qual.A;
 import org.omni.config.ConfigurationFile;
 import org.omni.packets.PacketMapperRegistry;
 import org.omni.packets.PacketRegistry;
+import org.omni.packets.data.CacheInvalidationRequest;
 import org.omni.packets.data.ProfileExternRequestData;
 import org.omni.packets.data.ProfileExternUpdateData;
 import org.omni.packets.data.ProfileResultData;
@@ -32,10 +33,12 @@ public class ProfileSocketEndpoint implements ProfileEndpoint {
 
     private final ConcurrentHashMap<AnalyticsKey, CompletableFuture<ProfileResultData>> inFlightFetches = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, CompletableFuture<ProfileResultData>> queue = new ConcurrentHashMap<>();
-    private final Cache<UUID, ProfileResultData> cacheProvider = Caffeine.newBuilder()
+
+    private final Cache<UUID, ProfileResultData> profileCache = Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(10))
             .maximumSize(3000)
             .build();
+
     private final Cache<AnalyticsKey, Boolean> deduplicationCache = Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofMillis(500))
             .build();
@@ -54,12 +57,6 @@ public class ProfileSocketEndpoint implements ProfileEndpoint {
     }
 
 
-    public Cache<UUID, ProfileResultData> cacheProvider() {
-        return cacheProvider;
-    }
-
-
-
 
     @Override
     public void handleIncoming(ProfileResultData inbound) {
@@ -70,7 +67,7 @@ public class ProfileSocketEndpoint implements ProfileEndpoint {
         CompletableFuture<ProfileResultData> future = queue.remove(requestId);
 
         inFlightFetches.remove(analyticsKey);
-        cacheProvider.put(playerId, inbound);
+        this.set(playerId, inbound);
 
         if (future != null) {
             future.complete(inbound);
@@ -83,7 +80,7 @@ public class ProfileSocketEndpoint implements ProfileEndpoint {
         AnalyticsKey analyticsKey = abstractAnalyticsSecret.getAnalyticsKey(uuid);
 
 
-        ProfileResultData cachedProfile = cacheProvider.getIfPresent(uuid);
+        ProfileResultData cachedProfile = this.get(uuid);
         if (cachedProfile != null) {
             return CompletableFuture.completedFuture(cachedProfile);
         }
@@ -138,12 +135,40 @@ public class ProfileSocketEndpoint implements ProfileEndpoint {
             return;
         }
 
-        cacheProvider.put(playerId, inbound);
+        this.set(playerId, inbound);
 
         transportSender.sendPacket(PacketRegistry.PROFILE_UPDATE_EXTERN,
                 new ProfileExternUpdateData(
                         inbound
                 )
         );
+
+        transportSender.sendPacket(PacketRegistry.CACHE_INVALIDATION,
+                new CacheInvalidationRequest(UUID.randomUUID(), new CacheInvalidationRequest.Profile(analyticsKey.bytes())));
+    }
+
+    @Override
+    public void set(UUID key, ProfileResultData value) {
+        profileCache.put(key, value);
+    }
+
+    @Override
+    public ProfileResultData get(UUID key) {
+        return profileCache.getIfPresent(key);
+    }
+
+    @Override
+    public void invalidate(UUID key) {
+        profileCache.invalidate(key);
+    }
+
+    @Override
+    public boolean exists(UUID key) {
+        return profileCache.asMap().containsKey(key);
+    }
+
+    @Override
+    public void clear() {
+        profileCache.invalidateAll();
     }
 }

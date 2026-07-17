@@ -7,6 +7,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import org.omni.entity.TranslationModule;
 import org.omni.packets.PacketRegistry;
+import org.omni.packets.data.ProfileResultData;
 import org.omni.packets.data.TranslationRequestData;
 import org.omni.packets.data.TranslationResultData;
 import org.omni.transport.EndpointHandler;
@@ -30,6 +31,10 @@ public class TranslationSocketEndpoint implements TranslationEndpoint {
 
     final TransportSender transportSender;
 
+    private final Cache<DeduplicationKey, String> translationCache = Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(10))
+            .maximumSize(3000)
+            .build();
 
 
     public final Cache<UUID, List<CompletableFuture<String>>> pendingRequests = Caffeine.newBuilder()
@@ -73,6 +78,12 @@ public class TranslationSocketEndpoint implements TranslationEndpoint {
         if (text == null || text.isEmpty()) return CompletableFuture.completedFuture("");
 
         DeduplicationKey key = new DeduplicationKey(text, targetLang, translationModule);
+
+        String cachedResult = this.get(key);
+        if (cachedResult != null) {
+            return CompletableFuture.completedFuture(cachedResult);
+        }
+
         CompletableFuture<String> future = new CompletableFuture<>();
         future.orTimeout(15, TimeUnit.SECONDS).exceptionally(ex -> text);
 
@@ -96,8 +107,41 @@ public class TranslationSocketEndpoint implements TranslationEndpoint {
                     ));
         }
 
-        return future;
+        return future.whenComplete((s, throwable) ->
+        {
+            this.set(key, s);
+        });
     }
-    public record DeduplicationKey(String text, String lang, TranslationModule translationModule) {
+
+
+    private DeduplicationKey generateKey(String text, String lang, TranslationModule translationModule)
+    {
+        return new DeduplicationKey(text,lang,translationModule);
+    }
+
+    @Override
+    public void set(DeduplicationKey key, String value) {
+        translationCache.put(key,value);
+    }
+
+    @Override
+    public String get(DeduplicationKey key) {
+        return translationCache.getIfPresent(key);
+    }
+
+    @Override
+    public void invalidate(DeduplicationKey key) {
+        translationCache.invalidate(key);
+    }
+
+    @Override
+    public boolean exists(DeduplicationKey key) {
+        return translationCache.asMap().containsKey(key);
+    }
+
+    @Override
+    public void clear() {
+        translationCache.invalidateAll();
+        System.out.println("CLEARED ALL : " + translationCache.estimatedSize());
     }
 }

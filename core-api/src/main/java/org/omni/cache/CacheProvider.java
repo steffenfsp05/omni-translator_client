@@ -11,5 +11,6 @@ public interface CacheProvider<K, V> {
 
     boolean exists(K key);
 
+    void clear();
 
 }

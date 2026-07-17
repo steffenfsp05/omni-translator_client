@@ -17,10 +17,7 @@ import org.pytenix.socket.endpoint.ConfigurationSocketEndpoint;
 import org.pytenix.socket.endpoint.GeoSocketEndpoint;
 import org.pytenix.socket.endpoint.ProfileSocketEndpoint;
 import org.pytenix.socket.endpoint.TranslationSocketEndpoint;
-import org.pytenix.socket.listener.BackendCloseListener;
-import org.pytenix.socket.listener.BackendConfigUpdateListener;
-import org.pytenix.socket.listener.BackendConnectListener;
-import org.pytenix.socket.listener.BackendMessageReceiveListener;
+import org.pytenix.socket.listener.*;
 import org.pytenix.socket.socket.WebSocketService;
 import org.transport.TransportOptions;
 import org.transport.TransportService;
@@ -60,6 +57,7 @@ public class SocketModule extends AbstractModule {
         omniListeners.addBinding().to(BackendConnectListener.class).in(Scopes.SINGLETON);
         omniListeners.addBinding().to(BackendMessageReceiveListener.class).in(Scopes.SINGLETON);
         omniListeners.addBinding().to(BackendConfigUpdateListener.class).in(Scopes.SINGLETON);
+        omniListeners.addBinding().to(BackendCacheInvalidationListener.class).in(Scopes.SINGLETON);
 
 
 

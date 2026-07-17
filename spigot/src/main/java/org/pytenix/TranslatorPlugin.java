@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.*;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -16,10 +17,12 @@ import org.omni.injection.CoreModule;
 import org.omni.profile.AbstractAnalyticsSecret;
 import org.omni.translation.TranslatorService;
 import org.omni.transport.TransportConnector;
+import org.pytenix.commands.OmniCommand;
 import org.pytenix.injection.TranslatorSpigotModule;
 import org.pytenix.listener.PlayerJoinQuitListener;
 import org.pytenix.listener.PlayerLocaleChangeListener;
 import org.pytenix.network.VelocitySecretReader;
+import org.pytenix.network.listener.ConsentUpdateListener;
 import org.pytenix.service.ModuleService;
 import org.pytenix.socket.inject.SocketModule;
 import org.pytenix.socket.socket.WebSocketService;
@@ -86,7 +89,7 @@ public class TranslatorPlugin extends JavaPlugin {
 
         registerListeners(injector);
 
-        registerTestCommand(injector);
+        registerCommands(injector);
 
         getLogger().info("AITranslator Test-Modul geladen!");
     }
@@ -94,6 +97,8 @@ public class TranslatorPlugin extends JavaPlugin {
     private void registerListeners(Injector injector) {
 
         EventService eventService = injector.getInstance(EventService.class);
+
+        eventService.register(injector.getInstance(ConsentUpdateListener.class));
 
         Set<Object> omniListeners = injector.getInstance(Key.get(new TypeLiteral<>() {
         }, Names.named("omniListeners")));
@@ -107,7 +112,12 @@ public class TranslatorPlugin extends JavaPlugin {
 
     }
 
-    private void registerTestCommand(Injector injector) {
+    private void registerCommands(Injector injector) {
+
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
+            event.registrar().register("omni", injector.getInstance(OmniCommand.class));
+        });
+
         getServer().getCommandMap().register("translator", new org.bukkit.command.Command("testmsg") {
             private final TestMessageCommand executor = injector.getInstance(TestMessageCommand.class);
 

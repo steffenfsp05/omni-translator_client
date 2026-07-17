@@ -33,4 +33,9 @@ public class CaffeineCacheProvider<A, B> implements CacheProvider<A, B> {
     public boolean exists(A key) {
         return translationCache.getIfPresent(key) != null;
     }
+
+    @Override
+    public void clear() {
+        translationCache.cleanUp();
+    }
 }

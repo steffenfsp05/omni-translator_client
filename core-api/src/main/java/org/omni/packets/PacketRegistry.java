@@ -83,4 +83,10 @@ public class PacketRegistry {
                     13,
                     Protobuf.ProfileExternUpdate.parser()
             );
+
+    public static final PacketDefinition<Protobuf.CacheInvalidationRequest> CACHE_INVALIDATION =
+            new PacketDefinition<>(
+                    14,
+                    Protobuf.CacheInvalidationRequest.parser()
+            );
 }
