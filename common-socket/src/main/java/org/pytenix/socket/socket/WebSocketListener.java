@@ -5,9 +5,9 @@ import com.google.inject.Singleton;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.omni.event.EventService;
-import org.omni.event.register.BackendConnectionCloseEvent;
-import org.omni.event.register.BackendConnectionConnectEvent;
-import org.omni.event.register.BackendMessageReceiveEvent;
+import org.omni.event.register.backend.BackendConnectionCloseEvent;
+import org.omni.event.register.backend.BackendConnectionConnectEvent;
+import org.omni.event.register.backend.BackendMessageReceiveEvent;
 
 import java.net.http.WebSocket;
 import java.nio.ByteBuffer;

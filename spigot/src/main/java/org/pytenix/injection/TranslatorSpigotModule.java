@@ -9,14 +9,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.omni.config.ConfigService;
 import org.omni.config.ConfigurationFile;
-import org.omni.profile.AbstractAnalyticsSecret;
 import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.omni.translation.module.AbstractTranslatorModule;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.gui.InventoryModule;
 import org.pytenix.module.hologram.HologramModule;
 import org.pytenix.module.player.LiveChatModule;
-import org.pytenix.service.SpigotAnalyticsSecret;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -25,11 +23,9 @@ import java.nio.file.Path;
 public class TranslatorSpigotModule extends AbstractModule {
 
     private final TranslatorPlugin plugin;
-    private final Path dataDirectory;
 
-    public TranslatorSpigotModule(TranslatorPlugin plugin, Path dataDirectory) {
+    public TranslatorSpigotModule(TranslatorPlugin plugin) {
         this.plugin = plugin;
-        this.dataDirectory = dataDirectory;
     }
 
     @Override
@@ -65,11 +61,7 @@ public class TranslatorSpigotModule extends AbstractModule {
         return configService.loadConfig("config.json", ConfigurationFile.class);
     }
 
-    @Provides
-    @Singleton
-    public AbstractAnalyticsSecret provideAnalyticsSecret(Logger logger) {
-        return new SpigotAnalyticsSecret(logger, dataDirectory);
-    }
+
 
     @Provides
     @Singleton

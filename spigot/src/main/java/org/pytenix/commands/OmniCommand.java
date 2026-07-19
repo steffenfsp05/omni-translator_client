@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.omni.event.EventService;
-import org.omni.event.register.ConsentUpdateEvent;
+import org.omni.event.register.player.ConsentUpdateEvent;
 import org.omni.packets.data.ConsentRefreshRequestData;
 import org.omni.profile.AbstractAnalyticsSecret;
 import org.omni.profile.AnalyticsKey;

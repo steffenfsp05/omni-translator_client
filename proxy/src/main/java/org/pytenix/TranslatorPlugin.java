@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -14,15 +13,14 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
-import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import lombok.Getter;
 import org.omni.event.EventService;
 import org.omni.injection.CoreModule;
 import org.omni.transport.TransportConnector;
-import org.pytenix.chat.listener.SystemChatPacketListener;
+import org.pytenix.module.chat.listener.SystemChatPacketListener;
 import org.pytenix.injection.TranslatorProxyModule;
 import org.pytenix.limbo.LimboService;
+import org.pytenix.roi.inject.RoiModule;
 import org.pytenix.socket.inject.SocketModule;
 import org.pytenix.socket.socket.WebSocketService;
 import org.slf4j.Logger;
@@ -74,12 +72,12 @@ public class TranslatorPlugin {
         final String remoteAddress = "ws://192.168.178.121:8083/ws/omni";
 
         Injector appInjector = velocityInjector.createChildInjector(
-                new CoreModule(),
+                new CoreModule(dataDirectory),
+                new RoiModule(),
                 new SocketModule(remoteAddress),
                 new TranslatorProxyModule(
                         this,
-                        secret,
-                        dataDirectory
+                        secret
                         )
         );
 

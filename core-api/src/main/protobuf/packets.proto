@@ -24,34 +24,32 @@ message GeoRequestPacket
 
 message TrackPlayerPacket {
 
-  string license_key = 1;
-  int64 timestamp = 2;
+  int64 timestamp = 1;
 
-  fixed64 request_id_most_sig = 3;
-  fixed64 request_id_least_sig = 4;
+  fixed64 request_id_most_sig = 2;
+  fixed64 request_id_least_sig = 3;
 
-  bytes analytics_id = 5;
+  bytes analytics_id = 4;
 
-  int32 playtime_seconds = 6;
+  int32 playtime_seconds = 5;
 
-  bool is_translated = 7;
-  string language = 8;
+  bool is_translated = 6;
+  string language = 7;
 }
 
 message HeartbeatPacket {
 
-  string license_key = 1;
-  int64 timestamp = 2;
+  int64 timestamp = 1;
 
-  fixed64 request_id_most_sig = 3;
-  fixed64 request_id_least_sig = 4;
+  fixed64 request_id_most_sig = 2;
+  fixed64 request_id_least_sig = 3;
 
-  int32 total_online = 5;
-  int32 consent_unknown_count = 6;
-  int32 consent_explicit_count = 7;
-  int32 consent_auto_count = 8;
-  int32 consent_declined_count = 9;
-  map<string, int32> lang_distribution = 10;
+  int32 total_online = 4;
+  int32 consent_unknown_count = 5;
+  int32 consent_explicit_count = 6;
+  int32 consent_auto_count = 7;
+  int32 consent_declined_count = 8;
+  map<string, int32> lang_distribution = 9;
 }
 
 message GeoResultPacket
@@ -69,6 +67,7 @@ message ConfigRequestPacket {
 message TranslationRequest {
   fixed64 request_id_most_sig = 1;
   fixed64 request_id_least_sig = 2;
+
   string text = 3;
   string target_lang = 4;
   Module module = 5;
@@ -100,17 +99,6 @@ message ProfileExternRequest
   bytes analytics_id = 4;
 }
 
-//Nur für Spigot -> Proxy
-message ProfileInternRequest
-{
-  string license = 1;
-  fixed64 request_id_most_sig = 2;
-  fixed64 request_id_least_sig = 3;
-
-
-  fixed64 user_id_most_sig = 4;
-  fixed64 user_id_least_sig = 5;
-}
 
 message ProfilePacket {
 
@@ -200,9 +188,9 @@ message PacketWrapper {
     ConsentRefreshRequest consent_refresh_request = 8;
     HeartbeatPacket heart_beat_packet = 9;
     TrackPlayerPacket track_player_packet = 10;
-    ProfileInternRequest profile_intern_request = 11;
-    ProfileExternRequest profile_extern_request = 12;
-    ProfileExternUpdate profile_extern_update = 13;
+    ProfileExternRequest profile_extern_request = 11;
+    ProfileExternUpdate profile_extern_update = 12;
+    CacheInvalidationRequest cache_invalidation_request = 13;
 
   }
 }

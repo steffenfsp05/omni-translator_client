@@ -50,6 +50,7 @@ public class EntityPacketListener implements PacketListener, Listener {
         } catch (ExecutionException e) {
             e.printStackTrace();
             return null;
+
         }
     }
 

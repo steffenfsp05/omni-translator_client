@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import org.omni.event.annotation.OmniSubscribe;
-import org.omni.event.register.BackendConnectionCloseEvent;
+import org.omni.event.register.backend.BackendConnectionCloseEvent;
 import org.pytenix.socket.socket.WebSocketService;
 import org.transport.TransportService;
 

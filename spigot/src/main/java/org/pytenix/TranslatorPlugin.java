@@ -73,9 +73,9 @@ public class TranslatorPlugin extends JavaPlugin {
         final String remoteAddress = "ws://192.168.178.121:8083/ws/omni";
 
         Injector injector = Guice.createInjector(
-                new CoreModule(),
+                new CoreModule(getDataFolder().toPath()),
                 new SocketModule(remoteAddress),
-                new TranslatorSpigotModule(this, getDataFolder().toPath())
+                new TranslatorSpigotModule(this)
         );
 
         injector.injectMembers(this);
@@ -83,7 +83,6 @@ public class TranslatorPlugin extends JavaPlugin {
         loadConfigFromDisk();
 
         injector.getInstance(ModuleService.class);
-        injector.getInstance(AbstractAnalyticsSecret.class);
 
         injector.getInstance(TransportConnector.class).connect();
 

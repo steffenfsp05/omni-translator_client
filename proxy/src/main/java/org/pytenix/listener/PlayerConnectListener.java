@@ -1,0 +1,23 @@
+package org.pytenix.listener;
+
+import com.google.inject.Inject;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.LoginEvent;
+import org.omni.event.EventService;
+import org.omni.event.register.player.PlayerConnectEvent;
+
+
+public class PlayerConnectListener {
+
+    private final EventService eventService;
+
+    @Inject
+    public PlayerConnectListener(EventService eventService) {
+        this.eventService = eventService;
+    }
+
+    @Subscribe
+    public void onConnect(LoginEvent event) {
+        eventService.callEvent(new PlayerConnectEvent(event.getPlayer().getUniqueId()));
+    }
+}

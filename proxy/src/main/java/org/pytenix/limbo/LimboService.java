@@ -4,7 +4,7 @@ import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.limbo.command.TranslateCommand;
+import org.pytenix.command.TranslateCommand;
 import org.pytenix.limbo.listener.ServerPreConnectListener;
 
 import java.io.File;

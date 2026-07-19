@@ -67,26 +67,22 @@ public class PacketRegistry {
                     Protobuf.TrackPlayerPacket.parser()
             );
 
-    public static final PacketDefinition<Protobuf.ProfileInternRequest> PROFILE_REQUEST_INTERN =
-            new PacketDefinition<>(
-                    11,
-                    Protobuf.ProfileInternRequest.parser()
-            );
+
     public static final PacketDefinition<Protobuf.ProfileExternRequest> PROFILE_REQUEST_EXTERN =
             new PacketDefinition<>(
-                    12,
+                    11,
                     Protobuf.ProfileExternRequest.parser()
             );
 
     public static final PacketDefinition<Protobuf.ProfileExternUpdate> PROFILE_UPDATE_EXTERN =
             new PacketDefinition<>(
-                    13,
+                    12,
                     Protobuf.ProfileExternUpdate.parser()
             );
 
     public static final PacketDefinition<Protobuf.CacheInvalidationRequest> CACHE_INVALIDATION =
             new PacketDefinition<>(
-                    14,
+                    13,
                     Protobuf.CacheInvalidationRequest.parser()
             );
 }

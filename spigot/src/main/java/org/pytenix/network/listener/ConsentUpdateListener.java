@@ -2,15 +2,11 @@ package org.pytenix.network.listener;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.omni.event.annotation.OmniSubscribe;
-import org.omni.event.register.ConsentUpdateEvent;
-import org.omni.packets.data.ConsentRefreshRequestData;
-import org.omni.proto.generated.Protobuf;
+import org.omni.event.register.player.ConsentUpdateEvent;
 import org.pytenix.service.TaskScheduler;
 
 @Singleton

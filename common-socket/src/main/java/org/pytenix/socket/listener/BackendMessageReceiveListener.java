@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.netty.buffer.ByteBuf;
 import org.omni.event.annotation.OmniSubscribe;
-import org.omni.event.register.BackendMessageReceiveEvent;
+import org.omni.event.register.backend.BackendMessageReceiveEvent;
 import org.transport.TransportService;
 
 import java.net.http.WebSocket;

@@ -19,7 +19,6 @@ public class TrackPlayerRequestMapper extends AbstractPacketMapper<Protobuf.Trac
     @Override
     public Protobuf.TrackPlayerPacket to(TrackPlayerRequestData packet) {
         return Protobuf.TrackPlayerPacket.newBuilder()
-                .setLicenseKey(packet.licenseKey())
                 .setRequestIdMostSig(packet.requestId().getMostSignificantBits())
                 .setRequestIdLeastSig(packet.requestId().getLeastSignificantBits())
                 .setAnalyticsId(ByteString.copyFrom(packet.analyticId()))
@@ -33,7 +32,6 @@ public class TrackPlayerRequestMapper extends AbstractPacketMapper<Protobuf.Trac
     @Override
     public TrackPlayerRequestData from(Protobuf.TrackPlayerPacket packet) {
         return new TrackPlayerRequestData(
-                packet.getLicenseKey(),
                 new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig()),
                 packet.getAnalyticsId().toByteArray(),
                 packet.getTimestamp(),
