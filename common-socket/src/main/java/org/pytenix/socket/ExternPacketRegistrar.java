@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.omni.packets.PacketRegistrar;
 import org.omni.packets.PacketRegistry;
-import org.omni.packets.data.CacheInvalidationRequest;
 import org.pytenix.socket.consumer.*;
 import org.transport.TransportService;
 

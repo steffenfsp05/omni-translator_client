@@ -10,13 +10,13 @@ import org.omni.packets.PacketMapperRegistry;
 @Singleton
 public class BackendConfigUpdateListener {
 
-   // final ProxyTransport proxyTransport;
+    // final ProxyTransport proxyTransport;
     final PacketMapperRegistry packetMapperRegistry;
 
 
     @Inject
     public BackendConfigUpdateListener(PacketMapperRegistry packetMapperRegistry) {
-       // this.proxyTransport = proxyTransport;
+        // this.proxyTransport = proxyTransport;
         this.packetMapperRegistry = packetMapperRegistry;
     }
 
@@ -27,8 +27,8 @@ public class BackendConfigUpdateListener {
         System.out.println("[OmniTranslator] New Config received!");
 
         //TODO: IMPLEMENT!!!!
-       // proxyTransport.broadcastConfigurationUpdate(
-      //          packetMapperRegistry.toProto(serverConfiguration)
-      //  );
+        // proxyTransport.broadcastConfigurationUpdate(
+        //          packetMapperRegistry.toProto(serverConfiguration)
+        //  );
     }
 }

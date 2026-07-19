@@ -16,7 +16,7 @@ import org.pytenix.module.chat.SystemChatModule;
 
 import java.util.UUID;
 
- @Singleton
+@Singleton
 public class SystemChatPacketListener implements PacketListener {
 
     private final TranslatorService translatorService;

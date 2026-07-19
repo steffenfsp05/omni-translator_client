@@ -1,6 +1,5 @@
 package org.pytenix.network.consumer;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.omni.packets.MappedPacketReceiveConsumer;
 import org.omni.packets.data.ConsentRefreshRequestData;

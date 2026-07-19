@@ -4,8 +4,6 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.checkerframework.checker.units.qual.A;
-import org.omni.config.ConfigurationFile;
 import org.omni.packets.PacketMapperRegistry;
 import org.omni.packets.PacketRegistry;
 import org.omni.packets.data.CacheInvalidationRequest;
@@ -55,7 +53,6 @@ public class ProfileSocketEndpoint implements ProfileEndpoint {
 
 
     }
-
 
 
     @Override

@@ -5,12 +5,12 @@ import com.google.protobuf.ByteString;
 import org.omni.entity.TranslationModule;
 import org.omni.packets.AbstractPacketMapper;
 import org.omni.packets.data.CacheInvalidationRequest;
-import org.omni.packets.data.ConfigurationRequestData;
 import org.omni.proto.generated.Protobuf;
 
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
+
 @Singleton
 public class CacheInvalidationRequestMapper extends AbstractPacketMapper<Protobuf.CacheInvalidationRequest, CacheInvalidationRequest> {
 
@@ -73,10 +73,9 @@ public class CacheInvalidationRequestMapper extends AbstractPacketMapper<Protobu
     public CacheInvalidationRequest from(Protobuf.CacheInvalidationRequest packet) {
         CacheInvalidationRequest.Payload payload = switch (packet.getPayloadCase()) {
 
-            case PROFILE_INVALIDATION ->
-                    new CacheInvalidationRequest.Profile(
-                            packet.getProfileInvalidation().getAnalyticId().toByteArray()
-                    );
+            case PROFILE_INVALIDATION -> new CacheInvalidationRequest.Profile(
+                    packet.getProfileInvalidation().getAnalyticId().toByteArray()
+            );
 
             case TRANSLATION_INVALIDATION -> {
                 TranslationModule javaModule = MODULE_MAP.getOrDefault(
@@ -90,8 +89,7 @@ public class CacheInvalidationRequestMapper extends AbstractPacketMapper<Protobu
                 );
             }
 
-            case PAYLOAD_NOT_SET ->
-                    throw new IllegalArgumentException("Invalidation Payload ist nicht gesetzt!");
+            case PAYLOAD_NOT_SET -> throw new IllegalArgumentException("Invalidation Payload ist nicht gesetzt!");
         };
 
         return new CacheInvalidationRequest(

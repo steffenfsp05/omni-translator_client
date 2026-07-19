@@ -3,7 +3,6 @@ package org.omni.injection.modules;
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
 import com.google.inject.multibindings.Multibinder;
-import jakarta.inject.Singleton;
 import org.omni.packets.AbstractPacketMapper;
 import org.omni.packets.PacketMapperRegistry;
 import org.omni.packets.impl.*;

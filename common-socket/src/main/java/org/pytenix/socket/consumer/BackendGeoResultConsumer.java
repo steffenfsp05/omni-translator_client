@@ -6,7 +6,6 @@ import org.omni.packets.MappedPacketReceiveConsumer;
 import org.omni.packets.data.GeoResultData;
 import org.omni.proto.generated.Protobuf;
 import org.omni.transport.endpoint.GeoEndpoint;
-import org.pytenix.socket.endpoint.GeoSocketEndpoint;
 import org.transport.service.PacketContext;
 
 import java.net.http.WebSocket;

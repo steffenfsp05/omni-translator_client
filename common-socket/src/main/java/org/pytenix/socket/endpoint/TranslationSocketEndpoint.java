@@ -3,38 +3,23 @@ package org.pytenix.socket.endpoint;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import org.omni.entity.TranslationModule;
 import org.omni.packets.PacketRegistry;
-import org.omni.packets.data.ProfileResultData;
 import org.omni.packets.data.TranslationRequestData;
 import org.omni.packets.data.TranslationResultData;
-import org.omni.transport.EndpointHandler;
 import org.omni.transport.TransportSender;
 import org.omni.transport.endpoint.TranslationEndpoint;
-import org.pytenix.socket.socket.WebSocketService;
-import org.transport.TransportService;
 
-import java.net.http.WebSocket;
 import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class TranslationSocketEndpoint implements TranslationEndpoint {
-
-
-    final TransportSender transportSender;
-
-    private final Cache<DeduplicationKey, String> translationCache = Caffeine.newBuilder()
-            .expireAfterWrite(Duration.ofMinutes(10))
-            .maximumSize(3000)
-            .build();
 
 
     public final Cache<UUID, List<CompletableFuture<String>>> pendingRequests = Caffeine.newBuilder()
@@ -44,6 +29,11 @@ public class TranslationSocketEndpoint implements TranslationEndpoint {
     public final Cache<DeduplicationKey, UUID> deduplicationRequests = Caffeine.newBuilder()
             .maximumSize(10_000)
             .expireAfterWrite(Duration.ofSeconds(20))
+            .build();
+    final TransportSender transportSender;
+    private final Cache<DeduplicationKey, String> translationCache = Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(10))
+            .maximumSize(3000)
             .build();
 
     @Inject
@@ -114,14 +104,13 @@ public class TranslationSocketEndpoint implements TranslationEndpoint {
     }
 
 
-    private DeduplicationKey generateKey(String text, String lang, TranslationModule translationModule)
-    {
-        return new DeduplicationKey(text,lang,translationModule);
+    private DeduplicationKey generateKey(String text, String lang, TranslationModule translationModule) {
+        return new DeduplicationKey(text, lang, translationModule);
     }
 
     @Override
     public void set(DeduplicationKey key, String value) {
-        translationCache.put(key,value);
+        translationCache.put(key, value);
     }
 
     @Override

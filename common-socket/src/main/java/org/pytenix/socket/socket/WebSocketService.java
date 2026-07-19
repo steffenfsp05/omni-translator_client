@@ -3,17 +3,11 @@ package org.pytenix.socket.socket;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.google.protobuf.MessageLite;
-import com.sun.jdi.connect.Transport;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.Setter;
 import org.omni.config.ConfigurationFile;
-import org.omni.packets.PacketMapperRegistry;
 import org.omni.transport.TransportConnector;
-import org.omni.transport.TransportSender;
-import org.transport.TransportService;
-import org.transport.service.impl.PacketDefinition;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -39,9 +33,8 @@ public class WebSocketService implements AutoCloseable, TransportConnector {
     private final String url;
 
     private final HttpClient httpClient;
-    private WebSocket webSocket;
-
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private WebSocket webSocket;
 
     @Inject
     public WebSocketService(
@@ -85,7 +78,6 @@ public class WebSocketService implements AutoCloseable, TransportConnector {
             nettyBuf.release();
         }
     }
-
 
 
     public void handleConnectionError(Throwable ex) {

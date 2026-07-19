@@ -15,8 +15,7 @@ public class CoreModule extends AbstractModule {
 
     private final Path dataDirectory;
 
-    public CoreModule(Path dataDirectory)
-    {
+    public CoreModule(Path dataDirectory) {
         this.dataDirectory = dataDirectory;
     }
 

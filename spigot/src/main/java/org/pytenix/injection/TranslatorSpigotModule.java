@@ -1,7 +1,10 @@
 package org.pytenix.injection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.Scopes;
+import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
 import org.bukkit.Bukkit;
@@ -18,7 +21,6 @@ import org.pytenix.module.player.LiveChatModule;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.nio.file.Path;
 
 public class TranslatorSpigotModule extends AbstractModule {
 
@@ -38,11 +40,6 @@ public class TranslatorSpigotModule extends AbstractModule {
         bind(ObjectMapper.class).in(Scopes.SINGLETON);
 
 
-
-
-
-
-
         Multibinder<AbstractTranslatorModule> moduleBinder = Multibinder.newSetBinder(binder(), AbstractTranslatorModule.class);
         moduleBinder.addBinding().to(InventoryModule.class);
         moduleBinder.addBinding().to(LiveChatModule.class);
@@ -60,7 +57,6 @@ public class TranslatorSpigotModule extends AbstractModule {
         }
         return configService.loadConfig("config.json", ConfigurationFile.class);
     }
-
 
 
     @Provides

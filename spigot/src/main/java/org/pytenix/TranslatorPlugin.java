@@ -14,7 +14,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.omni.entity.ServerConfiguration;
 import org.omni.event.EventService;
 import org.omni.injection.CoreModule;
-import org.omni.profile.AbstractAnalyticsSecret;
 import org.omni.translation.TranslatorService;
 import org.omni.transport.TransportConnector;
 import org.pytenix.commands.OmniCommand;
@@ -25,7 +24,6 @@ import org.pytenix.network.VelocitySecretReader;
 import org.pytenix.network.listener.ConsentUpdateListener;
 import org.pytenix.service.ModuleService;
 import org.pytenix.socket.inject.SocketModule;
-import org.pytenix.socket.socket.WebSocketService;
 
 import java.io.File;
 import java.io.IOException;

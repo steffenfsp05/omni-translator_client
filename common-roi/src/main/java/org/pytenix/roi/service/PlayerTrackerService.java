@@ -34,8 +34,7 @@ public class PlayerTrackerService {
 
     @Inject
     public PlayerTrackerService(TranslatorService translatorService, TransportSender transportSender, AbstractAnalyticsSecret abstractAnalyticsSecret,
-                                PlayerLocaleProcessor playerLocaleProcessor)
-    {
+                                PlayerLocaleProcessor playerLocaleProcessor) {
         this.translatorService = translatorService;
         this.transportSender = transportSender;
         this.abstractAnalyticsSecret = abstractAnalyticsSecret;

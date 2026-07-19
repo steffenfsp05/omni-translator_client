@@ -10,7 +10,6 @@ import org.omni.packets.data.GeoRequestData;
 import org.omni.translation.TranslatorService;
 import org.omni.translation.component.TextComponentService;
 import org.omni.transport.endpoint.GeoEndpoint;
-import org.pytenix.socket.endpoint.GeoSocketEndpoint;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;

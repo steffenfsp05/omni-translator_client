@@ -13,14 +13,12 @@ public class PlayerConnectListener {
 
 
     @Inject
-    public PlayerConnectListener(PlayerTrackerService playerTrackerService)
-    {
+    public PlayerConnectListener(PlayerTrackerService playerTrackerService) {
         this.playerTrackerService = playerTrackerService;
     }
 
     @OmniSubscribe(priority = 90)
-    public void onPlayerConnect(PlayerConnectEvent event)
-    {
+    public void onPlayerConnect(PlayerConnectEvent event) {
         playerTrackerService.initTrackingProcess(event.playerId());
 
     }

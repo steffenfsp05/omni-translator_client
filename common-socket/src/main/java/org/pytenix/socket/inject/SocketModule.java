@@ -4,7 +4,6 @@ import com.google.inject.*;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import org.omni.packets.PacketRegistrar;
-import org.omni.packets.data.TranslationRequestData;
 import org.omni.transport.TransportConnector;
 import org.omni.transport.TransportSender;
 import org.omni.transport.endpoint.GeoEndpoint;
@@ -60,10 +59,7 @@ public class SocketModule extends AbstractModule {
         omniListeners.addBinding().to(BackendCacheInvalidationListener.class).in(Scopes.SINGLETON);
 
 
-
-
     }
-
 
 
     @Provides
@@ -87,9 +83,6 @@ public class SocketModule extends AbstractModule {
         packetRegistrar.register(transportService);
         return transportService;
     }
-
-
-
 
 
 }

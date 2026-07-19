@@ -30,8 +30,7 @@ public class HeartBeatSender implements AutoCloseable {
     private final TransportSender transportSender;
 
     @Inject
-    public HeartBeatSender(PlayerLocaleProcessor playerLocaleProcessor, ProfileEndpoint profileEndpoint, TransportSender transportSender, PlayerTrackerService playerTrackerService)
-    {
+    public HeartBeatSender(PlayerLocaleProcessor playerLocaleProcessor, ProfileEndpoint profileEndpoint, TransportSender transportSender, PlayerTrackerService playerTrackerService) {
 
         this.playerTrackerService = playerTrackerService;
         this.playerLocaleProcessor = playerLocaleProcessor;
@@ -40,7 +39,6 @@ public class HeartBeatSender implements AutoCloseable {
 
         scheduler.schedule(this::sendHeartbeat, 20, TimeUnit.SECONDS);
     }
-
 
 
     private void sendHeartbeat() {
@@ -86,12 +84,12 @@ public class HeartBeatSender implements AutoCloseable {
                     );
                 });
     }
+
     private int filterByConsent(List<ProfileResultData> profileDataList, Protobuf.ConsentType consentType) {
         return (int) profileDataList.stream()
                 .filter(profileData -> profileData.consentType() == consentType)
                 .count();
     }
-
 
 
     @Override

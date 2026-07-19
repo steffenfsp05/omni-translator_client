@@ -92,8 +92,6 @@ public class MessageSequencer {
     }
 
 
-
-
     private void completeMessage(final long startTime, UUID uuid, QueuedMessage msg, Component translatedComponent) {
         if (msg.translatedComponent.compareAndSet(null, translatedComponent)) {
             processQueue(uuid, startTime);

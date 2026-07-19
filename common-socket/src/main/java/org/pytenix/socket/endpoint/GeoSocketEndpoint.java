@@ -1,15 +1,12 @@
 package org.pytenix.socket.endpoint;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import org.omni.packets.PacketRegistry;
 import org.omni.packets.data.GeoRequestData;
 import org.omni.packets.data.GeoResultData;
-import org.omni.transport.EndpointHandler;
 import org.omni.transport.TransportSender;
 import org.omni.transport.endpoint.GeoEndpoint;
-import org.pytenix.socket.socket.WebSocketService;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;

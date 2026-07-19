@@ -4,16 +4,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.Component;
-import org.omni.packets.PacketMapperRegistry;
-import org.omni.packets.PacketRegistry;
-import org.omni.packets.data.ConsentRefreshRequestData;
 import org.omni.proto.generated.Protobuf;
 import org.omni.transport.endpoint.ProfileEndpoint;
 import org.pytenix.TranslatorPlugin;
-
-import java.util.UUID;
 
 @Singleton
 public class TranslateCommand implements SimpleCommand {

@@ -17,8 +17,7 @@ public class BackendCacheInvalidationConsumer extends MappedPacketReceiveConsume
 
 
     @Inject
-    public BackendCacheInvalidationConsumer(EventService eventService)
-    {
+    public BackendCacheInvalidationConsumer(EventService eventService) {
         this.eventService = eventService;
     }
 

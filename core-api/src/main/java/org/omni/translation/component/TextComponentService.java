@@ -13,7 +13,8 @@ public interface TextComponentService extends CacheProvider<TextComponentService
 
     String sanitizeLegacyText(String text);
 
-    record TranslationKey(Component component, String lang, TranslationModule translationModule) { }
+    record TranslationKey(Component component, String lang, TranslationModule translationModule) {
+    }
 
 
 }

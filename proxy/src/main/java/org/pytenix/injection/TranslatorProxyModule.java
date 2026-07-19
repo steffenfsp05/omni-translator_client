@@ -1,6 +1,9 @@
 package org.pytenix.injection;
 
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.Scopes;
+import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.velocitypowered.api.proxy.Player;
@@ -9,11 +12,11 @@ import org.omni.config.ConfigService;
 import org.omni.config.ConfigurationFile;
 import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.pytenix.TranslatorPlugin;
+import org.pytenix.command.TranslateCommand;
+import org.pytenix.limbo.LimboService;
+import org.pytenix.limbo.listener.ServerPreConnectListener;
 import org.pytenix.listener.*;
 import org.pytenix.module.chat.listener.SystemChatPacketListener;
-import org.pytenix.limbo.LimboService;
-import org.pytenix.command.TranslateCommand;
-import org.pytenix.limbo.listener.ServerPreConnectListener;
 
 import java.util.Optional;
 
@@ -36,9 +39,6 @@ public class TranslatorProxyModule extends AbstractModule {
         bind(String.class).annotatedWith(Names.named("forwardingSecret")).toInstance(forwardingSecret);
 
 
-
-
-
         Multibinder<Object> velocityListeners = Multibinder.newSetBinder(binder(), Object.class, Names.named("velocityListeners"));
         velocityListeners.addBinding().to(org.pytenix.module.chat.listener.PlayerDisconnectListener.class).in(Scopes.SINGLETON);
         velocityListeners.addBinding().to(ProxyPingListener.class).in(Scopes.SINGLETON);
@@ -51,8 +51,6 @@ public class TranslatorProxyModule extends AbstractModule {
         bind(SystemChatPacketListener.class).in(Scopes.SINGLETON);
 
     }
-
-
 
 
     @Provides
@@ -74,9 +72,6 @@ public class TranslatorProxyModule extends AbstractModule {
             return player.map(value -> value.getPlayerSettings().getLocale().toString()).orElse("en_en");
         };
     }
-
-
-
 
 
     @Provides

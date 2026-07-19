@@ -6,7 +6,6 @@ import org.omni.entity.ServerConfiguration;
 import org.omni.packets.MappedPacketReceiveConsumer;
 import org.omni.proto.generated.Protobuf;
 import org.omni.transport.endpoint.ServerConfigurationEndpoint;
-import org.pytenix.socket.endpoint.ConfigurationSocketEndpoint;
 import org.transport.service.PacketContext;
 
 import java.net.http.WebSocket;

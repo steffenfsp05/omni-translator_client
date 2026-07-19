@@ -19,11 +19,7 @@ import org.omni.profile.AnalyticsKey;
 import org.omni.proto.generated.Protobuf;
 import org.omni.transport.endpoint.ProfileEndpoint;
 
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Singleton
 public class OmniCommand implements BasicCommand {
@@ -110,17 +106,14 @@ public class OmniCommand implements BasicCommand {
         return Base64.getEncoder().encodeToString(analyticsKey.bytes());
     }
 
-    private void handleInfoAboutPlayer(Player p, String targetPlayer)
-    {
-        if(!p.hasPermission("omni.admin"))
-        {
+    private void handleInfoAboutPlayer(Player p, String targetPlayer) {
+        if (!p.hasPermission("omni.admin")) {
             p.sendMessage(mm.deserialize("<red>No permission"));
             return;
         }
 
         @Nullable OfflinePlayer player = Bukkit.getOfflinePlayerIfCached(targetPlayer);
-        if(player == null)
-        {
+        if (player == null) {
             p.sendMessage(mm.deserialize("<red>This player does not exists on this server!"));
             return;
         }
@@ -173,7 +166,7 @@ public class OmniCommand implements BasicCommand {
 
             profileEndpoint.update(profileResultData.withConsentType(newConsent));
 
-            eventService.callEvent(new ConsentUpdateEvent( new ConsentRefreshRequestData(UUID.randomUUID(), p.getUniqueId(), newConsent)));
+            eventService.callEvent(new ConsentUpdateEvent(new ConsentRefreshRequestData(UUID.randomUUID(), p.getUniqueId(), newConsent)));
 
             p.sendMessage(mm.deserialize("<green>Translations " + message));
         });
@@ -200,7 +193,7 @@ public class OmniCommand implements BasicCommand {
         p.sendMessage(mm.deserialize("<gray>/omni export <white>- Export Data we've collected about you."));
         p.sendMessage(mm.deserialize("<gray>/omni export/delete <white>- Delete your collected Data."));
 
-        if(p.hasPermission("omni.admin"))
+        if (p.hasPermission("omni.admin"))
             p.sendMessage(mm.deserialize("<gray>/omni info <Playername> <white>- Get the Analytic Id from a Player."));
     }
 }

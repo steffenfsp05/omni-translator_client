@@ -6,9 +6,7 @@ import org.omni.entity.ServerConfiguration;
 import org.omni.event.EventService;
 import org.omni.event.register.ConfigUpdateEvent;
 import org.omni.packets.data.ConfigurationRequestData;
-import org.omni.proto.generated.Protobuf;
 import org.omni.translation.TranslatorService;
-import org.omni.transport.EndpointHandler;
 import org.omni.transport.endpoint.ServerConfigurationEndpoint;
 
 import java.util.concurrent.CompletableFuture;

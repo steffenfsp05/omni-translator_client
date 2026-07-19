@@ -38,7 +38,7 @@ public class InventoryModule extends AbstractTranslatorModule {
             PacketListener inventoryPacketListener,
             ItemStackCache itemStackCache
     ) {
-        super( translatorService, playerLocaleProcessor, TranslationModule.GUI);
+        super(translatorService, playerLocaleProcessor, TranslationModule.GUI);
 
         this.itemStackCache = itemStackCache;
         this.legacyComponentSerializer = TranslatorPlugin.getLegacyComponentSerializer();

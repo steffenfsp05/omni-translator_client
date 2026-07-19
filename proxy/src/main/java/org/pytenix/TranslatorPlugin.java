@@ -17,9 +17,9 @@ import lombok.Getter;
 import org.omni.event.EventService;
 import org.omni.injection.CoreModule;
 import org.omni.transport.TransportConnector;
-import org.pytenix.module.chat.listener.SystemChatPacketListener;
 import org.pytenix.injection.TranslatorProxyModule;
 import org.pytenix.limbo.LimboService;
+import org.pytenix.module.chat.listener.SystemChatPacketListener;
 import org.pytenix.roi.inject.RoiModule;
 import org.pytenix.socket.inject.SocketModule;
 import org.pytenix.socket.socket.WebSocketService;
@@ -78,7 +78,7 @@ public class TranslatorPlugin {
                 new TranslatorProxyModule(
                         this,
                         secret
-                        )
+                )
         );
 
         this.limboService = appInjector.getInstance(LimboService.class);

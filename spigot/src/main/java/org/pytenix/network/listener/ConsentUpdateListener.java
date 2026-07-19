@@ -22,22 +22,22 @@ public class ConsentUpdateListener {
     @OmniSubscribe(priority = 90)
     public void onConsentUpdate(ConsentUpdateEvent event) {
         taskScheduler.runSyncLater(() -> {
-        Player player = Bukkit.getPlayer(event.refreshRequestData().playerId());
-        if (player == null) return;
+            Player player = Bukkit.getPlayer(event.refreshRequestData().playerId());
+            if (player == null) return;
 
-        final Location originalLocation = player.getLocation().clone();
+            final Location originalLocation = player.getLocation().clone();
 
-        taskScheduler.runForEntity(player, () -> {
-            Location refreshLocation = originalLocation.clone().add(0, 0, 200);
-            final double hearts = player.getHealth();
-            player.teleport(refreshLocation);
+            taskScheduler.runForEntity(player, () -> {
+                Location refreshLocation = originalLocation.clone().add(0, 0, 200);
+                final double hearts = player.getHealth();
+                player.teleport(refreshLocation);
 
-            taskScheduler.runSyncLater(() -> {
-                player.teleport(originalLocation);
-                player.setHealth(hearts);
+                taskScheduler.runSyncLater(() -> {
+                    player.teleport(originalLocation);
+                    player.setHealth(hearts);
 
-            }, 5);
-        });
+                }, 5);
+            });
         }, 2);
     }
 }

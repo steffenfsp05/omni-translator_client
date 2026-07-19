@@ -32,7 +32,7 @@ public class HologramModule extends AbstractTranslatorModule {
             TranslatorPlugin translatorPlugin,
             EntityPacketListener entityPacketListener
     ) {
-        super( translatorService, playerLocaleProcessor, TranslationModule.HOLOGRAM);
+        super(translatorService, playerLocaleProcessor, TranslationModule.HOLOGRAM);
 
         this.translatorPlugin = translatorPlugin;
         this.playerTranslationCache = CacheBuilder.newBuilder()
