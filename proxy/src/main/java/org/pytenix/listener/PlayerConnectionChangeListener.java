@@ -25,6 +25,6 @@ public class PlayerConnectionChangeListener {
 
     @Subscribe
     public void onQuit(DisconnectEvent event) {
-        playerNameProtector.addPlayer(event.getPlayer().getUsername());
+        playerNameProtector.removePlayer(event.getPlayer().getUsername());
     }
 }

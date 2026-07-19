@@ -26,6 +26,7 @@ public class CoreModule extends AbstractModule {
         install(new ConfigModule());
         install(new EventModule());
         install(new PacketModule());
+        install(new TranslationPipelineModule());
         install(new PlaceholderModule());
         install(new TranslationModule());
 

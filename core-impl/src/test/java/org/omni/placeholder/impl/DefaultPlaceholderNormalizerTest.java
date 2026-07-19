@@ -47,7 +47,7 @@ class DefaultPlaceholderNormalizerTest {
         String input = "Color {C0}";
         String result = normalizer.denormalizeText(testUuid, input);
 
-        assertEquals("", result);
+        assertEquals(input, result);
     }
     @Test
     void testNormalize_MultiUserIsolation() {

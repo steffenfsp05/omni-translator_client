@@ -36,10 +36,12 @@ public class DefaultPlaceholderNormalizer implements PlaceholderNormalizer {
     }
 
     public String denormalizeText(UUID uuid, String text) {
-        if (cachedNormalized.getIfPresent(uuid) == null)
-            return "";
+        NormalizationResult result = cachedNormalized.getIfPresent(uuid);
+        if (result == null) {
+            return text;
+        }
 
-        return denormalize(text, cachedNormalized.getIfPresent(uuid).mappings());
+        return denormalize(text, result.mappings());
 
     }
 

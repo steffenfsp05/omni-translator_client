@@ -11,15 +11,13 @@ import org.omni.entity.TranslationModule;
 import org.omni.event.EventService;
 import org.omni.packets.data.ProfileResultData;
 import org.omni.packets.data.TranslationRequestData;
-import org.omni.placeholder.gradient.ExtractionResult;
-import org.omni.placeholder.gradient.GradientService;
+import org.omni.placeholder.pipeline.impl.DefaultTranslationPipeline;
 import org.omni.placeholder.service.PlaceholderService;
 import org.omni.proto.generated.Protobuf;
 import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.omni.transport.endpoint.ProfileEndpoint;
 import org.omni.transport.endpoint.TranslationEndpoint;
 
-import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -33,19 +31,19 @@ class DefaultTranslatorServiceTest {
 
     @Mock private TranslationEndpoint translationEndpoint;
     @Mock private ProfileEndpoint profileEndpoint;
-    @Mock private PlaceholderService placeholderService;
-    @Mock private GradientService gradientService;
     @Mock private EventService eventService;
     @Mock private PlayerLocaleProcessor localeProcessor;
+    @Mock private DefaultTranslationPipeline defaultTranslationPipeline;
 
+    @Mock private PlaceholderService placeholderService;
     private DefaultTranslatorService translatorService;
     private final UUID testPlayerUuid = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
         translatorService = new DefaultTranslatorService(
-                translationEndpoint, profileEndpoint, placeholderService,
-                gradientService, eventService, localeProcessor
+                translationEndpoint, defaultTranslationPipeline, profileEndpoint,
+                 eventService, localeProcessor,placeholderService
         );
     }
 
@@ -119,50 +117,7 @@ class DefaultTranslatorServiceTest {
         assertTrue(future.isCompletedExceptionally());
     }
 
-    @Test
-    void testPipeline_GradientRestorationFlow() throws Exception {
-        String inputText = "§aTest";
 
-        ExtractionResult mockExtraction = new ExtractionResult("Test", Collections.singletonMap("G0", mock(org.omni.placeholder.gradient.GradientData.class)));
-        when(gradientService.stripAndAnalyze(inputText)).thenReturn(mockExtraction);
-
-        when(translationEndpoint.sendRequest(any(TranslationRequestData.class)))
-                .thenReturn(CompletableFuture.completedFuture("Test"));
-
-        when(gradientService.getCachedGradient(any(UUID.class)))
-                .thenReturn(Collections.singletonMap("G0", mock(org.omni.placeholder.gradient.GradientData.class)));
-
-        translatorService.translate(inputText, "en", TranslationModule.LIVE_CHAT).get();
-
-        verify(gradientService).cacheGradient(any(UUID.class), anyMap());
-        verify(gradientService).restoreGradients(any(UUID.class), eq("Test"));
-        verify(gradientService).invalidCachedGradient(any(UUID.class));
-    }
-
-    @Test
-    void testPipelineIntegration() throws Exception {
-        String inputText = "Line1\nLine2";
-        String translatedText = "Translated1\nTranslated2";
-
-        when(gradientService.stripAndAnalyze(anyString()))
-                .thenAnswer(inv -> new ExtractionResult(inv.getArgument(0), Collections.emptyMap()));
-
-        when(placeholderService.toPlaceholders(any(UUID.class), anyString()))
-                .thenAnswer(inv -> inv.getArgument(1));
-
-        when(placeholderService.fromPlaceholders(any(UUID.class), anyString()))
-                .thenAnswer(inv -> inv.getArgument(1));
-
-        when(translationEndpoint.sendRequest(any(TranslationRequestData.class)))
-                .thenReturn(CompletableFuture.completedFuture(translatedText));
-
-        String result = translatorService.translate(inputText, "en", TranslationModule.LIVE_CHAT).get();
-
-        assertEquals(translatedText, result);
-
-        verify(placeholderService, times(2)).toPlaceholders(any(UUID.class), anyString());
-        verify(placeholderService, times(2)).fromPlaceholders(any(UUID.class), anyString());
-    }
 
     // ==================== NEUE TESTS ====================
 
@@ -227,31 +182,8 @@ class DefaultTranslatorServiceTest {
         assertFalse(translatorService.requiresTranslation(testPlayerUuid).get());
     }
 
-    @Test
-    void testHandleGradient_NullGradientsMap_ReturnsOriginalTextUnchanged() {
-        ExtractionResult mockExtraction = mock(ExtractionResult.class);
-        when(mockExtraction.gradients()).thenReturn(null);
-        when(gradientService.stripAndAnalyze("Text")).thenReturn(mockExtraction);
 
-        String result = translatorService.handleGradient(testPlayerUuid, "Text");
 
-        assertEquals("Text", result);
-        verify(gradientService, never()).cacheGradient(any(UUID.class), anyMap());
-    }
-
-    @Test
-    void testHandleGradient_EmptyGradientsMap_StillCachesAndReturnsCleanText() {
-        ExtractionResult mockExtraction = mock(ExtractionResult.class);
-        when(mockExtraction.gradients()).thenReturn(Collections.emptyMap());
-        when(mockExtraction.cleanText()).thenReturn("CleanedText");
-        when(gradientService.stripAndAnalyze("Text")).thenReturn(mockExtraction);
-
-        String result = translatorService.handleGradient(testPlayerUuid, "Text");
-
-        // Da gradients() != null ist (auch wenn leer), wird trotzdem gecacht
-        assertEquals("CleanedText", result);
-        verify(gradientService).cacheGradient(testPlayerUuid, Collections.emptyMap());
-    }
 
     @Test
     void testProcess_DelegatesDirectlyToTranslationEndpoint() throws Exception {
@@ -264,91 +196,5 @@ class DefaultTranslatorServiceTest {
         assertEquals("Ergebnis", result);
     }
 
-    @Test
-    void testTranslate_MultiLine_AllLinesHaveGradients() throws Exception {
-        String inputText = "§aLine1\n§bLine2\n§cLine3";
 
-        when(gradientService.stripAndAnalyze(anyString()))
-                .thenAnswer(inv -> new ExtractionResult(inv.getArgument(0),
-                        Collections.singletonMap("G0", mock(org.omni.placeholder.gradient.GradientData.class))));
-
-        when(placeholderService.toPlaceholders(any(UUID.class), anyString()))
-                .thenAnswer(inv -> inv.getArgument(1));
-        when(placeholderService.fromPlaceholders(any(UUID.class), anyString()))
-                .thenAnswer(inv -> inv.getArgument(1));
-
-        when(translationEndpoint.sendRequest(any(TranslationRequestData.class)))
-                .thenReturn(CompletableFuture.completedFuture("Line1\nLine2\nLine3"));
-
-        when(gradientService.getCachedGradient(any(UUID.class)))
-                .thenReturn(Collections.singletonMap("G0", mock(org.omni.placeholder.gradient.GradientData.class)));
-
-        String result = translatorService.translate(inputText, "en", TranslationModule.LIVE_CHAT).get();
-
-        assertEquals("Line1\nLine2\nLine3", result);
-        verify(gradientService, times(3)).cacheGradient(any(UUID.class), anyMap());
-        verify(gradientService, times(3)).restoreGradients(any(UUID.class), anyString());
-        verify(gradientService, times(3)).invalidCachedGradient(any(UUID.class));
-    }
-
-    @Test
-    void testTranslate_TranslatedResultHasFewerLines_MissingLinesAreEmpty() throws Exception {
-        String inputText = "Line1\nLine2\nLine3";
-
-        when(gradientService.stripAndAnalyze(anyString()))
-                .thenAnswer(inv -> new ExtractionResult(inv.getArgument(0), Collections.emptyMap()));
-        when(placeholderService.toPlaceholders(any(UUID.class), anyString()))
-                .thenAnswer(inv -> inv.getArgument(1));
-        when(placeholderService.fromPlaceholders(any(UUID.class), anyString()))
-                .thenAnswer(inv -> inv.getArgument(1));
-
-        // Übersetzungsdienst liefert (fehlerhaft) nur eine Zeile statt drei zurück
-        when(translationEndpoint.sendRequest(any(TranslationRequestData.class)))
-                .thenReturn(CompletableFuture.completedFuture("OnlyOneLine"));
-
-        String result = translatorService.translate(inputText, "en", TranslationModule.LIVE_CHAT).get();
-
-        // Fehlende Zeilen werden als Leerstrings aufgefüllt statt einer Exception
-        assertEquals("OnlyOneLine\n\n", result);
-    }
-
-    @Test
-    void testTranslate_TranslatedResultHasMoreLines_ExtraLinesAreIgnored() throws Exception {
-        String inputText = "Line1\nLine2";
-
-        when(gradientService.stripAndAnalyze(anyString()))
-                .thenAnswer(inv -> new ExtractionResult(inv.getArgument(0), Collections.emptyMap()));
-        when(placeholderService.toPlaceholders(any(UUID.class), anyString()))
-                .thenAnswer(inv -> inv.getArgument(1));
-        when(placeholderService.fromPlaceholders(any(UUID.class), anyString()))
-                .thenAnswer(inv -> inv.getArgument(1));
-
-        when(translationEndpoint.sendRequest(any(TranslationRequestData.class)))
-                .thenReturn(CompletableFuture.completedFuture("Trans1\nTrans2\nUnexpectedExtra"));
-
-        String result = translatorService.translate(inputText, "en", TranslationModule.LIVE_CHAT).get();
-
-        // Es werden nur so viele Zeilen zurückgegeben, wie ursprünglich vorhanden waren
-        assertEquals("Trans1\nTrans2", result);
-    }
-
-    @Test
-    void testTranslate_PreservesEmptyLinesInMultiLineText() throws Exception {
-        String inputText = "Line1\n\nLine3";
-
-        when(gradientService.stripAndAnalyze(anyString()))
-                .thenAnswer(inv -> new ExtractionResult(inv.getArgument(0), Collections.emptyMap()));
-        when(placeholderService.toPlaceholders(any(UUID.class), anyString()))
-                .thenAnswer(inv -> inv.getArgument(1));
-        when(placeholderService.fromPlaceholders(any(UUID.class), anyString()))
-                .thenAnswer(inv -> inv.getArgument(1));
-
-        when(translationEndpoint.sendRequest(any(TranslationRequestData.class)))
-                .thenReturn(CompletableFuture.completedFuture("Line1\n\nLine3"));
-
-        String result = translatorService.translate(inputText, "en", TranslationModule.LIVE_CHAT).get();
-
-        assertEquals(inputText, result);
-        verify(placeholderService, times(3)).toPlaceholders(any(UUID.class), anyString());
-    }
 }
