@@ -23,6 +23,8 @@
             <version>3.2.4</version>
             <scope>compile</scope>
         </dependency>
+        <!-- Source: https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+
         <dependency>
             <groupId>org.example</groupId>
             <artifactId>core-api</artifactId>
@@ -52,6 +54,27 @@
             <artifactId>slf4j-api</artifactId>
             <version>2.1.0-alpha1</version>
             <scope>compile</scope>
+        </dependency>
+        <!-- JUnit 5 (Das Test-Framework) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.10.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito (Zum Simulieren von Services) -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.7.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>5.7.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

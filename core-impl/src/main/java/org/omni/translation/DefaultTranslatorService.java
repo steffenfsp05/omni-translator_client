@@ -107,7 +107,7 @@ public class DefaultTranslatorService implements TranslatorService {
 
     public String handleGradient(UUID uuid, String text) {
         ExtractionResult extractionResult = gradientService.stripAndAnalyze(text);
-        if (extractionResult.gradients() != null) {
+        if (extractionResult != null && extractionResult.gradients() != null) {
             gradientService.cacheGradient(uuid, extractionResult.gradients());
             return extractionResult.cleanText();
         }
@@ -159,26 +159,23 @@ public class DefaultTranslatorService implements TranslatorService {
 
         for (int i = 0; i < lineIds.size(); i++) {
             UUID lineUuid = lineIds.get(i);
-
             String currentLine = (i < translatedLines.length) ? translatedLines[i] : "";
 
             if (placeholderService != null) {
-                currentLine = placeholderService.fromPlaceholders(lineUuid, currentLine);
+                String restored = placeholderService.fromPlaceholders(lineUuid, currentLine);
+                if (restored != null) currentLine = restored;
             }
 
             if (gradientService != null) {
-
                 Map<String, GradientData> gradientInfo = gradientService.getCachedGradient(lineUuid);
-
                 if (gradientInfo != null) {
-                    currentLine = gradientService.restoreGradients(lineUuid, currentLine);
+                    String restored = gradientService.restoreGradients(lineUuid, currentLine);
+                    if (restored != null) currentLine = restored;
                     gradientService.invalidCachedGradient(lineUuid);
                 }
             }
-
             finalLines.add(currentLine);
         }
-
 
         cachedReferences.invalidate(uuid);
 

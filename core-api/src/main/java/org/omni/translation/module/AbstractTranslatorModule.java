@@ -48,27 +48,9 @@ public abstract class AbstractTranslatorModule {
     }
 
 
-    private String generateKey(String text, String lang) {
-        return text + ":" + lang;
-    }
-
 
     public CompletableFuture<String> translate(String text, String locale) {
-
-
-        //TODO: IMPLEMENT!!!
-        //  String cached = translatorPlugin.getCaffeineCache().get(generateKey(text, locale));
-
-        //  if (cached != null)
-        //      return CompletableFuture.completedFuture(cached);
-
-        return translatorService.translate(text, locale, this.translationModule).whenComplete((result, throwable) -> {
-
-            if (throwable == null && result != null) {
-                //translatorPlugin.getCaffeineCache().set(generateKey(text, locale), result);
-            }
-
-        });
+        return translatorService.translate(text, locale, this.translationModule);
     }
 
 

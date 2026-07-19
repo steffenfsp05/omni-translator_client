@@ -26,9 +26,5 @@ public class BackendConfigUpdateListener {
 
         System.out.println("[OmniTranslator] New Config received!");
 
-        //TODO: IMPLEMENT!!!!
-        // proxyTransport.broadcastConfigurationUpdate(
-        //          packetMapperRegistry.toProto(serverConfiguration)
-        //  );
     }
 }

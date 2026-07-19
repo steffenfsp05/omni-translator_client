@@ -99,13 +99,14 @@ public class TranslationSocketEndpoint implements TranslationEndpoint {
 
         return future.whenComplete((s, throwable) ->
         {
+            if(s.equalsIgnoreCase(text)) return;
+            if(s.equalsIgnoreCase("ERROR")) return;
+            if(s.equalsIgnoreCase("TIMEOUT")) return;
+
+            if(throwable != null) throwable.printStackTrace();
+
             this.set(key, s);
         });
-    }
-
-
-    private DeduplicationKey generateKey(String text, String lang, TranslationModule translationModule) {
-        return new DeduplicationKey(text, lang, translationModule);
     }
 
     @Override

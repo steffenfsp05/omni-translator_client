@@ -1,7 +1,7 @@
 package org.omni.placeholder.impl;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.inject.Singleton;
 import org.jetbrains.annotations.Nullable;
 import org.omni.placeholder.gradient.ExtractionResult;
@@ -19,22 +19,26 @@ import java.util.regex.Pattern;
 @Singleton
 public class DefaultGradientService implements GradientService {
 
-    // Regex für Hex-Colors
     private static final String COLOR_CODE = "(?:§x(?:§[0-9a-fA-F]){6}|[§&]#[0-9a-fA-F]{6})";
     private static final String FORMAT_CODE = "(?:[§&][l-oK-OrR])";
     private static final String TEXT_CHARS = "[^§&]+";
 
     private static final Pattern GRADIENT_WORD_PATTERN = Pattern.compile("((?:" + COLOR_CODE + "(?:" + FORMAT_CODE + ")*" + TEXT_CHARS + "){2,})");
     private static final Pattern GRADIENT_HEX_PATTERN = Pattern.compile(COLOR_CODE);
-    private static final Pattern FORMAT_PATTERN = Pattern.compile("(?i)[§&][l-oK-OrR]");
+    private static final Pattern FORMAT_PATTERN = Pattern.compile("[§&][l-oK-OrR]", Pattern.CASE_INSENSITIVE);
 
-    public Cache<UUID, Map<String, GradientData>> cachedGradients = CacheBuilder.newBuilder()
-            .expireAfterWrite(30, TimeUnit.SECONDS).build();
 
-    private static String toModernHex(Color c) {
-        return String.format("§#%06x", c.getRGB() & 0xFFFFFF);
-    }
+    private static final Pattern HEX_CLEANER = Pattern.compile("[^0-9a-fA-F]");
 
+    private final Cache<UUID, Map<String, GradientData>> cachedGradients = Caffeine.newBuilder()
+            .expireAfterWrite(30, TimeUnit.SECONDS)
+            .build();
+
+    private final Cache<String, Pattern> patternCache = Caffeine.newBuilder()
+            .maximumSize(100)
+            .build();
+
+    @Override
     public ExtractionResult stripAndAnalyze(String input) {
         if (input == null || input.isEmpty()) return new ExtractionResult(input, new HashMap<>());
 
@@ -44,18 +48,16 @@ public class DefaultGradientService implements GradientService {
         Matcher fullMatcher = GRADIENT_WORD_PATTERN.matcher(trimmedInput);
         if (fullMatcher.matches()) {
             String fullGradientString = fullMatcher.group(1);
-
             GradientData data = extractColorsAndFormat(fullGradientString);
             foundGradients.put("FULL_LINE", data);
 
             String cleanText = GRADIENT_HEX_PATTERN.matcher(input).replaceAll("");
             cleanText = FORMAT_PATTERN.matcher(cleanText).replaceAll("");
-
             return new ExtractionResult(cleanText, foundGradients);
         }
 
         Matcher m = GRADIENT_WORD_PATTERN.matcher(input);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         int gradientCounter = 0;
 
         while (m.find()) {
@@ -77,6 +79,7 @@ public class DefaultGradientService implements GradientService {
         return new ExtractionResult(sb.toString(), foundGradients);
     }
 
+    @Override
     public String restoreGradients(UUID uuid, String translatedText) {
         Map<String, GradientData> gradients = cachedGradients.getIfPresent(uuid);
         if (gradients == null || gradients.isEmpty()) return translatedText;
@@ -86,40 +89,67 @@ public class DefaultGradientService implements GradientService {
         }
 
         String result = translatedText;
+
         for (Map.Entry<String, GradientData> entry : gradients.entrySet()) {
             String tagId = entry.getKey();
-            String startTag = "<" + tagId + ">";
-            String endTag = "</" + tagId + ">";
+            Pattern tagPattern = patternCache.get(tagId, id ->
+                    Pattern.compile("<" + Pattern.quote(id) + ">(.*?)</" + Pattern.quote(id) + ">", Pattern.DOTALL)
+            );
 
-            Pattern tagPattern = Pattern.compile(Pattern.quote(startTag) + "(.*?)" + Pattern.quote(endTag), Pattern.DOTALL);
             Matcher m = tagPattern.matcher(result);
-            StringBuffer sb = new StringBuffer();
+            if (!m.find()) continue;
 
-            while (m.find()) {
+            StringBuilder sb = new StringBuilder();
+            do {
                 String translatedWord = m.group(1);
                 String gradientApplied = applyGradientToWord(translatedWord, entry.getValue());
                 m.appendReplacement(sb, Matcher.quoteReplacement(gradientApplied));
-            }
+            } while (m.find());
+
             m.appendTail(sb);
             result = sb.toString();
         }
         return result;
     }
 
+    private String applyGradientToWord(String text, GradientData info) {
+        if (text == null || text.isEmpty()) return text;
 
-    @Override
-    public void cacheGradient(UUID uuid, Map<String, GradientData> gradients) {
-        cachedGradients.put(uuid, gradients);
-    }
+        if (info.startColor().equals(info.endColor())) {
+            StringBuilder sb = new StringBuilder(text.length() + 16);
+            sb.append("§#").append(String.format("%02x%02x%02x", info.startColor().getRed(), info.startColor().getGreen(), info.startColor().getBlue()));
+            if (info.bold()) sb.append("§l");
+            if (info.italic()) sb.append("§o");
+            sb.append(text);
+            return sb.toString();
+        }
 
-    @Override
-    public void invalidCachedGradient(UUID uuid) {
-        cachedGradients.invalidate(uuid);
-    }
+        StringBuilder sb = new StringBuilder(text.length() * 16);
 
-    @Override
-    public @Nullable Map<String, GradientData> getCachedGradient(UUID uuid) {
-        return cachedGradients.getIfPresent(uuid);
+        int rStart = info.startColor().getRed();
+        int gStart = info.startColor().getGreen();
+        int bStart = info.startColor().getBlue();
+
+        int rDiff = info.endColor().getRed() - rStart;
+        int gDiff = info.endColor().getGreen() - gStart;
+        int bDiff = info.endColor().getBlue() - bStart;
+
+        int visibleLength = text.length();
+
+        for (int i = 0; i < text.length(); i++) {
+            float t = (visibleLength > 1) ? (float) i / (visibleLength - 1) : 0;
+
+            int r = (int) (rStart + t * rDiff);
+            int g = (int) (gStart + t * gDiff);
+            int b = (int) (bStart + t * bDiff);
+
+            sb.append("§#").append(String.format("%02x%02x%02x", r, g, b));
+            if (info.bold()) sb.append("§l");
+            if (info.italic()) sb.append("§o");
+            sb.append(text.charAt(i));
+        }
+
+        return sb.toString();
     }
 
     private GradientData extractColorsAndFormat(String fullGradientString) {
@@ -127,8 +157,9 @@ public class DefaultGradientService implements GradientService {
         Color firstColor = null;
         Color lastColor = null;
         while (colorMatcher.find()) {
-            if (firstColor == null) firstColor = parseColor(colorMatcher.group());
-            lastColor = parseColor(colorMatcher.group());
+            Color c = parseColor(colorMatcher.group());
+            if (firstColor == null) firstColor = c;
+            lastColor = c;
         }
 
         boolean isBold = fullGradientString.contains("§l") || fullGradientString.contains("&l");
@@ -137,48 +168,13 @@ public class DefaultGradientService implements GradientService {
         return new GradientData(firstColor, lastColor, isBold, isItalic);
     }
 
-    private String applyGradientToWord(String text, GradientData info) {
-        if (text == null || text.isEmpty()) return text;
-
-        if (info.startColor().equals(info.endColor())) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(toModernHex(info.startColor()));
-            if (info.bold()) sb.append("§l");
-            if (info.italic()) sb.append("§o");
-            sb.append(text);
-            return sb.toString();
-        }
-
-        int visibleLength = text.length();
-        StringBuilder sb = new StringBuilder(text.length() * 14);
-
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            float t = (visibleLength > 1) ? (float) i / (visibleLength - 1) : 0;
-            Color current = interpolate(info.startColor(), info.endColor(), t);
-
-            sb.append(toModernHex(current));
-            if (info.bold()) sb.append("§l");
-            if (info.italic()) sb.append("§o");
-            sb.append(c);
-        }
-
-        return sb.toString();
-    }
-
-    private Color interpolate(Color start, Color end, float t) {
-        int r = (int) (start.getRed() + t * (end.getRed() - start.getRed()));
-        int g = (int) (start.getGreen() + t * (end.getGreen() - start.getGreen()));
-        int b = (int) (start.getBlue() + t * (end.getBlue() - start.getBlue()));
-        return new Color(Math.max(0, Math.min(255, r)), Math.max(0, Math.min(255, g)), Math.max(0, Math.min(255, b)));
-    }
 
     private Color parseColor(String hexString) {
-        if (hexString.startsWith("§x")) {
-            String raw = hexString.replace("§", "").substring(1);
-            return new Color(Integer.parseInt(raw, 16));
-        }
-        return new Color(Integer.parseInt(hexString.substring(2), 16));
+        String cleanHex = HEX_CLEANER.matcher(hexString).replaceAll("");
+        return new Color(Integer.parseInt(cleanHex, 16));
     }
 
+    @Override public void cacheGradient(UUID uuid, Map<String, GradientData> gradients) { cachedGradients.put(uuid, gradients); }
+    @Override public void invalidCachedGradient(UUID uuid) { cachedGradients.invalidate(uuid); }
+    @Override public @Nullable Map<String, GradientData> getCachedGradient(UUID uuid) { return cachedGradients.getIfPresent(uuid); }
 }

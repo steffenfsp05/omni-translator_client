@@ -21,7 +21,6 @@ public class DefaultWordProtector implements WordProtector {
         }
 
         Trie.TrieBuilder builder = Trie.builder()
-                .ignoreCase()
                 .onlyWholeWords();
 
         for (String word : words) {
