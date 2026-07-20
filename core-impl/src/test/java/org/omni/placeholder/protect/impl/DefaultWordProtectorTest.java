@@ -2,10 +2,14 @@ package org.omni.placeholder.protect.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.omni.placeholder.protector.ProtectionResult;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -81,6 +85,45 @@ class DefaultWordProtectorTest {
         System.out.println(result.maskedText());
         assertTrue(result.maskedText().contains("apfel"));
         assertEquals(1, result.replacements().size());
+    }
+
+    @Test
+    void testProtect_UserManuallyTypesPlaceholder_DoesNotCorrupt() {
+        wordProtector.build(Set.of("Apfel"));
+
+        String maliciousInput = "Ich esse einen Apfel und hacke {W0}";
+        ProtectionResult result = wordProtector.protect(maliciousInput);
+
+        assertFalse(result.replacements().isEmpty());
+        assertTrue(result.maskedText().contains("{W"));
+    }
+
+    static Stream<Arguments> provideWordProtectionCases() {
+        return Stream.of(
+                Arguments.of(Set.of("Böse", "Schlecht"), "Das ist Böse und Schlecht", 2),
+                Arguments.of(Set.of("Test"), "Nur ein Wort", 0),
+                Arguments.of(Set.of("Apfel", "Birne"), "Das ist Apfel und Birne", 2)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideWordProtectionCases")
+    void testProtect_DifferentBlacklists(Set<String> blacklist, String input, int expectedReplacements) {
+        wordProtector.build(blacklist);
+        var result = wordProtector.protect(input);
+
+        assertEquals(expectedReplacements, result.replacements().size());
+    }
+
+    @Test
+    void testRestore_MissingKeyInMap_LeavesPlaceholderIntact() {
+        Map<String, String> incompleteReplacements = Map.of("{W0}", "Apfel");
+        String input = "Hier ist ein {W0} und eine {W1}";
+
+        String restored = wordProtector.restore(input, incompleteReplacements);
+
+        // Sollte nicht crashen (NullPointerException) und das unaufgelöste {W1} stehen lassen
+        assertEquals("Hier ist ein Apfel und eine {W1}", restored);
     }
 
     @Test

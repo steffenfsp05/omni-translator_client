@@ -21,12 +21,11 @@ public class DefaultGradientService implements GradientService {
 
     private static final String COLOR_CODE = "(?:§x(?:§[0-9a-fA-F]){6}|[§&]#[0-9a-fA-F]{6})";
     private static final String FORMAT_CODE = "(?:[§&][l-oK-OrR])";
-    private static final String TEXT_CHARS = "[^§&]+";
+    private static final String TEXT_CHARS = "[^§&]*";
 
     private static final Pattern GRADIENT_WORD_PATTERN = Pattern.compile("((?:" + COLOR_CODE + "(?:" + FORMAT_CODE + ")*" + TEXT_CHARS + "){2,})");
     private static final Pattern GRADIENT_HEX_PATTERN = Pattern.compile(COLOR_CODE);
     private static final Pattern FORMAT_PATTERN = Pattern.compile("[§&][l-oK-OrR]", Pattern.CASE_INSENSITIVE);
-
 
     private static final Pattern HEX_CLEANER = Pattern.compile("[^0-9a-fA-F]");
 
@@ -81,7 +80,7 @@ public class DefaultGradientService implements GradientService {
 
     @Override
     public String restoreGradients(UUID uuid, String translatedText) {
-        Map<String, GradientData> gradients = cachedGradients.getIfPresent(uuid);
+        Map<String, GradientData> gradients = getCachedGradient(uuid);
         if (gradients == null || gradients.isEmpty()) return translatedText;
 
         if (gradients.containsKey("FULL_LINE")) {
@@ -168,13 +167,25 @@ public class DefaultGradientService implements GradientService {
         return new GradientData(firstColor, lastColor, isBold, isItalic);
     }
 
-
     private Color parseColor(String hexString) {
         String cleanHex = HEX_CLEANER.matcher(hexString).replaceAll("");
+
+        if (cleanHex.length() < 6) {
+            throw new IllegalArgumentException("Ungültige Farbe (zu kurz): " + hexString);
+        }
+
         return new Color(Integer.parseInt(cleanHex, 16));
     }
 
-    @Override public void cacheGradient(UUID uuid, Map<String, GradientData> gradients) { cachedGradients.put(uuid, gradients); }
-    @Override public void invalidCachedGradient(UUID uuid) { cachedGradients.invalidate(uuid); }
-    @Override public @Nullable Map<String, GradientData> getCachedGradient(UUID uuid) { return cachedGradients.getIfPresent(uuid); }
+    @Override public void cacheGradient(UUID uuid, Map<String, GradientData> gradients) {
+        if (uuid != null && gradients != null) cachedGradients.put(uuid, gradients);
+    }
+
+    @Override public void invalidCachedGradient(UUID uuid) {
+        if (uuid != null) cachedGradients.invalidate(uuid);
+    }
+
+    @Override public @Nullable Map<String, GradientData> getCachedGradient(UUID uuid) {
+        return (uuid == null) ? new HashMap<>() : cachedGradients.getIfPresent(uuid);
+    }
 }

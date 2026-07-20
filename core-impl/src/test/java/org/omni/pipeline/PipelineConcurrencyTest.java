@@ -38,6 +38,50 @@ class PipelineConcurrencyTest {
         executor.shutdown();
     }
 
+    @Test
+    void testParallelExecutionWithRealStatefulProcessors() throws InterruptedException, ExecutionException {
+        org.omni.placeholder.impl.DefaultPlaceholderNormalizer realNormalizer =
+                new org.omni.placeholder.impl.DefaultPlaceholderNormalizer();
+
+        TextProcessor statefulProcessor = new TextProcessor() {
+            @Override
+            public String process(UUID id, String text) {
+                return realNormalizer.normalizeText(id, text);
+            }
+
+            @Override
+            public String restore(UUID id, String text) {
+                return realNormalizer.denormalizeText(id, text);
+            }
+        };
+
+        DefaultTranslationPipeline pipeline = new DefaultTranslationPipeline(List.of(statefulProcessor));
+
+        int threadCount = 100;
+        ExecutorService executor = Executors.newFixedThreadPool(20);
+
+        Callable<Boolean> task = () -> {
+            UUID id = UUID.randomUUID();
+            String input = "Player {C100} Text";
+
+            String prepared = pipeline.prepare(id, input);
+
+            String restored = pipeline.restore(id, prepared);
+
+            return input.equals(restored);
+        };
+
+        var futures = java.util.stream.IntStream.range(0, threadCount)
+                .mapToObj(i -> executor.submit(task))
+                .toList();
+
+        for (var f : futures) {
+            assertTrue(f.get(), "Concurrency Failure: Die interne Cache-Map des Normalizers ist nicht Thread-Safe!");
+        }
+
+        executor.shutdown();
+    }
+
     private record MockProcessor(String prefix) implements TextProcessor {
         public String process(UUID id, String text) {
             return prefix + text;

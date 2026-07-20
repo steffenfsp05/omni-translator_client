@@ -63,6 +63,9 @@ public class DefaultTranslatorService implements TranslatorService {
 
     public CompletableFuture<String> translate(String text, String lang, TranslationModule module) {
         if (text == null || text.isBlank()) return CompletableFuture.completedFuture(text);
+        if (module == null) {
+            throw new IllegalArgumentException("TranslationModule cannot be null");
+        }
 
         UUID batchId = UUID.randomUUID();
 
@@ -88,6 +91,8 @@ public class DefaultTranslatorService implements TranslatorService {
                         return true;
 
                     return !profileData.consentType().equals(Protobuf.ConsentType.DECLINED);
+                }).exceptionally(throwable -> {
+                    return false;
                 });
     }
 

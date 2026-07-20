@@ -48,6 +48,28 @@ class DefaultTranslatorServiceTest {
     }
 
     @Test
+    void testRequiresTranslation_ProfileEndpointThrowsException_DefaultsToFalse() throws Exception {
+        ServerConfiguration config = mock(ServerConfiguration.class);
+        when(config.getDefaultLanguage()).thenReturn("en");
+        translatorService.setTranslationConfiguration(config);
+
+        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn("de_de");
+
+        when(profileEndpoint.sendRequest(testPlayerUuid))
+                .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Database offline")));
+
+        CompletableFuture<Boolean> future = translatorService.requiresTranslation(testPlayerUuid);
+        assertFalse(future.get());
+    }
+
+    @Test
+    void testTranslate_NullModule_IsHandledGracefully() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            translatorService.translate("Text", "en", null);
+        }, "Sollte eine Exception werfen, wenn das Modul null ist.");
+    }
+
+    @Test
     void testTranslate_NullOrBlank() throws Exception {
         assertEquals("", translatorService.translate("", "en", TranslationModule.LIVE_CHAT).get());
         assertNull(translatorService.translate(null, "en", TranslationModule.LIVE_CHAT).get());

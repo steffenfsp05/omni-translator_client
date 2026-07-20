@@ -51,48 +51,40 @@ class DefaultPlaceholderNormalizerTest {
     }
     @Test
     void testNormalize_MultiUserIsolation() {
-        // Sicherstellen, dass User A und User B sich nicht gegenseitig beeinflussen
         UUID userA = UUID.randomUUID();
         UUID userB = UUID.randomUUID();
 
-        String inputA = "{C15}"; // User A hat ein spezielles Mapping
-        String inputB = "{C99}"; // User B hat ein anderes
+        String inputA = "{C15}";
+        String inputB = "{C99}";
 
         String normA = normalizer.normalizeText(userA, inputA);
         String normB = normalizer.normalizeText(userB, inputB);
 
-        // Beide starten bei Index 0 für den ersten Platzhalter des Users
         assertEquals("{C0}", normA);
         assertEquals("{C0}", normB);
 
-        // Denormalisierung darf nur die eigenen Werte zurückgeben
         assertEquals("{C15}", normalizer.denormalizeText(userA, normA));
         assertEquals("{C99}", normalizer.denormalizeText(userB, normB));
     }
 
     @Test
     void testNormalize_RepeatedPlaceholders() {
-        // Testet, ob das System erkennt, wenn derselbe Platzhalter mehrfach vorkommt
         String input = "Text {C5} wiederholung {C5} ende";
 
         String normalized = normalizer.normalizeText(testUuid, input);
 
-        // Erwartung: Beide {C5} sollten zum selben Index {C0} gemappt werden
         assertEquals("Text {C0} wiederholung {C1} ende", normalized);
 
-        // Denormalisierung muss beide wieder korrekt auflösen
         String denormalized = normalizer.denormalizeText(testUuid, normalized);
         assertEquals(input, denormalized);
     }
 
     @Test
     void testNormalize_ComplexMixedString() {
-        // Testet eine Mischung aus Farben, Text und mehreren verschiedenen Platzhaltern
         String input = "§aPlayer {C10} &bmit {C20} und {C10}";
 
         String normalized = normalizer.normalizeText(testUuid, input);
 
-        // {C10} -> {C0}, {C20} -> {C1}
         String expected = "§aPlayer {C0} &bmit {C1} und {C2}";
         assertEquals(expected, normalized);
 
@@ -103,7 +95,6 @@ class DefaultPlaceholderNormalizerTest {
 
     @Test
     void testNormalize_AdjacentPlaceholders_AreMergedIntoOneToken() {
-        // Direkt aneinandergereihte {C..}-Codes werden vom Pattern als EIN Block erkannt
         String input = "abc{C1}{C2}def";
 
         String normalized = normalizer.normalizeText(testUuid, input);
@@ -128,7 +119,6 @@ class DefaultPlaceholderNormalizerTest {
 
         String result = normalizer.denormalizeText(testUuid, "Beliebiger Text {C0}");
 
-        // Da beim letzten normalize() keine Mappings erzeugt wurden, bleibt der Text unangetastet
         assertEquals("Beliebiger Text {C0}", result);
     }
 
@@ -138,7 +128,6 @@ class DefaultPlaceholderNormalizerTest {
 
         String result = normalizer.denormalizeText(testUuid, "{C0} und {C99}");
 
-        // {C99} war nie Teil der ursprünglichen Normalisierung -> bleibt unverändert
         assertEquals("{C7} und {C99}", result);
     }
 
@@ -147,7 +136,6 @@ class DefaultPlaceholderNormalizerTest {
         normalizer.normalizeText(testUuid, "{C1}");
         normalizer.normalizeText(testUuid, "{C99}");
 
-        // Nur das zuletzt erzeugte Mapping ist noch gültig
         assertEquals("{C99}", normalizer.denormalizeText(testUuid, "{C0}"));
     }
 }

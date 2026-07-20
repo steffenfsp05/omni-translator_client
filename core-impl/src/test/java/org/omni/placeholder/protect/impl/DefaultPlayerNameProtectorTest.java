@@ -25,6 +25,27 @@ class DefaultPlayerNameProtectorTest {
     }
 
     @Test
+    void testRestoreNames_MissingKeyInMap_LeavesPlaceholderIntact() {
+        Map<String, String> incompleteReplacements = Map.of("{P0}", "Steve");
+        String input = "Hallo {P0} und {P1}!";
+
+        String restored = nameProtector.restoreNames(input, incompleteReplacements);
+
+        assertEquals("Hallo Steve und {P1}!", restored);
+    }
+
+    @Test
+    void testMaskNames_UserManuallyTypesPlaceholder_IsIgnoredByRegex() {
+        nameProtector.addPlayer("Steve");
+        String input = "Steve {P0} {P1}";
+
+        ProtectionResult result = nameProtector.maskNames(input);
+
+        assertEquals(1, result.replacements().size());
+        assertTrue(result.maskedText().contains("{P0}"));
+    }
+
+    @Test
     void testMaskNames_WithColorsAndCaseInsensitive() {
         nameProtector.addPlayer("Zelmyra");
         nameProtector.addPlayer("Steve");

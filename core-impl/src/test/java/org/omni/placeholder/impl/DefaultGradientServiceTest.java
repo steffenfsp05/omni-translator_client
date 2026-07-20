@@ -114,6 +114,19 @@ class DefaultGradientServiceTest {
     }
 
     @Test
+    void testCacheGradient_NullSafety() {
+        assertDoesNotThrow(() -> {
+            gradientService.cacheGradient(null, new HashMap<>());
+            gradientService.cacheGradient(testUuid, null);
+            gradientService.invalidCachedGradient(null);
+            gradientService.restoreGradients(null, "Text");
+        });
+
+        gradientService.cacheGradient(testUuid, new HashMap<>());
+        assertNotNull(gradientService.getCachedGradient(testUuid));
+    }
+
+    @Test
     void testStripAndAnalyze_SolidColorFullLine_UsesSingleColorPrefix() {
         String input = "§#ff0000S§#ff0000olid";
 
