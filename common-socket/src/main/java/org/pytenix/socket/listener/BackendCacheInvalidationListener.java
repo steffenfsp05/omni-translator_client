@@ -42,7 +42,7 @@ public class BackendCacheInvalidationListener {
             UUID uuid = abstractAnalyticsSecret.getUuidFromAnalyticsKey(analyticsKey);
 
             if (uuid == null)
-                sendErrorMessage(analyticsKey);
+                return;
 
             profileEndpoint.invalidate(uuid);
 
@@ -65,8 +65,4 @@ public class BackendCacheInvalidationListener {
         }
     }
 
-
-    private void sendErrorMessage(AnalyticsKey analyticId) {
-        throw new NullPointerException("Analytic ID not reversable from ID " + Base64.getEncoder().encodeToString(analyticId.bytes()));
-    }
 }
