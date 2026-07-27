@@ -16,7 +16,6 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.Getter;
 import org.omni.event.EventService;
 import org.omni.injection.CoreModule;
-import org.omni.placeholder.listener.ConfigUpdateListener;
 import org.omni.transport.TransportConnector;
 import org.pytenix.injection.TranslatorProxyModule;
 import org.pytenix.limbo.LimboService;
