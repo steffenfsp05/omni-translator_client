@@ -17,6 +17,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.module.hologram.HologramModule;
 import org.pytenix.service.TaskScheduler;
@@ -84,66 +85,75 @@ public class EntityPacketListener implements PacketListener, Listener {
                     Player player = Bukkit.getPlayer(playerUuid);
                     if (player == null) return;
 
-                    Cache<Component, Component> personalCache = getHologramCache(hologramModule.getPlayerLocaleProcessor().retrieveLocale(player.getUniqueId()));
-                    if (personalCache == null) return;
+                    hologramModule.getPlayerLocaleProcessor().retrieveLocale(player.getUniqueId()).thenAccept(locale ->
+                    {
+                        Cache<Component, Component> personalCache = getHologramCache(locale);
+                        if (personalCache == null) return;
 
-                    List<EntityData<?>> instantUpdatesToSend = new ArrayList<>();
-                    for (EntityData data : snapshotDataList) {
-                        Object value = data.getValue();
-                        Component originalComponent = null;
-                        boolean wasOptional = false;
+                        List<EntityData<?>> instantUpdatesToSend = new ArrayList<>();
+                        for (EntityData data : snapshotDataList) {
+                            Object value = data.getValue();
+                            Component originalComponent = null;
+                            boolean wasOptional = false;
 
-                        if (value instanceof Optional<?> opt) {
-                            if (opt.isPresent() && opt.get() instanceof Component comp) {
+                            if (value instanceof Optional<?> opt) {
+                                if (opt.isPresent() && opt.get() instanceof Component comp) {
+                                    originalComponent = comp;
+                                    wasOptional = true;
+                                }
+                            } else if (value instanceof Component comp) {
                                 originalComponent = comp;
-                                wasOptional = true;
+                                wasOptional = false;
                             }
-                        } else if (value instanceof Component comp) {
-                            originalComponent = comp;
-                            wasOptional = false;
-                        }
 
-                        if (originalComponent != null) {
-                            Component cachedTranslation = personalCache.getIfPresent(originalComponent);
+                            if (originalComponent != null) {
+                                Component cachedTranslation = personalCache.getIfPresent(originalComponent);
 
-                            if (cachedTranslation != null) {
-                                Object newValue = wasOptional ? Optional.of(cachedTranslation) : cachedTranslation;
-                                instantUpdatesToSend.add(new EntityData(data.getIndex(), data.getType(), newValue));
-                            } else {
-                                String legacyText = TranslatorPlugin.getLegacyComponentSerializer().serialize(originalComponent);
+                                if (cachedTranslation != null) {
+                                    Object newValue = wasOptional ? Optional.of(cachedTranslation) : cachedTranslation;
+                                    instantUpdatesToSend.add(new EntityData(data.getIndex(), data.getType(), newValue));
+                                } else {
+                                    String legacyText = TranslatorPlugin.getLegacyComponentSerializer().serialize(originalComponent);
 
-                                if (!legacyText.trim().isEmpty()) {
-                                    final Component keyComponent = originalComponent;
-                                    final boolean isOptionalFinal = wasOptional;
+                                    if (!legacyText.trim().isEmpty()) {
+                                        final Component keyComponent = originalComponent;
+                                        final boolean isOptionalFinal = wasOptional;
 
-                                    translateHologramLine(player, legacyText, hologramModule)
-                                            .thenAccept(translatedComponent -> {
-                                                if (translatedComponent == null) return;
+                                        translateHologramLine(player, legacyText, hologramModule)
+                                                .thenAccept(translatedComponent -> {
+                                                    if (translatedComponent == null) return;
 
-                                                personalCache.put(keyComponent, translatedComponent);
+                                                    personalCache.put(keyComponent, translatedComponent);
 
-                                                Object updatedValue = isOptionalFinal ? Optional.of(translatedComponent) : translatedComponent;
-                                                EntityData<?> newDataUpdate = new EntityData<>(data.getIndex(), data.getType(), updatedValue);
+                                                    Object updatedValue = isOptionalFinal ? Optional.of(translatedComponent) : translatedComponent;
+                                                    EntityData<?> newDataUpdate = new EntityData<>(data.getIndex(), data.getType(), updatedValue);
 
-                                                sendUpdatePacket(user, entityId, List.of(newDataUpdate), hologramModule);
-                                            });
+                                                    sendUpdatePacket(user, entityId, List.of(newDataUpdate), hologramModule);
+                                                });
+                                    }
                                 }
                             }
                         }
-                    }
+                        if (!instantUpdatesToSend.isEmpty()) {
+                            sendUpdatePacket(user, entityId, instantUpdatesToSend, hologramModule);
+                        }
+                    });
 
-                    if (!instantUpdatesToSend.isEmpty()) {
-                        sendUpdatePacket(user, entityId, instantUpdatesToSend, hologramModule);
-                    }
+
+
                 });
     }
 
     private CompletableFuture<Component> translateHologramLine(Player player, String text, HologramModule hologramModule) {
         if (player == null) return CompletableFuture.completedFuture(null);
-        String lang = hologramModule.getPlayerLocaleProcessor().retrieveLocale(player.getUniqueId());
 
-        return hologramModule.translate(text, lang)
-                .thenApply(translatedString -> TranslatorPlugin.getLegacyComponentSerializer().deserialize(translatedString));
+        final UUID playerId = player.getUniqueId();
+
+        final PlayerLocaleProcessor playerLocaleProcessor = hologramModule.getPlayerLocaleProcessor();
+
+        return playerLocaleProcessor.retrieveLocale(playerId).thenCompose(lang ->
+                hologramModule.translate(text, lang).thenApply(translatedString ->
+                        TranslatorPlugin.getLegacyComponentSerializer().deserialize(translatedString)));
     }
 
     private void sendUpdatePacket(User user, int entityId, List<EntityData<?>> newData, HologramModule hologramModule) {

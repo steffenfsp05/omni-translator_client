@@ -81,12 +81,14 @@ public class SystemChatPacketListener implements PacketListener {
                 return;
             }
 
-            messageSequencer.translateWithOrder(
-                    uuid,
-                    messageComponent,
-                    systemChatService.getPlayerLocaleProcessor().retrieveLocale(uuid),
-                    isOverlay
-            );
+            systemChatService.getPlayerLocaleProcessor().retrieveLocale(uuid).thenAccept(locale ->
+                    messageSequencer.translateWithOrder(
+                            uuid,
+                            messageComponent,
+                            locale,
+                            isOverlay
+                    ));
+
         });
 
 

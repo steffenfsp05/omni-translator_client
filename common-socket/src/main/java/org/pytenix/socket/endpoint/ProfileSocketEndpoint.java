@@ -114,6 +114,7 @@ public class ProfileSocketEndpoint implements ProfileEndpoint {
                         return new ProfileResultData(
                                 requestId,
                                 key.bytes(),
+                                Protobuf.ConsentType.UNKNOWN,
                                 Protobuf.ConsentType.UNKNOWN
                         );
                     });

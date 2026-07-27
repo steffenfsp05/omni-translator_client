@@ -7,13 +7,16 @@ import java.util.UUID;
 public record ProfileResultData(
         UUID requestId,
         byte[] analyticId,
-        Protobuf.ConsentType consentType
+        Protobuf.ConsentType translationConsent,
+        Protobuf.ConsentType analyticConsent
+
 ) {
     public static ProfileResultData createDefault(byte[] analyticId, UUID requestId) {
 
         return new ProfileResultData(
                 requestId,
                 analyticId,
+                Protobuf.ConsentType.UNKNOWN,
                 Protobuf.ConsentType.UNKNOWN
         );
     }
@@ -22,16 +25,26 @@ public record ProfileResultData(
         return new ProfileResultData(
                 newRequestId,
                 this.analyticId,
-                this.consentType
+                this.translationConsent,
+                this.analyticConsent
         );
     }
 
 
-    public ProfileResultData withConsentType(Protobuf.ConsentType newConsent) {
+    public ProfileResultData withTranslationConsentType(Protobuf.ConsentType newTranslationConsent) {
         return new ProfileResultData(
                 this.requestId,
                 this.analyticId,
-                newConsent
+                newTranslationConsent,
+                this.analyticConsent
+        );
+    }
+    public ProfileResultData withAnalyticConsentType(Protobuf.ConsentType newAnalyticConsent) {
+        return new ProfileResultData(
+                this.requestId,
+                this.analyticId,
+                this.translationConsent,
+                newAnalyticConsent
         );
     }
 

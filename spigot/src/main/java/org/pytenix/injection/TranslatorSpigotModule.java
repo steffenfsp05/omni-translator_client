@@ -67,14 +67,4 @@ public class TranslatorSpigotModule extends AbstractModule {
     }
 
 
-    @Provides
-    @Singleton
-    public PlayerLocaleProcessor providePlayerLocaleProcessor() {
-        return uuid -> {
-            Player player = Bukkit.getPlayer(uuid);
-            return (player == null) ? "en-en" : player.getLocale();
-        };
-    }
-
-
 }

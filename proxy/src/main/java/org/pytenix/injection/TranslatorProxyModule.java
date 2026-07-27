@@ -14,6 +14,7 @@ import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.pytenix.TranslatorPlugin;
 import org.pytenix.command.TranslateCommand;
 import org.pytenix.limbo.LimboService;
+import org.pytenix.limbo.book.ConsentBookService;
 import org.pytenix.limbo.listener.ServerPreConnectListener;
 import org.pytenix.listener.*;
 import org.pytenix.module.chat.listener.SystemChatPacketListener;
@@ -35,6 +36,7 @@ public class TranslatorProxyModule extends AbstractModule {
     @Override
     protected void configure() {
 
+        bind(ConsentBookService.class).in(Scopes.SINGLETON);
 
         bind(String.class).annotatedWith(Names.named("forwardingSecret")).toInstance(forwardingSecret);
 
@@ -42,7 +44,6 @@ public class TranslatorProxyModule extends AbstractModule {
         Multibinder<Object> velocityListeners = Multibinder.newSetBinder(binder(), Object.class, Names.named("velocityListeners"));
         velocityListeners.addBinding().to(org.pytenix.module.chat.listener.PlayerDisconnectListener.class).in(Scopes.SINGLETON);
         velocityListeners.addBinding().to(ProxyPingListener.class).in(Scopes.SINGLETON);
-        velocityListeners.addBinding().to(PlayerConnectionChangeListener.class).in(Scopes.SINGLETON);
         velocityListeners.addBinding().to(PlayerConnectListener.class).in(Scopes.SINGLETON);
         velocityListeners.addBinding().to(PlayerDisconnectListener.class).in(Scopes.SINGLETON);
         velocityListeners.addBinding().to(PlayerSettingsChangeListener.class).in(Scopes.SINGLETON);
@@ -63,15 +64,7 @@ public class TranslatorProxyModule extends AbstractModule {
         return configService.loadConfig("config.json", ConfigurationFile.class);
     }
 
-    @Provides
-    @Singleton
-    public PlayerLocaleProcessor providePlayerLocaleProcessor(ProxyServer proxyServer) {
-        return uuid ->
-        {
-            final Optional<Player> player = proxyServer.getPlayer(uuid);
-            return player.map(value -> value.getPlayerSettings().getLocale().toString()).orElse("en_en");
-        };
-    }
+
 
 
     @Provides

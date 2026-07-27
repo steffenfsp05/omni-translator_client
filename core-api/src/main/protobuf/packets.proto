@@ -5,153 +5,11 @@ package org.omni.proto;
 option java_package = "org.omni.proto.generated";
 option java_outer_classname = "Protobuf";
 
+// ==========================================
+// CONFIGURATION & ENUMS
+// ==========================================
 
-message ServerConfiguration {
-  string license_key = 1;
-  string default_language = 2;
-  ConsentMode consentMode = 3;
-  repeated Module active_modules = 4; // Liste aller Module, die auf 'true' stehen
-  repeated string words = 5;
-}
-
-message GeoRequestPacket
-{
-  fixed64 request_id_most_sig = 1;
-  fixed64 request_id_least_sig = 2;
-  string ip_address = 3;
-}
-
-
-message TrackPlayerPacket {
-
-  int64 timestamp = 1;
-
-  fixed64 request_id_most_sig = 2;
-  fixed64 request_id_least_sig = 3;
-
-  bytes analytics_id = 4;
-
-  int32 playtime_seconds = 5;
-
-  bool is_translated = 6;
-  string language = 7;
-}
-
-message HeartbeatPacket {
-
-  int64 timestamp = 1;
-
-  fixed64 request_id_most_sig = 2;
-  fixed64 request_id_least_sig = 3;
-
-  int32 total_online = 4;
-  int32 consent_unknown_count = 5;
-  int32 consent_explicit_count = 6;
-  int32 consent_auto_count = 7;
-  int32 consent_declined_count = 8;
-  map<string, int32> lang_distribution = 9;
-}
-
-message GeoResultPacket
-{
-  fixed64 request_id_most_sig = 1;
-  fixed64 request_id_least_sig = 2;
-  string language = 3;
-}
-
-
-message ConfigRequestPacket {
-  int64 timestamp = 1;
-}
-
-message TranslationRequest {
-  fixed64 request_id_most_sig = 1;
-  fixed64 request_id_least_sig = 2;
-
-  string text = 3;
-  string target_lang = 4;
-  Module module = 5;
-}
-
-message ConsentRefreshRequest
-{
-  fixed64 request_id_most_sig = 1;
-  fixed64 request_id_least_sig = 2;
-
-  fixed64 user_id_most_sig = 3;
-  fixed64 user_id_least_sig = 4;
-
-  ConsentType consentType = 5;
-}
-
-//Für Proxy -> Backend
-message ProfileExternUpdate
-{
-  ProfilePacket profilePacket = 1;
-}
-
-//Für Proxy -> Backend
-message ProfileExternRequest
-{
-  string license = 1;
-  fixed64 request_id_most_sig = 2;
-  fixed64 request_id_least_sig = 3;
-  bytes analytics_id = 4;
-}
-
-
-message ProfilePacket {
-
-
-  string license = 1;
-  fixed64 request_id_most_sig = 3;
-  fixed64 request_id_least_sig = 4;
-
-  bytes analytics_id = 5;
-
-  ConsentType consentType = 6;
-}
-
-
-
-message TranslationResult {
-  fixed64 request_id_most_sig = 1;
-  fixed64 request_id_least_sig = 2;
-  string result = 3;
-}
-
-
-message CacheInvalidationRequest
-{
-  fixed64 request_id_most_sig = 1;
-  fixed64 request_id_least_sig = 2;
-  oneof payload {
-    ProfileInvalidation profile_invalidation = 3;
-    TranslationInvalidation translation_invalidation = 4;
-  }
-}
-
-message ProfileInvalidation
-{
-  bytes analyticId = 1;
-}
-
-message TranslationInvalidation
-{
-  string text = 1;
-  string language = 2;
-  Module module = 3;
-}
-
-enum CacheInvalidationType
-{
-  CACHE_UNKNOWN = 0;
-  CACHE_PROFILE = 1;
-  CACHE_TRANSLATION = 2;
-}
-
-enum ConsentType
-{
+enum ConsentType {
   UNKNOWN = 0;
   EXPLICIT = 1;
   AUTO = 2;
@@ -165,7 +23,6 @@ enum ConsentMode {
   CONSENT_AUTO_OPT = 3;
 }
 
-
 enum Module {
   MODULE_UNKNOWN = 0;
   MODULE_LIVE_CHAT = 1;
@@ -175,6 +32,155 @@ enum Module {
   MODULE_SIGNS = 5;
   MODULE_MOTD = 6;
 }
+
+enum CacheInvalidationType {
+  CACHE_UNKNOWN = 0;
+  CACHE_PROFILE = 1;
+  CACHE_TRANSLATION = 2;
+}
+
+message ServerConfiguration {
+  string license_key = 1;
+  string default_language = 2;
+  ConsentMode consentMode = 3;
+  repeated Module active_modules = 4; // Liste aller Module, die auf 'true' stehen
+  repeated string words = 5;
+}
+
+message ConfigRequestPacket {
+  int64 timestamp = 1;
+}
+
+// ==========================================
+// TELEMETRY & ANALYTICS (DSGVO konform)
+// ==========================================
+
+message HeartbeatPacket {
+  int64 timestamp = 1;
+
+  fixed64 request_id_most_sig = 2;
+  fixed64 request_id_least_sig = 3;
+
+  int32 total_online = 4;
+
+  int32 translation_unknown_count = 5;
+  int32 translation_explicit_count = 6;
+  int32 translation_auto_count = 7;
+  int32 translation_declined_count = 8;
+
+  int32 analytics_unknown_count = 9;
+  int32 analytics_explicit_count = 10;
+  int32 analytics_auto_count = 11;
+  int32 analytics_declined_count = 12;
+
+  map<string, int32> lang_distribution = 13;
+}
+
+message TrackPlayerPacket {
+  int64 timestamp = 1;
+
+  fixed64 request_id_most_sig = 2;
+  fixed64 request_id_least_sig = 3;
+
+  bytes analytics_id = 4;
+  int32 playtime_seconds = 5;
+  bool is_translated = 6;
+  string language = 7;
+}
+
+// ==========================================
+// PLAYER PROFILES & CONSENT
+// ==========================================
+
+message ConsentRefreshRequest {
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+
+  fixed64 user_id_most_sig = 3;
+  fixed64 user_id_least_sig = 4;
+
+  ConsentType translation_consent_type = 5;
+  ConsentType analytics_consent_type = 6;
+}
+
+message ProfilePacket {
+  fixed64 request_id_most_sig = 3;
+  fixed64 request_id_least_sig = 4;
+
+  bytes analytics_id = 5;
+
+  ConsentType translation_consent_type = 6;
+  ConsentType analytics_consent_type = 7;
+}
+
+message ProfileExternRequest {
+  string license = 1;
+  fixed64 request_id_most_sig = 2;
+  fixed64 request_id_least_sig = 3;
+  bytes analytics_id = 4;
+}
+
+message ProfileExternUpdate {
+  ProfilePacket profilePacket = 1;
+}
+
+// ==========================================
+// TRANSLATION & GEO-IP
+// ==========================================
+
+message GeoRequestPacket {
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+  string ip_address = 3;
+}
+
+message GeoResultPacket {
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+  string language = 3;
+}
+
+message TranslationRequest {
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+
+  string text = 3;
+  string target_lang = 4;
+  Module module = 5;
+}
+
+message TranslationResult {
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+  string result = 3;
+}
+
+// ==========================================
+// CACHING
+// ==========================================
+
+message CacheInvalidationRequest {
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+  oneof payload {
+    ProfileInvalidation profile_invalidation = 3;
+    TranslationInvalidation translation_invalidation = 4;
+  }
+}
+
+message ProfileInvalidation {
+  bytes analyticId = 1;
+}
+
+message TranslationInvalidation {
+  string text = 1;
+  string language = 2;
+  Module module = 3;
+}
+
+// ==========================================
+// WRAPPER
+// ==========================================
 
 message PacketWrapper {
   oneof payload {
@@ -191,6 +197,5 @@ message PacketWrapper {
     ProfileExternRequest profile_extern_request = 11;
     ProfileExternUpdate profile_extern_update = 12;
     CacheInvalidationRequest cache_invalidation_request = 13;
-
   }
 }

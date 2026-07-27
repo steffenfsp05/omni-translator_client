@@ -13,9 +13,6 @@ import java.util.UUID;
 @Singleton
 public class HeartBeatRequestMapper extends AbstractPacketMapper<Protobuf.HeartbeatPacket, HeartBeatUpdateData> {
 
-
-    private static final Map<Protobuf.Module, TranslationModule> MODULE_MAP = new EnumMap<>(Protobuf.Module.class);
-
     public HeartBeatRequestMapper() {
         super(Protobuf.HeartbeatPacket.class, HeartBeatUpdateData.class);
     }
@@ -27,12 +24,19 @@ public class HeartBeatRequestMapper extends AbstractPacketMapper<Protobuf.Heartb
                 .setRequestIdMostSig(packet.requestId().getMostSignificantBits())
                 .setRequestIdLeastSig(packet.requestId().getLeastSignificantBits())
                 .setTimestamp(packet.timestamp())
-                .setTotalOnline(packet.total_online())
-                .setConsentUnknownCount(packet.consent_unknown())
-                .setConsentExplicitCount(packet.consent_explicit())
-                .setConsentAutoCount(packet.consent_auto())
-                .setConsentDeclinedCount(packet.consent_declined())
-                .putAllLangDistribution(packet.language_distribution())
+                .setTotalOnline(packet.totalOnline())
+
+                .setTranslationUnknownCount(packet.translationUnknown())
+                .setTranslationExplicitCount(packet.translationExplicit())
+                .setTranslationAutoCount(packet.translationAuto())
+                .setTranslationDeclinedCount(packet.translationDeclined())
+
+                .setAnalyticsUnknownCount(packet.analyticsUnknown())
+                .setAnalyticsExplicitCount(packet.analyticsExplicit())
+                .setAnalyticsAutoCount(packet.analyticsAuto())
+                .setAnalyticsDeclinedCount(packet.analyticsDeclined())
+
+                .putAllLangDistribution(packet.languageDistribution())
                 .build();
     }
 
@@ -43,11 +47,18 @@ public class HeartBeatRequestMapper extends AbstractPacketMapper<Protobuf.Heartb
                 new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig()),
                 packet.getTimestamp(),
                 packet.getTotalOnline(),
-                packet.getConsentUnknownCount(),
-                packet.getConsentExplicitCount(),
-                packet.getConsentAutoCount(),
-                packet.getConsentDeclinedCount(),
-                packet.getLangDistributionMap());
-    }
 
+                packet.getTranslationUnknownCount(),
+                packet.getTranslationExplicitCount(),
+                packet.getTranslationAutoCount(),
+                packet.getTranslationDeclinedCount(),
+
+                packet.getAnalyticsUnknownCount(),
+                packet.getAnalyticsExplicitCount(),
+                packet.getAnalyticsAutoCount(),
+                packet.getAnalyticsDeclinedCount(),
+
+                packet.getLangDistributionMap()
+        );
+    }
 }

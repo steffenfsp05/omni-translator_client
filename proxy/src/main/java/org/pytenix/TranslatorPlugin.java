@@ -22,7 +22,6 @@ import org.pytenix.limbo.LimboService;
 import org.pytenix.module.chat.listener.SystemChatPacketListener;
 import org.pytenix.roi.inject.RoiModule;
 import org.pytenix.socket.inject.SocketModule;
-import org.pytenix.socket.socket.WebSocketService;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -46,7 +45,6 @@ public class TranslatorPlugin {
     private final Path dataDirectory;
     private final Injector velocityInjector;
 
-    private WebSocketService connectionService;
     private LimboService limboService;
 
     @Inject
@@ -119,7 +117,6 @@ public class TranslatorPlugin {
 
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) throws Exception {
-        if (connectionService != null) connectionService.close();
         if (limboService != null) limboService.shutdown();
     }
 

@@ -7,7 +7,8 @@ import java.util.UUID;
 public record ConsentRefreshRequestData(
         UUID requestId,
         UUID playerId,
-        Protobuf.ConsentType consentType
+        Protobuf.ConsentType translationConsentType,
+        Protobuf.ConsentType analyticConsentType
 ) {
 
 }

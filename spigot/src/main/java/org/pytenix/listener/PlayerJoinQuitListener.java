@@ -22,7 +22,7 @@ public class PlayerJoinQuitListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        this.eventService.callEvent(new PlayerConnectEvent(event.getPlayer().getUniqueId(), event.getPlayer().getName()));
+        this.eventService.callEvent(new PlayerConnectEvent(event.getPlayer().getUniqueId(), event.getPlayer().getName(), event.getPlayer().getLocale().toString()));
     }
 
     @EventHandler

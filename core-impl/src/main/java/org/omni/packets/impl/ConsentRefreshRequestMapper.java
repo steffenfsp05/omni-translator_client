@@ -20,7 +20,8 @@ public class ConsentRefreshRequestMapper extends AbstractPacketMapper<Protobuf.C
     @Override
     public Protobuf.ConsentRefreshRequest to(ConsentRefreshRequestData packet) {
         return Protobuf.ConsentRefreshRequest.newBuilder()
-                .setConsentType(packet.consentType())
+                .setAnalyticsConsentType(packet.analyticConsentType())
+                .setTranslationConsentType(packet.translationConsentType())
                 .setUserIdMostSig(packet.playerId().getMostSignificantBits())
                 .setUserIdLeastSig(packet.playerId().getLeastSignificantBits())
                 .setRequestIdMostSig(packet.requestId().getMostSignificantBits())
@@ -33,7 +34,8 @@ public class ConsentRefreshRequestMapper extends AbstractPacketMapper<Protobuf.C
         return new ConsentRefreshRequestData(
                 new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig()),
                 new UUID(packet.getUserIdMostSig(), packet.getUserIdLeastSig()),
-                packet.getConsentType()
+                packet.getTranslationConsentType(),
+                packet.getAnalyticsConsentType()
         );
     }
 

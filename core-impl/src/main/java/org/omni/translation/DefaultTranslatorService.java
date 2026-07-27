@@ -74,21 +74,22 @@ public class DefaultTranslatorService implements TranslatorService {
             return CompletableFuture.completedFuture(true);
         }
 
-        String playerLocale = playerLocaleProcessor.retrieveLocale(playerUUID);
-        if (playerLocale != null && playerLocale.startsWith(translationConfiguration.getDefaultLanguage().toLowerCase())) {
-            return CompletableFuture.completedFuture(false);
-        }
+        return playerLocaleProcessor.retrieveLocale(playerUUID).thenCompose(playerLocale -> {
 
-        return profileEndpoint.sendRequest(playerUUID)
-                .thenApply(profileData -> {
-                    if (translationConfiguration.getConsentMode().equals(ServerConsentMode.AUTO_OPT) &&
-                            profileData.consentType().equals(Protobuf.ConsentType.AUTO))
-                        return true;
+            if (playerLocale != null && playerLocale.startsWith(translationConfiguration.getDefaultLanguage().toLowerCase())) {
+                return CompletableFuture.completedFuture(false);
+            }
 
-                    return !profileData.consentType().equals(Protobuf.ConsentType.DECLINED);
-                }).exceptionally(throwable -> {
-                    return false;
-                });
+            return profileEndpoint.sendRequest(playerUUID)
+                    .thenApply(profileData -> {
+                        if (translationConfiguration.getConsentMode().equals(ServerConsentMode.AUTO_OPT) &&
+                                profileData.translationConsent().equals(Protobuf.ConsentType.AUTO)) {
+                            return true;
+                        }
+                        return !profileData.translationConsent().equals(Protobuf.ConsentType.DECLINED);
+                    })
+                    .exceptionally(throwable -> false);
+        });
     }
 
     public CompletableFuture<String> process(UUID id, String text, String targetLang, TranslationModule translationModule) {

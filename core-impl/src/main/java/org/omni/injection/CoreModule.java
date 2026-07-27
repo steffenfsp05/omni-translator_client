@@ -4,11 +4,14 @@ import com.google.inject.*;
 import org.omni.cache.CacheProvider;
 import org.omni.cache.CaffeineCacheProvider;
 import org.omni.injection.modules.*;
+import org.omni.locale.LocaleManager;
 import org.omni.profile.AbstractAnalyticsSecret;
 import org.omni.secret.CommonAnalyticsSecret;
+import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 public class CoreModule extends AbstractModule {
 
@@ -40,5 +43,11 @@ public class CoreModule extends AbstractModule {
     @Singleton
     public AbstractAnalyticsSecret provideAnalyticsSecret(Logger logger) {
         return new CommonAnalyticsSecret(logger, dataDirectory);
+    }
+
+    @Provides
+    @Singleton
+    public PlayerLocaleProcessor providePlayerLocaleProcessor(LocaleManager localeManager) {
+        return localeManager::getLocale;
     }
 }

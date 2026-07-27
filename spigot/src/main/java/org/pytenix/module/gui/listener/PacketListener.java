@@ -82,15 +82,15 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
                     .map(SpigotConversionUtil::toBukkitItemStack)
                     .orElse(null);
 
-            String locale = inventoryModule.getPlayerLocaleProcessor().retrieveLocale(player.getUniqueId());
-
-            CompletableFuture.runAsync(() -> {
+            inventoryModule.getPlayerLocaleProcessor().retrieveLocale(player.getUniqueId()).thenAcceptAsync(locale ->
+            {
                 try {
                     translateAndSendUpdate(player, windowId, stateId, bukkitItems, carriedItem, locale, inventoryModule);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
+
         } catch (Exception e) {
             System.out.println("Fehler beim Lesen des Pakets: " + e.getMessage());
             e.printStackTrace();
@@ -114,9 +114,10 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
         int stateId = wrapper.getStateId();
         int slot = wrapper.getSlot();
         final ItemStack item = SpigotConversionUtil.toBukkitItemStack(wrapper.getItem()).clone();
-        String locale = inventoryModule.getPlayerLocaleProcessor().retrieveLocale(player.getUniqueId());
 
-        inventoryModule.translateItem(item, locale).thenAccept(translatedItem -> {
+
+        inventoryModule.getPlayerLocaleProcessor().retrieveLocale(player.getUniqueId()).thenCompose(locale ->
+                inventoryModule.translateItem(item, locale).thenAccept(translatedItem -> {
             if (!player.isOnline()) return;
 
             Integer lastId = latestStateIdMap.get(player.getUniqueId());
@@ -135,7 +136,7 @@ public class PacketListener implements com.github.retrooper.packetevents.event.P
             );
 
             PacketEvents.getAPI().getPlayerManager().sendPacketSilently(player, updatePacket);
-        });
+        }));
     }
 
     private void sendUpdateToClient(Player player, int windowId, int stateId, List<ItemStack> items, ItemStack carriedItem) {

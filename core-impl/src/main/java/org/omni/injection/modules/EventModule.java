@@ -6,6 +6,9 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import org.omni.event.EventService;
 import org.omni.event.impl.DefaultEventService;
+import org.omni.locale.listener.LocalePlayerConnectListener;
+import org.omni.locale.listener.LocalePlayerDisconnectListener;
+import org.omni.locale.listener.LocaleSettingsChangeListener;
 import org.omni.placeholder.listener.ConfigUpdateListener;
 import org.omni.placeholder.listener.PlayerConnectListener;
 import org.omni.placeholder.listener.PlayerDisconnectListener;
@@ -20,5 +23,8 @@ public class EventModule extends AbstractModule {
         omniListeners.addBinding().to(ConfigUpdateListener.class).in(Scopes.SINGLETON);
         omniListeners.addBinding().to(PlayerConnectListener.class).in(Scopes.SINGLETON);
         omniListeners.addBinding().to(PlayerDisconnectListener.class).in(Scopes.SINGLETON);
+        omniListeners.addBinding().to(LocaleSettingsChangeListener.class).in(Scopes.SINGLETON);
+        omniListeners.addBinding().to(LocalePlayerConnectListener.class).in(Scopes.SINGLETON);
+        omniListeners.addBinding().to(LocalePlayerDisconnectListener.class).in(Scopes.SINGLETON);
     }
 }

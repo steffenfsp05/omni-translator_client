@@ -5,12 +5,19 @@ import java.util.UUID;
 
 public record HeartBeatUpdateData(
         UUID requestId,
-        Long timestamp,
-        int total_online,
-        int consent_unknown,
-        int consent_explicit,
-        int consent_auto,
-        int consent_declined,
-        Map<String, Integer> language_distribution
+        long timestamp,
+        int totalOnline,
+
+        int translationUnknown,
+        int translationExplicit,
+        int translationAuto,
+        int translationDeclined,
+
+        int analyticsUnknown,
+        int analyticsExplicit,
+        int analyticsAuto,
+        int analyticsDeclined,
+
+        Map<String, Integer> languageDistribution
 ) {
 }

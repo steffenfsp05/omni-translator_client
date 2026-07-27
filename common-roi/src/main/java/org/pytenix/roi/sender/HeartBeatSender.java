@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 @Singleton
 public class HeartBeatSender implements AutoCloseable {
 
-
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     private final PlayerTrackerService playerTrackerService;
@@ -30,67 +29,107 @@ public class HeartBeatSender implements AutoCloseable {
     private final TransportSender transportSender;
 
     @Inject
-    public HeartBeatSender(PlayerLocaleProcessor playerLocaleProcessor, ProfileEndpoint profileEndpoint, TransportSender transportSender, PlayerTrackerService playerTrackerService) {
+    public HeartBeatSender(PlayerLocaleProcessor playerLocaleProcessor, ProfileEndpoint profileEndpoint,
+                           TransportSender transportSender, PlayerTrackerService playerTrackerService) {
 
         this.playerTrackerService = playerTrackerService;
         this.playerLocaleProcessor = playerLocaleProcessor;
         this.profileEndpoint = profileEndpoint;
         this.transportSender = transportSender;
 
-        scheduler.schedule(this::sendHeartbeat, 20, TimeUnit.SECONDS);
+        scheduler.scheduleWithFixedDelay(this::sendHeartbeat, 20, 20, TimeUnit.SECONDS);
     }
-
 
     private void sendHeartbeat() {
 
-
+        System.out.println("SENDING HEARTBEAT");
         final Set<UUID> onlinePlayers = playerTrackerService.getTrackCache().asMap().keySet();
 
-        Map<String, Integer> langDistribution;
-        List<CompletableFuture<ProfileResultData>> futures;
+        if (onlinePlayers.isEmpty()) {
+            sendEmptyHeartbeat();
+            return;
+        }
 
+        List<CompletableFuture<String>> localeFutures = onlinePlayers.stream()
+                .map(playerLocaleProcessor::retrieveLocale)
+                .toList();
 
-        langDistribution = onlinePlayers.stream()
-                .collect(Collectors.toMap(
-                        playerLocaleProcessor::retrieveLocale,
-                        profile -> 1,
-                        Integer::sum
-                ));
-
-        futures = onlinePlayers.stream()
+        List<CompletableFuture<ProfileResultData>> profileFutures = onlinePlayers.stream()
                 .map(profileEndpoint::sendRequest)
                 .toList();
 
+        List<CompletableFuture<?>> allFutures = new ArrayList<>();
+        allFutures.addAll(localeFutures);
+        allFutures.addAll(profileFutures);
 
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+        CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0]))
                 .thenAccept(unused -> {
 
-                    List<ProfileResultData> data = futures.stream()
+                    Map<String, Integer> langDistribution = localeFutures.stream()
+                            .map(CompletableFuture::join)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toMap(
+                                    locale -> locale,
+                                    locale -> 1,
+                                    Integer::sum
+                            ));
+
+                    List<ProfileResultData> data = profileFutures.stream()
                             .map(CompletableFuture::join)
                             .filter(Objects::nonNull)
                             .toList();
+
+                    System.out.println("SENT!");
 
                     transportSender.sendPacket(PacketRegistry.HEART_BEAT,
                             new HeartBeatUpdateData(
                                     UUID.randomUUID(),
                                     System.currentTimeMillis(),
-                                    data.size(),
-                                    filterByConsent(data, Protobuf.ConsentType.UNKNOWN),
-                                    filterByConsent(data, Protobuf.ConsentType.EXPLICIT),
-                                    filterByConsent(data, Protobuf.ConsentType.AUTO),
-                                    filterByConsent(data, Protobuf.ConsentType.DECLINED),
+                                    data.size(), // totalOnline
+
+                                    filterByTranslationConsent(data, Protobuf.ConsentType.UNKNOWN),
+                                    filterByTranslationConsent(data, Protobuf.ConsentType.EXPLICIT),
+                                    filterByTranslationConsent(data, Protobuf.ConsentType.AUTO),
+                                    filterByTranslationConsent(data, Protobuf.ConsentType.DECLINED),
+
+                                    filterByAnalyticConsent(data, Protobuf.ConsentType.UNKNOWN),
+                                    filterByAnalyticConsent(data, Protobuf.ConsentType.EXPLICIT),
+                                    filterByAnalyticConsent(data, Protobuf.ConsentType.AUTO),
+                                    filterByAnalyticConsent(data, Protobuf.ConsentType.DECLINED),
+
                                     langDistribution
                             )
                     );
+                }).exceptionally(ex -> {
+                    System.err.println("Fehler beim Senden des Heartbeats: " + ex.getMessage());
+                    return null;
                 });
     }
 
-    private int filterByConsent(List<ProfileResultData> profileDataList, Protobuf.ConsentType consentType) {
+    private void sendEmptyHeartbeat() {
+        transportSender.sendPacket(PacketRegistry.HEART_BEAT,
+                new HeartBeatUpdateData(
+                        UUID.randomUUID(),
+                        System.currentTimeMillis(),
+                        0, // totalOnline
+                        0, 0, 0, 0,
+                        0, 0, 0, 0,
+                        Collections.emptyMap()
+                )
+        );
+    }
+
+    private int filterByTranslationConsent(List<ProfileResultData> profileDataList, Protobuf.ConsentType consentType) {
         return (int) profileDataList.stream()
-                .filter(profileData -> profileData.consentType() == consentType)
+                .filter(profileData -> profileData.translationConsent() == consentType)
                 .count();
     }
 
+    private int filterByAnalyticConsent(List<ProfileResultData> profileDataList, Protobuf.ConsentType consentType) {
+        return (int) profileDataList.stream()
+                .filter(profileData -> profileData.analyticConsent() == consentType)
+                .count();
+    }
 
     @Override
     public void close() throws Exception {

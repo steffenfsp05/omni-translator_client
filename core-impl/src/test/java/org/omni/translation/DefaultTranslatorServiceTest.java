@@ -53,7 +53,7 @@ class DefaultTranslatorServiceTest {
         when(config.getDefaultLanguage()).thenReturn("en");
         translatorService.setTranslationConfiguration(config);
 
-        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn("de_de");
+        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn(CompletableFuture.completedFuture("de_de"));
 
         when(profileEndpoint.sendRequest(testPlayerUuid))
                 .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Database offline")));
@@ -89,7 +89,7 @@ class DefaultTranslatorServiceTest {
         when(config.getDefaultLanguage()).thenReturn("de");
         translatorService.setTranslationConfiguration(config);
 
-        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn("de_de");
+        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn(CompletableFuture.completedFuture("de_de"));
 
         assertFalse(translatorService.requiresTranslation(testPlayerUuid).get());
     }
@@ -101,10 +101,10 @@ class DefaultTranslatorServiceTest {
         when(config.getConsentMode()).thenReturn(ServerConsentMode.STRICT);
         translatorService.setTranslationConfiguration(config);
 
-        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn("de_de");
+        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn(CompletableFuture.completedFuture("de_de"));
 
         ProfileResultData mockProfile = mock(ProfileResultData.class);
-        when(mockProfile.consentType()).thenReturn(Protobuf.ConsentType.DECLINED);
+        when(mockProfile.translationConsent()).thenReturn(Protobuf.ConsentType.DECLINED);
 
         when(profileEndpoint.sendRequest(testPlayerUuid)).thenReturn(CompletableFuture.completedFuture(mockProfile));
 
@@ -118,11 +118,11 @@ class DefaultTranslatorServiceTest {
         when(config.getConsentMode()).thenReturn(ServerConsentMode.AUTO_OPT);
         translatorService.setTranslationConfiguration(config);
 
-        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn("de_de");
+        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn(CompletableFuture.completedFuture("de_de"));
 
         ProfileResultData mockProfile = mock(ProfileResultData.class);
         // Bei AUTO_OPT und Typ AUTO muss Übersetzung aktiv sein
-        when(mockProfile.consentType()).thenReturn(Protobuf.ConsentType.AUTO);
+        when(mockProfile.translationConsent()).thenReturn(Protobuf.ConsentType.AUTO);
 
         when(profileEndpoint.sendRequest(testPlayerUuid)).thenReturn(CompletableFuture.completedFuture(mockProfile));
 
@@ -161,11 +161,11 @@ class DefaultTranslatorServiceTest {
         when(config.getConsentMode()).thenReturn(ServerConsentMode.STRICT);
         translatorService.setTranslationConfiguration(config);
 
-        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn("de_de");
+        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn(CompletableFuture.completedFuture("de_de"));
 
         ProfileResultData mockProfile = mock(ProfileResultData.class);
         // Im STRICT Modus greift die AUTO_OPT Sonderregel nicht, aber "nicht abgelehnt" reicht
-        when(mockProfile.consentType()).thenReturn(Protobuf.ConsentType.AUTO);
+        when(mockProfile.translationConsent()).thenReturn(Protobuf.ConsentType.AUTO);
         when(profileEndpoint.sendRequest(testPlayerUuid)).thenReturn(CompletableFuture.completedFuture(mockProfile));
 
         assertTrue(translatorService.requiresTranslation(testPlayerUuid).get());
@@ -178,10 +178,10 @@ class DefaultTranslatorServiceTest {
         when(config.getConsentMode()).thenReturn(ServerConsentMode.AUTO_OPT);
         translatorService.setTranslationConfiguration(config);
 
-        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn("de_de");
+        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn(CompletableFuture.completedFuture("de_de"));
 
         ProfileResultData mockProfile = mock(ProfileResultData.class);
-        when(mockProfile.consentType()).thenReturn(Protobuf.ConsentType.DECLINED);
+        when(mockProfile.translationConsent()).thenReturn(Protobuf.ConsentType.DECLINED);
         when(profileEndpoint.sendRequest(testPlayerUuid)).thenReturn(CompletableFuture.completedFuture(mockProfile));
 
         assertFalse(translatorService.requiresTranslation(testPlayerUuid).get());
@@ -195,10 +195,10 @@ class DefaultTranslatorServiceTest {
         translatorService.setTranslationConfiguration(config);
 
         // Spieler hat (noch) keine bekannte Locale
-        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn(null);
+        when(localeProcessor.retrieveLocale(testPlayerUuid)).thenReturn(CompletableFuture.completedFuture(null));
 
         ProfileResultData mockProfile = mock(ProfileResultData.class);
-        when(mockProfile.consentType()).thenReturn(Protobuf.ConsentType.DECLINED);
+        when(mockProfile.translationConsent()).thenReturn(Protobuf.ConsentType.DECLINED);
         when(profileEndpoint.sendRequest(testPlayerUuid)).thenReturn(CompletableFuture.completedFuture(mockProfile));
 
         assertFalse(translatorService.requiresTranslation(testPlayerUuid).get());
