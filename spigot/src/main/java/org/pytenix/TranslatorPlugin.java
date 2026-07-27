@@ -43,14 +43,6 @@ public class TranslatorPlugin extends JavaPlugin {
     @Inject
     TranslatorService translatorService;
 
-
-    @Inject
-    @Named("configFile")
-    private File configFile;
-
-    @Inject
-    private ObjectMapper mapper;
-
     private String serverName;
 
     @Override
@@ -78,8 +70,6 @@ public class TranslatorPlugin extends JavaPlugin {
 
         injector.injectMembers(this);
 
-        loadConfigFromDisk();
-
         injector.getInstance(ModuleService.class);
 
         injector.getInstance(TransportConnector.class).connect();
@@ -88,7 +78,7 @@ public class TranslatorPlugin extends JavaPlugin {
 
         registerCommands(injector);
 
-        getLogger().info("AITranslator Test-Modul geladen!");
+        getLogger().info("Omni Spigot Translator loaded successfully");
     }
 
     private void registerListeners(Injector injector) {
@@ -125,23 +115,6 @@ public class TranslatorPlugin extends JavaPlugin {
         });
     }
 
-    private void loadConfigFromDisk() {
-        if (!configFile.exists()) {
-            getLogger().info("Keine lokale Config gefunden. Nutze Default bis Proxy sendet.");
-            resetConfiguration();
-            return;
-        }
-        try {
-            translatorService.setTranslationConfiguration(mapper.readValue(configFile, ServerConfiguration.class));
-        } catch (IOException e) {
-            getLogger().severe("Konnte lokale Config nicht laden: " + e.getMessage());
-            resetConfiguration();
-        }
-    }
-
-    private void resetConfiguration() {
-        translatorService.setTranslationConfiguration(ServerConfiguration.createDefault("DEIN-LIZENZ-SCHLÜSSEL"));
-    }
 
     @Override
     public void onDisable() {

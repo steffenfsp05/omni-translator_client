@@ -6,25 +6,27 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.omni.placeholder.protector.PlayerNameProtector;
+import org.omni.event.EventService;
+import org.omni.event.register.player.PlayerConnectEvent;
+import org.omni.event.register.player.PlayerDisconnectEvent;
 
 @Singleton
 public class PlayerJoinQuitListener implements Listener {
 
-    private final PlayerNameProtector playerNameProtector;
+    private final EventService eventService;
 
     @Inject
-    public PlayerJoinQuitListener(PlayerNameProtector playerNameProtector) {
-        this.playerNameProtector = playerNameProtector;
+    public PlayerJoinQuitListener(EventService eventService) {
+        this.eventService = eventService;
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        this.playerNameProtector.addPlayer(event.getPlayer().getName());
+        this.eventService.callEvent(new PlayerConnectEvent(event.getPlayer().getUniqueId(), event.getPlayer().getName()));
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        this.playerNameProtector.removePlayer(event.getPlayer().getName());
+        this.eventService.callEvent(new PlayerDisconnectEvent(event.getPlayer().getUniqueId(), event.getPlayer().getName()));
     }
 }

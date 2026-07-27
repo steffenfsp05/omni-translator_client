@@ -48,8 +48,7 @@ public class DefaultTranslatorService implements TranslatorService {
             DefaultTranslationPipeline pipeline,
             ProfileEndpoint profileEndpoint,
             EventService eventService,
-            PlayerLocaleProcessor playerLocaleProcessor,
-            PlaceholderService placeholderService) {
+            PlayerLocaleProcessor playerLocaleProcessor) {
 
         this.translationEndpoint = translationEndpoint;
         this.pipeline = pipeline;
@@ -57,8 +56,6 @@ public class DefaultTranslatorService implements TranslatorService {
         this.profileEndpoint = profileEndpoint;
         this.eventService = eventService;
 
-
-        eventService.register(new ConfigUpdateListener(placeholderService));
     }
 
     public CompletableFuture<String> translate(String text, String lang, TranslationModule module) {

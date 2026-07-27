@@ -52,7 +52,6 @@ public class InventoryModule extends AbstractTranslatorModule {
                 inventoryPacketListener,
                 PacketListenerPriority.NORMAL
         );
-        System.out.println("REGISTERED EVENT!!!!!!!!!!");
     }
 
     public CompletableFuture<ItemStack> translateItem(ItemStack item, String targetLanguage) {

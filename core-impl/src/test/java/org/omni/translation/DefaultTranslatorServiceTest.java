@@ -43,7 +43,7 @@ class DefaultTranslatorServiceTest {
     void setUp() {
         translatorService = new DefaultTranslatorService(
                 translationEndpoint, defaultTranslationPipeline, profileEndpoint,
-                 eventService, localeProcessor,placeholderService
+                 eventService, localeProcessor
         );
     }
 

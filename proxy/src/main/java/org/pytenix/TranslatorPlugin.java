@@ -16,6 +16,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.Getter;
 import org.omni.event.EventService;
 import org.omni.injection.CoreModule;
+import org.omni.placeholder.listener.ConfigUpdateListener;
 import org.omni.transport.TransportConnector;
 import org.pytenix.injection.TranslatorProxyModule;
 import org.pytenix.limbo.LimboService;
@@ -105,6 +106,7 @@ public class TranslatorPlugin {
         }, Names.named("velocityListeners")));
         Set<Object> omniListeners = injector.getInstance(Key.get(new TypeLiteral<>() {
         }, Names.named("omniListeners")));
+
 
 
         for (Object listener : velocityListeners) {

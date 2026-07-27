@@ -17,6 +17,6 @@ public class PlayerDisconnectListener {
 
     @Subscribe
     public void onDisconnect(DisconnectEvent event) {
-        eventService.callEvent(new PlayerDisconnectEvent(event.getPlayer().getUniqueId()));
+        eventService.callEvent(new PlayerDisconnectEvent(event.getPlayer().getUniqueId(), event.getPlayer().getUsername()));
     }
 }

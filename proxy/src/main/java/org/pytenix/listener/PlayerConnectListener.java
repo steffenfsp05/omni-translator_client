@@ -18,6 +18,6 @@ public class PlayerConnectListener {
 
     @Subscribe
     public void onConnect(LoginEvent event) {
-        eventService.callEvent(new PlayerConnectEvent(event.getPlayer().getUniqueId()));
+        eventService.callEvent(new PlayerConnectEvent(event.getPlayer().getUniqueId(), event.getPlayer().getUsername()));
     }
 }
