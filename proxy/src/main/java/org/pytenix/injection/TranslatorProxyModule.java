@@ -49,7 +49,7 @@ public class TranslatorProxyModule extends AbstractModule {
         velocityListeners.addBinding().to(PlayerSettingsChangeListener.class).in(Scopes.SINGLETON);
 
 
-        bind(SystemChatPacketListener.class).in(Scopes.SINGLETON);
+        bind(SystemChatPacketListener.class).asEagerSingleton();
 
     }
 

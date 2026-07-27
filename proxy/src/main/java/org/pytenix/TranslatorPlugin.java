@@ -71,8 +71,8 @@ public class TranslatorPlugin {
 
         Injector appInjector = velocityInjector.createChildInjector(
                 new CoreModule(dataDirectory),
-                new RoiModule(),
                 new SocketModule(remoteAddress),
+                new RoiModule(),
                 new TranslatorProxyModule(
                         this,
                         secret

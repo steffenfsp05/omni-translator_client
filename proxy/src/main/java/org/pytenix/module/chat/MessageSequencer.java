@@ -111,8 +111,7 @@ public class MessageSequencer {
 
                 if (compToSend != null) {
                     if (sendPacket(uuid, compToSend, head.isOverlay)) {
-                        System.out.println("MessageSequencer took " + ((System.nanoTime() - startTime) / 1000000) + " ms for " + compToSend.toString().substring(0, Math.min(compToSend.toString().length(), 15)));
-                        uq.queue.poll();
+                       uq.queue.poll();
                     } else {
                         scheduler.schedule(() -> processQueue(uuid, startTime), 500, TimeUnit.MILLISECONDS);
                         break;

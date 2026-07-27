@@ -37,7 +37,7 @@ public class SocketModule extends AbstractModule {
     protected void configure() {
 
         bind(String.class).annotatedWith(Names.named("backendRemoteAddress")).toInstance(backendRemoteAddress);
-        bind(WebSocketService.class).in(Scopes.SINGLETON);
+        bind(WebSocketService.class).asEagerSingleton();
         bind(TransportConnector.class).to(WebSocketService.class).in(Scopes.SINGLETON);
 
 

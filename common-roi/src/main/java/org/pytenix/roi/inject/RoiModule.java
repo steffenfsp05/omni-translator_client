@@ -17,8 +17,7 @@ public class RoiModule extends AbstractModule {
     @Override
     protected void configure() {
 
-        bind(PlayerTrackerService.class).in(Scopes.SINGLETON);
-        bind(HeartBeatSender.class).in(Scopes.SINGLETON);
+        bind(HeartBeatSender.class).asEagerSingleton();
 
 
         Multibinder<Object> omniListeners = Multibinder.newSetBinder(binder(), Object.class, Names.named("omniListeners"));
