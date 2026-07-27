@@ -19,18 +19,12 @@ import org.omni.transport.endpoint.ProfileEndpoint;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 @Singleton
-public class ProfileSocketEndpoint implements ProfileEndpoint {
+public class ProfileSocketEndpoint extends AbstractDeduplicatingEndpoint<AnalyticsKey, UUID, ProfileResultData> implements ProfileEndpoint {
 
-    final AbstractAnalyticsSecret abstractAnalyticsSecret;
-    final PacketMapperRegistry packetMapperRegistry;
-    final TransportSender transportSender;
-
-    private final ConcurrentHashMap<AnalyticsKey, CompletableFuture<ProfileResultData>> inFlightFetches = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<UUID, CompletableFuture<ProfileResultData>> queue = new ConcurrentHashMap<>();
+    private final AbstractAnalyticsSecret abstractAnalyticsSecret;
+    private final TransportSender transportSender;
 
     private final Cache<UUID, ProfileResultData> profileCache = Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(10))
@@ -44,16 +38,11 @@ public class ProfileSocketEndpoint implements ProfileEndpoint {
     @Inject
     public ProfileSocketEndpoint(
             AbstractAnalyticsSecret abstractAnalyticsSecret,
-            PacketMapperRegistry packetMapperRegistry,
             TransportSender transportSender
     ) {
-        this.packetMapperRegistry = packetMapperRegistry;
         this.abstractAnalyticsSecret = abstractAnalyticsSecret;
         this.transportSender = transportSender;
-
-
     }
-
 
     @Override
     public void handleIncoming(ProfileResultData inbound) {
@@ -61,72 +50,45 @@ public class ProfileSocketEndpoint implements ProfileEndpoint {
         final AnalyticsKey analyticsKey = new AnalyticsKey(inbound.analyticId());
         final UUID playerId = abstractAnalyticsSecret.getUuidFromAnalyticsKey(analyticsKey);
 
-        CompletableFuture<ProfileResultData> future = queue.remove(requestId);
-
-        inFlightFetches.remove(analyticsKey);
         this.set(playerId, inbound);
 
-        if (future != null) {
-            future.complete(inbound);
-        }
+        resolveIncomingByRequestId(requestId, inbound);
     }
 
     @Override
     public CompletableFuture<ProfileResultData> sendRequest(UUID uuid) {
-
         AnalyticsKey analyticsKey = abstractAnalyticsSecret.getAnalyticsKey(uuid);
+        UUID requestId = UUID.randomUUID();
 
+        ProfileExternRequestData externProfileRequestData = new ProfileExternRequestData(
+                requestId,
+                analyticsKey.bytes()
+        );
 
-        ProfileResultData cachedProfile = this.get(uuid);
-        if (cachedProfile != null) {
-            return CompletableFuture.completedFuture(cachedProfile);
-        }
+        ProfileResultData fallbackValue = new ProfileResultData(
+                requestId,
+                analyticsKey.bytes(),
+                Protobuf.ConsentType.UNKNOWN,
+                Protobuf.ConsentType.UNKNOWN
+        );
 
-        return inFlightFetches.computeIfAbsent(analyticsKey, key -> {
-            CompletableFuture<ProfileResultData> future = new CompletableFuture<>();
-            UUID requestId = UUID.randomUUID();
-
-            ProfileExternRequestData externProfileRequestData = new ProfileExternRequestData(
-                    requestId,
-                    analyticsKey.bytes()
-            );
-
-
-            queue.put(requestId, future);
-
-            transportSender.sendPacket(
-                    PacketRegistry.PROFILE_REQUEST_EXTERN,
-                    externProfileRequestData
-            );
-
-            return future.orTimeout(5, TimeUnit.SECONDS)
-                    .exceptionally(ex -> {
-                        System.out.println("VALUES: " + uuid);
-                        System.out.println("analyticsKey: " + analyticsKey);
-                        System.out.println("requestId: " + requestId);
-                        System.out.println("externProfileRequestData: " + externProfileRequestData);
-                        System.out.println("SALT: " + abstractAnalyticsSecret.getOrCreateSalt());
-                        System.err.println("Fehler beim Abrufen des Profils (Asynchron): " + ex.getMessage());
-
-                        inFlightFetches.remove(key);
-                        queue.remove(requestId);
-
-                        return new ProfileResultData(
-                                requestId,
-                                key.bytes(),
-                                Protobuf.ConsentType.UNKNOWN,
-                                Protobuf.ConsentType.UNKNOWN
-                        );
-                    });
-        });
+        return executeDeduplicated(
+                analyticsKey,
+                requestId,
+                5,
+                () -> {
+                    transportSender.sendPacket(
+                            PacketRegistry.PROFILE_REQUEST_EXTERN,
+                            externProfileRequestData
+                    );
+                },
+                fallbackValue
+        );
     }
 
     @Override
     public void update(ProfileResultData inbound) {
-
-
         final AnalyticsKey analyticsKey = new AnalyticsKey(inbound.analyticId());
-
         final UUID playerId = abstractAnalyticsSecret.getUuidFromAnalyticsKey(analyticsKey);
 
         if (deduplicationCache.asMap().putIfAbsent(analyticsKey, Boolean.TRUE) != null) {
@@ -136,13 +98,22 @@ public class ProfileSocketEndpoint implements ProfileEndpoint {
         this.set(playerId, inbound);
 
         transportSender.sendPacket(PacketRegistry.PROFILE_UPDATE_EXTERN,
-                new ProfileExternUpdateData(
-                        inbound
-                )
-        );
+                new ProfileExternUpdateData(inbound));
 
         transportSender.sendPacket(PacketRegistry.CACHE_INVALIDATION,
                 new CacheInvalidationRequest(UUID.randomUUID(), new CacheInvalidationRequest.Profile(analyticsKey.bytes())));
+    }
+
+    @Override
+    protected ProfileResultData getFromCache(AnalyticsKey key) {
+        UUID playerId = abstractAnalyticsSecret.getUuidFromAnalyticsKey(key);
+        return get(playerId);
+    }
+
+    @Override
+    protected void saveToCache(AnalyticsKey key, ProfileResultData value) {
+        UUID playerId = abstractAnalyticsSecret.getUuidFromAnalyticsKey(key);
+        set(playerId, value);
     }
 
     @Override
