@@ -36,26 +36,21 @@ public class PlayerServerConnectListener implements Listener {
         UUID uniqueId = connection.getProfile().getId();
         if (uniqueId == null) return;
 
-
-        String locale = connection.getClientOption(ClientOption.LOCALE).toLowerCase();
-        System.out.println("LOCALE: " + locale);
+        String rawLocale = connection.getClientOption(ClientOption.LOCALE);
+        String locale = (rawLocale != null) ? rawLocale.toLowerCase() : "en_us";
         String playerLanguage = activeLanguages.getOrDefault(uniqueId, locale.split("_")[0]);
 
         boolean hasAcceptedDSGVO = false;
         if (hasAcceptedDSGVO) return;
 
-
         Dialog dialog = RegistryAccess.registryAccess().getRegistry(RegistryKey.DIALOG).get(GDPRBootstrap.getDialogKey(playerLanguage));
-
-        if(dialog == null)
-            return;
+        if (dialog == null) return;
 
         connection.getAudience().showDialog(dialog);
 
         CompletableFuture<Boolean> response = new CompletableFuture<>();
         response.completeOnTimeout(false, 5, TimeUnit.MINUTES);
         awaitingResponse.put(uniqueId, response);
-
 
         if (!response.join()) {
             connection.disconnect(Component.text("Timeout\nYou must respond to the privacy dialog to continue.", ERROR));
@@ -79,19 +74,14 @@ public class PlayerServerConnectListener implements Listener {
 
         } else if (key.equals(Key.key("omni:gdpr/submit"))) {
             DialogResponseView view = event.getDialogResponseView();
-
             boolean acceptTranslation = view.getBoolean("accept_translation");
             boolean acceptTracking = view.getBoolean("accept_tracking");
 
-
             setConnectionJoinResult(uniqueId, true);
-        }
-        else if (key.equals(Key.key("omni:gdpr/submit_all"))) {
-            DialogResponseView view = event.getDialogResponseView();
 
+        } else if (key.equals(Key.key("omni:gdpr/submit_all"))) {
             boolean acceptTranslation = true;
             boolean acceptTracking = true;
-
 
             setConnectionJoinResult(uniqueId, true);
         }

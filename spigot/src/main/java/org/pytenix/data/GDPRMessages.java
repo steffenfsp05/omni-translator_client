@@ -1,6 +1,8 @@
 package org.pytenix.data;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -31,7 +33,11 @@ public class GDPRMessages {
                     Map.entry("save_btn", "Speichern & Weiter"),
                     Map.entry("skip_btn", "Überspringen"),
                     Map.entry("accept_all_btn", "Alles akzeptieren"),
-                    Map.entry("open_url", "Klicke um zu öffnen")
+                    Map.entry("link_hover", "Link kann erst im Spiel (mit /omni) angeklickt werden."),
+                    Map.entry("open_url", "Klicke, um die Seite zu öffnen"),
+                    Map.entry("chat_privacy_info", "Unsere Richtlinien & Tracking-Details:"),
+                    Map.entry("chat_privacy_link", "[Datenschutzerklärung]"),
+                    Map.entry("chat_tracking_link", "[Tracking-Details]")
             ),
             "es", Map.ofEntries(
                     Map.entry("title_sub", " · Configuración de privacidad"),
@@ -46,7 +52,11 @@ public class GDPRMessages {
                     Map.entry("save_btn", "Guardar y Continuar"),
                     Map.entry("skip_btn", "Omitir"),
                     Map.entry("accept_all_btn", "Aceptar todo"),
-                    Map.entry("open_url", "Haz clic para abrir")
+                    Map.entry("link_hover", "El enlace solo se puede hacer clic en el juego (usando /omni)."),
+                    Map.entry("open_url", "Haz clic para abrir la página"),
+                    Map.entry("chat_privacy_info", "Nuestras políticas y detalles de seguimiento:"),
+                    Map.entry("chat_privacy_link", "[Política de privacidad]"),
+                    Map.entry("chat_tracking_link", "[Detalles de seguimiento]")
             ),
             "fr", Map.ofEntries(
                     Map.entry("title_sub", " · Paramètres de confidentialité"),
@@ -61,7 +71,11 @@ public class GDPRMessages {
                     Map.entry("save_btn", "Enregistrer & Continuer"),
                     Map.entry("skip_btn", "Passer"),
                     Map.entry("accept_all_btn", "Tout accepter"),
-                    Map.entry("open_url", "Cliquez pour ouvrir")
+                    Map.entry("link_hover", "Le lien ne peut être cliqué qu'en jeu (avec /omni)."),
+                    Map.entry("open_url", "Cliquez pour ouvrir la page"),
+                    Map.entry("chat_privacy_info", "Nos politiques et détails de suivi :"),
+                    Map.entry("chat_privacy_link", "[Politique de confidentialité]"),
+                    Map.entry("chat_tracking_link", "[Détails de suivi]")
             ),
             "pt", Map.ofEntries(
                     Map.entry("title_sub", " · Configurações de privacidade"),
@@ -76,7 +90,11 @@ public class GDPRMessages {
                     Map.entry("save_btn", "Salvar & Continuar"),
                     Map.entry("skip_btn", "Pular"),
                     Map.entry("accept_all_btn", "Aceitar tudo"),
-                    Map.entry("open_url", "Clique para abrir")
+                    Map.entry("link_hover", "O link só pode ser clicado no jogo (usando /omni)."),
+                    Map.entry("open_url", "Clique para abrir a página"),
+                    Map.entry("chat_privacy_info", "Nossas políticas e detalhes de rastreamento:"),
+                    Map.entry("chat_privacy_link", "[Política de Privacidade]"),
+                    Map.entry("chat_tracking_link", "[Detalhes de Rastreamento]")
             ),
             "pl", Map.ofEntries(
                     Map.entry("title_sub", " · Ustawienia prywatności"),
@@ -91,7 +109,11 @@ public class GDPRMessages {
                     Map.entry("save_btn", "Zapisz i kontynuuj"),
                     Map.entry("skip_btn", "Pomiń"),
                     Map.entry("accept_all_btn", "Zaakceptuj wszystko"),
-                    Map.entry("open_url", "Kliknij, aby otworzyć")
+                    Map.entry("link_hover", "Link można kliknąć tylko w grze (używając /omni)."),
+                    Map.entry("open_url", "Kliknij, aby otworzyć stronę"),
+                    Map.entry("chat_privacy_info", "Nasza polityka i szczegóły śledzenia:"),
+                    Map.entry("chat_privacy_link", "[Polityka prywatności]"),
+                    Map.entry("chat_tracking_link", "[Szczegóły śledzenia]")
             ),
             "ru", Map.ofEntries(
                     Map.entry("title_sub", " · Настройки конфиденциальности"),
@@ -106,7 +128,11 @@ public class GDPRMessages {
                     Map.entry("save_btn", "Сохранить и продолжить"),
                     Map.entry("skip_btn", "Пропустить"),
                     Map.entry("accept_all_btn", "Принять все"),
-                    Map.entry("open_url", "Нажмите, чтобы открыть")
+                    Map.entry("link_hover", "Ссылку можно нажать только в игре (через /omni)."),
+                    Map.entry("open_url", "Нажмите, чтобы открыть страницу"),
+                    Map.entry("chat_privacy_info", "Наша политика и детали отслеживания:"),
+                    Map.entry("chat_privacy_link", "[Политика конфиденциальности]"),
+                    Map.entry("chat_tracking_link", "[Детали отслеживания]")
             )
     );
 
@@ -123,7 +149,11 @@ public class GDPRMessages {
             Map.entry("save_btn", "Save & Continue"),
             Map.entry("skip_btn", "Skip"),
             Map.entry("accept_all_btn", "Accept All"),
-            Map.entry("open_url", "Click to open")
+            Map.entry("link_hover", "Link can only be clicked in-game (using /omni)."),
+            Map.entry("open_url", "Click to open the page"),
+            Map.entry("chat_privacy_info", "Our privacy policies & tracking details:"),
+            Map.entry("chat_privacy_link", "[Privacy Policy]"),
+            Map.entry("chat_tracking_link", "[Tracking Details]")
     );
 
     public static String get(String lang, String key) {
@@ -134,4 +164,29 @@ public class GDPRMessages {
         return Component.text(text, Style.style(HEADER, TextDecoration.BOLD));
     }
 
+
+    public static Component safeDetailsLine(String lang, String path) {
+        return Component.text(get(lang, "details"), MUTED)
+                .append(Component.text(path, Style.style(LINK, TextDecoration.UNDERLINED))
+                        .hoverEvent(HoverEvent.showText(Component.text(get(lang, "link_hover"), MUTED))));
+    }
+
+
+    public static Component getChatLinksMessage(String lang) {
+        Component prefix = Component.text("Omni-Translator | ", Style.style(ACCENT, TextDecoration.BOLD));
+
+        Component info = Component.text(get(lang, "chat_privacy_info") + " ", MUTED);
+
+        Component privacyLink = Component.text(get(lang, "chat_privacy_link"), Style.style(LINK, TextDecoration.BOLD))
+                .clickEvent(ClickEvent.openUrl("https://omni-translator.com/privacy"))
+                .hoverEvent(HoverEvent.showText(Component.text(get(lang, "open_url"), MUTED)));
+
+        Component separator = Component.text(" · ", MUTED);
+
+        Component trackingLink = Component.text(get(lang, "chat_tracking_link"), Style.style(LINK, TextDecoration.BOLD))
+                .clickEvent(ClickEvent.openUrl("https://omni-translator.com/tracking"))
+                .hoverEvent(HoverEvent.showText(Component.text(get(lang, "open_url"), MUTED)));
+
+        return prefix.append(info).append(privacyLink).append(separator).append(trackingLink);
+    }
 }
