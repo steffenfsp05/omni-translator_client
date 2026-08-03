@@ -17,6 +17,7 @@ import org.omni.injection.CoreModule;
 import org.omni.translation.TranslatorService;
 import org.omni.transport.TransportConnector;
 import org.pytenix.commands.OmniCommand;
+import org.pytenix.data.PlayerServerConnectListener;
 import org.pytenix.injection.TranslatorSpigotModule;
 import org.pytenix.listener.PlayerJoinQuitListener;
 import org.pytenix.listener.PlayerLocaleChangeListener;
@@ -96,6 +97,7 @@ public class TranslatorPlugin extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(injector.getInstance(PlayerJoinQuitListener.class), this);
         Bukkit.getPluginManager().registerEvents(injector.getInstance(PlayerLocaleChangeListener.class), this);
+        Bukkit.getPluginManager().registerEvents(injector.getInstance(PlayerServerConnectListener.class), this);
 
     }
 
