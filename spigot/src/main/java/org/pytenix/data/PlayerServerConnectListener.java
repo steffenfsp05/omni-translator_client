@@ -2,6 +2,7 @@ package org.pytenix.data;
 
 import com.destroystokyo.paper.ClientOption;
 import com.destroystokyo.paper.event.player.PlayerConnectionCloseEvent;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.papermc.paper.connection.PlayerConfigurationConnection;
 import io.papermc.paper.dialog.Dialog;
@@ -30,6 +31,15 @@ public class PlayerServerConnectListener implements Listener {
     private final Map<UUID, CompletableFuture<Boolean>> awaitingResponse = new ConcurrentHashMap<>();
     private final Map<UUID, String> activeLanguages = new ConcurrentHashMap<>();
 
+
+    private final GDPRService gdprService;
+
+    @Inject
+    public PlayerServerConnectListener(GDPRService gdprService)
+    {
+        this.gdprService = gdprService;
+    }
+
     @EventHandler
     public void onPlayerConfigure(AsyncPlayerConnectionConfigureEvent event) {
         PlayerConfigurationConnection connection = event.getConnection();
@@ -40,8 +50,9 @@ public class PlayerServerConnectListener implements Listener {
         String locale = (rawLocale != null) ? rawLocale.toLowerCase() : "en_us";
         String playerLanguage = activeLanguages.getOrDefault(uniqueId, locale.split("_")[0]);
 
-        boolean hasAcceptedDSGVO = false;
-        if (hasAcceptedDSGVO) return;
+        boolean needScreen = gdprService.needGDPRScreen(uniqueId).join();
+
+        if (!needScreen) return;
 
         Dialog dialog = RegistryAccess.registryAccess().getRegistry(RegistryKey.DIALOG).get(GDPRBootstrap.getDialogKey(playerLanguage));
         if (dialog == null) return;
@@ -69,22 +80,34 @@ public class PlayerServerConnectListener implements Listener {
 
         Key key = event.getIdentifier();
 
+        boolean acceptTranslation = false;
+        boolean acceptTracking = false;
+        boolean isGdprAction = false;
+
         if (key.equals(Key.key("omni:gdpr/skip"))) {
-            setConnectionJoinResult(uniqueId, true);
+            isGdprAction = true;
 
         } else if (key.equals(Key.key("omni:gdpr/submit"))) {
+            isGdprAction = true;
             DialogResponseView view = event.getDialogResponseView();
-            boolean acceptTranslation = view.getBoolean("accept_translation");
-            boolean acceptTracking = view.getBoolean("accept_tracking");
-
-            setConnectionJoinResult(uniqueId, true);
+            acceptTranslation = view.getBoolean("accept_translation");
+            acceptTracking = view.getBoolean("accept_tracking");
 
         } else if (key.equals(Key.key("omni:gdpr/submit_all"))) {
-            boolean acceptTranslation = true;
-            boolean acceptTracking = true;
-
-            setConnectionJoinResult(uniqueId, true);
+            isGdprAction = true;
+            acceptTranslation = true;
+            acceptTracking = true;
         }
+
+        if (!isGdprAction) return;
+
+        gdprService.setConsents(uniqueId, acceptTranslation, acceptTracking)
+                .whenComplete((unused, throwable) -> {
+                    if (throwable != null) {
+                        throwable.printStackTrace();
+                    }
+                    setConnectionJoinResult(uniqueId, true);
+                });
     }
 
     @EventHandler
@@ -96,7 +119,7 @@ public class PlayerServerConnectListener implements Listener {
     private void setConnectionJoinResult(UUID uniqueId, boolean value) {
         CompletableFuture<Boolean> future = awaitingResponse.get(uniqueId);
         if (future != null) {
-            future.complete(value);
+            future.completeAsync(() -> value, CompletableFuture.delayedExecutor(250, TimeUnit.MILLISECONDS));
         }
     }
 }

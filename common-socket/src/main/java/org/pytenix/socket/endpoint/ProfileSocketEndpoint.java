@@ -50,7 +50,9 @@ public class ProfileSocketEndpoint extends AbstractDeduplicatingEndpoint<Analyti
         final AnalyticsKey analyticsKey = new AnalyticsKey(inbound.analyticId());
         final UUID playerId = abstractAnalyticsSecret.getUuidFromAnalyticsKey(analyticsKey);
 
-        this.set(playerId, inbound);
+        if(inbound.translationConsent() != Protobuf.ConsentType.UNKNOWN &&
+                inbound.analyticConsent() != Protobuf.ConsentType.UNKNOWN)
+           this.set(playerId, inbound);
 
         resolveIncomingByRequestId(requestId, inbound);
     }

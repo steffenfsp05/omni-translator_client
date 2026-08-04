@@ -33,7 +33,7 @@ public class ServerPreConnectListener {
 
     @Subscribe
     public EventTask onPlayerConnect(ServerPreConnectEvent event) {
-
+/*
         if (event.getOriginalServer().getServerInfo().getName().equals("dynamic-limbo")) {
             return null;
         }
@@ -56,11 +56,14 @@ public class ServerPreConnectListener {
                             return null;
                         })
         );
+
+ */
+        return null;
     }
 
     @Subscribe
     public void onServerConnected(ServerConnectedEvent event) {
-
+/*
         if (event.getServer().getServerInfo().getName().equals("dynamic-limbo")) {
 
             proxyServer.getScheduler()
@@ -74,5 +77,7 @@ public class ServerPreConnectListener {
                     .delay(Duration.ofMillis(500))
                     .schedule();
         }
+
+ */
     }
 }

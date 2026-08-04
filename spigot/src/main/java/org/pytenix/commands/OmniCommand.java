@@ -59,6 +59,10 @@ public class OmniCommand implements BasicCommand {
             handleInfoAboutPlayer(player, args[1]);
             return;
         }
+        if (args.length == 2 && args[0].equalsIgnoreCase("reset") && player.hasPermission("omni.admin")) {
+            resetProfile(player, args[1]);
+            return;
+        }
 
         switch (args[0].toLowerCase()) {
             case "info" -> handlePrivacy(player);
@@ -67,6 +71,7 @@ public class OmniCommand implements BasicCommand {
             case "toggle" -> handleToggle(player, args);
             case "export" -> handleExport(player);
             case "delete" -> handleDelete(player);
+
             default -> sendHelp(player);
         }
     }
@@ -86,7 +91,7 @@ public class OmniCommand implements BasicCommand {
             if (sub.equals("toggle")) {
                 return filterStart(List.of("translation", "analytics"), args[1]);
             }
-            if (sub.equals("info") && source.getSender().hasPermission("omni.admin")) {
+            if ((sub.equals("info") ||sub.equals("reset"))&& source.getSender().hasPermission("omni.admin")) {
                 List<String> players = Bukkit.getOnlinePlayers().stream()
                         .map(Player::getName)
                         .toList();
@@ -121,6 +126,19 @@ public class OmniCommand implements BasicCommand {
             case AUTO -> "<yellow>Auto";
             case UNKNOWN, UNRECOGNIZED -> "<white>Unknown";
         };
+    }
+
+    private void resetProfile(Player p, String targetPlayer) {
+        @Nullable OfflinePlayer player = Bukkit.getOfflinePlayerIfCached(targetPlayer);
+        if (player == null) {
+            p.sendMessage(mm.deserialize("<red>This player does not exist on this server!"));
+            return;
+        }
+
+        profileEndpoint.sendRequest(player.getUniqueId()).thenAccept(profileResultData -> {
+            profileEndpoint.update(profileResultData.withAnalyticConsentType(Protobuf.ConsentType.UNKNOWN).withTranslationConsentType(Protobuf.ConsentType.UNKNOWN));
+            p.sendMessage(mm.deserialize("<red>Profile resetted ["+player.getUniqueId()+"]"));
+        });
     }
 
     private void handleInfoAboutPlayer(Player p, String targetPlayer) {
@@ -224,5 +242,6 @@ public class OmniCommand implements BasicCommand {
 
         if (p.hasPermission("omni.admin"))
             p.sendMessage(mm.deserialize("<gray>/omni info <Playername> <white>- Get the Analytic Id from a Player."));
+        p.sendMessage(mm.deserialize("<gray>/omni reset <Playername> <white>- Resets the profile from a player."));
     }
 }
