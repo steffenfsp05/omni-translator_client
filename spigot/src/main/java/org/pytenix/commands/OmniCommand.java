@@ -45,6 +45,11 @@ public class OmniCommand implements BasicCommand {
     public void execute(@NotNull CommandSourceStack source, @NotNull String[] args) {
         CommandSender sender = source.getSender();
 
+        if (args.length == 2 && args[0].equalsIgnoreCase("reset") && sender.hasPermission("omni.admin")) {
+            resetProfile(sender, args[1]);
+            return;
+        }
+
         if (!(sender instanceof Player player)) {
             sender.sendMessage(mm.deserialize("<red>Dieser Befehl ist nur für Spieler verfügbar."));
             return;
@@ -59,10 +64,7 @@ public class OmniCommand implements BasicCommand {
             handleInfoAboutPlayer(player, args[1]);
             return;
         }
-        if (args.length == 2 && args[0].equalsIgnoreCase("reset") && player.hasPermission("omni.admin")) {
-            resetProfile(player, args[1]);
-            return;
-        }
+
 
         switch (args[0].toLowerCase()) {
             case "info" -> handlePrivacy(player);
@@ -128,16 +130,16 @@ public class OmniCommand implements BasicCommand {
         };
     }
 
-    private void resetProfile(Player p, String targetPlayer) {
+    private void resetProfile(CommandSender sender, String targetPlayer) {
         @Nullable OfflinePlayer player = Bukkit.getOfflinePlayerIfCached(targetPlayer);
         if (player == null) {
-            p.sendMessage(mm.deserialize("<red>This player does not exist on this server!"));
+            sender.sendMessage(mm.deserialize("<red>This player does not exist on this server!"));
             return;
         }
 
         profileEndpoint.sendRequest(player.getUniqueId()).thenAccept(profileResultData -> {
             profileEndpoint.update(profileResultData.withAnalyticConsentType(Protobuf.ConsentType.UNKNOWN).withTranslationConsentType(Protobuf.ConsentType.UNKNOWN));
-            p.sendMessage(mm.deserialize("<red>Profile resetted ["+player.getUniqueId()+"]"));
+            sender.sendMessage(mm.deserialize("<red>Profile resetted ["+player.getUniqueId()+"]"));
         });
     }
 
