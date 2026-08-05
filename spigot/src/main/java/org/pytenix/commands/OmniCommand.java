@@ -242,8 +242,9 @@ public class OmniCommand implements BasicCommand {
         p.sendMessage(mm.deserialize("<gray>/omni export <white>- Export Data we've collected about you."));
         p.sendMessage(mm.deserialize("<gray>/omni delete <white>- Delete your collected Data."));
 
-        if (p.hasPermission("omni.admin"))
+        if (p.hasPermission("omni.admin")) {
             p.sendMessage(mm.deserialize("<gray>/omni info <Playername> <white>- Get the Analytic Id from a Player."));
-        p.sendMessage(mm.deserialize("<gray>/omni reset <Playername> <white>- Resets the profile from a player."));
+            p.sendMessage(mm.deserialize("<gray>/omni reset <Playername> <white>- Resets the profile from a player."));
+        }
     }
 }
