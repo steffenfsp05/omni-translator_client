@@ -12,7 +12,6 @@ import org.pytenix.TranslatorPlugin;
 import org.pytenix.listener.*;
 import org.pytenix.module.chat.listener.SystemChatPacketListener;
 
-import java.util.Optional;
 
 public class TranslatorProxyModule extends AbstractModule {
 
@@ -55,6 +54,4 @@ public class TranslatorProxyModule extends AbstractModule {
         }
         return configService.loadConfig("config.json", ConfigurationFile.class);
     }
-
-
 }

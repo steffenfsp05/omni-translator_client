@@ -44,6 +44,7 @@ public class TranslatorPlugin {
     private final Path dataDirectory;
     private final Injector velocityInjector;
 
+
     @Inject
     public TranslatorPlugin(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory, Injector velocityInjector) {
         this.proxyServer = server;
@@ -113,7 +114,6 @@ public class TranslatorPlugin {
 
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) throws Exception {
-
     }
 
     private void createDataDirectory() {

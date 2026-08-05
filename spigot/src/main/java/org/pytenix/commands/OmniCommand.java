@@ -51,7 +51,7 @@ public class OmniCommand implements BasicCommand {
         }
 
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(mm.deserialize("<red>Dieser Befehl ist nur für Spieler verfügbar."));
+            sender.sendMessage(mm.deserialize("<red>Dieser Befehl ist nur für Spieler verfügbar. Test"));
             return;
         }
 
