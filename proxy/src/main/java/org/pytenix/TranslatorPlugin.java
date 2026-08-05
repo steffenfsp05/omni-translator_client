@@ -18,7 +18,6 @@ import org.omni.event.EventService;
 import org.omni.injection.CoreModule;
 import org.omni.transport.TransportConnector;
 import org.pytenix.injection.TranslatorProxyModule;
-import org.pytenix.limbo.LimboService;
 import org.pytenix.module.chat.listener.SystemChatPacketListener;
 import org.pytenix.roi.inject.RoiModule;
 import org.pytenix.socket.inject.SocketModule;
@@ -44,8 +43,6 @@ public class TranslatorPlugin {
     private final Logger logger;
     private final Path dataDirectory;
     private final Injector velocityInjector;
-
-    private LimboService limboService;
 
     @Inject
     public TranslatorPlugin(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory, Injector velocityInjector) {
@@ -79,7 +76,6 @@ public class TranslatorPlugin {
                 )
         );
 
-        this.limboService = appInjector.getInstance(LimboService.class);
 
 
         appInjector.getInstance(TransportConnector.class).connect();
@@ -117,7 +113,7 @@ public class TranslatorPlugin {
 
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) throws Exception {
-        if (limboService != null) limboService.shutdown();
+
     }
 
     private void createDataDirectory() {

@@ -6,16 +6,9 @@ import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
-import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.ProxyServer;
 import org.omni.config.ConfigService;
 import org.omni.config.ConfigurationFile;
-import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.pytenix.TranslatorPlugin;
-import org.pytenix.command.TranslateCommand;
-import org.pytenix.limbo.LimboService;
-import org.pytenix.limbo.book.ConsentBookService;
-import org.pytenix.limbo.listener.ServerPreConnectListener;
 import org.pytenix.listener.*;
 import org.pytenix.module.chat.listener.SystemChatPacketListener;
 
@@ -36,7 +29,6 @@ public class TranslatorProxyModule extends AbstractModule {
     @Override
     protected void configure() {
 
-        bind(ConsentBookService.class).in(Scopes.SINGLETON);
 
         bind(String.class).annotatedWith(Names.named("forwardingSecret")).toInstance(forwardingSecret);
 
@@ -65,14 +57,4 @@ public class TranslatorProxyModule extends AbstractModule {
     }
 
 
-
-
-    @Provides
-    @Singleton
-    public LimboService provideLimboService(
-            ProxyServer proxyServer,
-            ServerPreConnectListener preConnectListener,
-            TranslateCommand translateCommand) {
-        return new LimboService(plugin, proxyServer, 25588, forwardingSecret, preConnectListener, translateCommand);
-    }
 }
