@@ -3,7 +3,7 @@
   "name": "TranslatorProxy",
   "version": "1.0-SNAPSHOT",
   "description": "Proxy-seitiges System für Echtzeit-Übersetzungen",
-  "main": "org.pytenix.VelocityTranslator",
+  "main": "org.pytenix.TranslatorPlugin",
   "authors": [
     "PytenixOG"
   ],
