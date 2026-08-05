@@ -80,9 +80,18 @@ public class OmniCommand implements BasicCommand {
 
     @Override
     public @NotNull Collection<String> suggest(@NotNull CommandSourceStack source, @NotNull String[] args) {
-        if (args.length == 1) {
-            List<String> subCommands = List.of("info", "accept", "decline", "toggle", "export", "delete");
-            return filterStart(subCommands, args[0]);
+        if (args.length == 0 || args.length == 1) {
+            String currentArg = args.length == 0 ? "" : args[0];
+
+            List<String> subCommands = new ArrayList<>(List.of(
+                    "info", "accept", "decline", "toggle", "export", "delete"
+            ));
+
+            if (source.getSender().hasPermission("omni.admin")) {
+                subCommands.add("reset");
+            }
+
+            return filterStart(subCommands, currentArg);
         }
 
         if (args.length == 2) {
