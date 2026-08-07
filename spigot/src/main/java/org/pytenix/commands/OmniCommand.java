@@ -242,6 +242,7 @@ public class OmniCommand implements BasicCommand {
         p.sendMessage(mm.deserialize("<yellow>Export-Anfrage wird an Backend gesendet..."));
         dataExportEndpoint.sendRequest(p.getUniqueId()).thenAccept(dataId -> {
 
+            //DUMMY ADDRESS; NEEDS TO BE REDO
             String dataUrl = "http://192.168.178.121:8083/api/v1/analytics/data?id="+dataId;
 
             String message = String.format("<yellow>Du kannst deine Daten einsehen unter:\n" +
