@@ -30,6 +30,8 @@ public class PacketModule extends AbstractModule {
         mapperBinder.addBinding().to(ExternProfileRequestMapper.class).in(Scopes.SINGLETON);
         mapperBinder.addBinding().to(ExternProfileUpdateMapper.class).in(Scopes.SINGLETON);
         mapperBinder.addBinding().to(CacheInvalidationRequestMapper.class).in(Scopes.SINGLETON);
+        mapperBinder.addBinding().to(DataExportRequestMapper.class).in(Scopes.SINGLETON);
+        mapperBinder.addBinding().to(DataExportResultMapper.class).in(Scopes.SINGLETON);
 
         bind(PacketMapperRegistry.class).to(DefaultPacketMapperRegistry.class).in(Scopes.SINGLETON);
 

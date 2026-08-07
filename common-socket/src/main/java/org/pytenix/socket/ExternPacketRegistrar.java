@@ -16,7 +16,8 @@ public class ExternPacketRegistrar implements PacketRegistrar<WebSocket> {
     private final BackendTranslationResultConsumer backendTranslationResultConsumer;
     private final BackendGeoResultConsumer backendGeoResultConsumer;
     private final BackendProfileResultConsumer backendProfileResultConsumer;
-    private final BackendCacheInvalidationConsumer cacheInvalidationConsumer;
+    private final BackendCacheInvalidationConsumer backendCacheInvalidationConsumer;
+    private final BackendDataExportResultConsumer backendDataExportResultConsumer;
 
     @Inject
     public ExternPacketRegistrar(
@@ -24,14 +25,16 @@ public class ExternPacketRegistrar implements PacketRegistrar<WebSocket> {
             BackendTranslationResultConsumer backendTranslationResultConsumer,
             BackendGeoResultConsumer backendGeoResultConsumer,
             BackendProfileResultConsumer backendProfileResultConsumer,
-            BackendCacheInvalidationConsumer cacheInvalidationConsumer
+            BackendCacheInvalidationConsumer backendCacheInvalidationConsumer,
+            BackendDataExportResultConsumer backendDataExportResultConsumer
     ) {
 
         this.backendServerConfigConsumer = backendServerConfigConsumer;
         this.backendTranslationResultConsumer = backendTranslationResultConsumer;
         this.backendGeoResultConsumer = backendGeoResultConsumer;
         this.backendProfileResultConsumer = backendProfileResultConsumer;
-        this.cacheInvalidationConsumer = cacheInvalidationConsumer;
+        this.backendCacheInvalidationConsumer = backendCacheInvalidationConsumer;
+        this.backendDataExportResultConsumer = backendDataExportResultConsumer;
     }
 
     @Override
@@ -40,13 +43,16 @@ public class ExternPacketRegistrar implements PacketRegistrar<WebSocket> {
         transport.registerPacket(PacketRegistry.TRANSLATION_RESULT, backendTranslationResultConsumer);
         transport.registerPacket(PacketRegistry.GEO_RESULT, backendGeoResultConsumer);
         transport.registerPacket(PacketRegistry.PROFILE, backendProfileResultConsumer);
-        transport.registerPacket(PacketRegistry.CACHE_INVALIDATION, cacheInvalidationConsumer);
+        transport.registerPacket(PacketRegistry.CACHE_INVALIDATION, backendCacheInvalidationConsumer);
+        transport.registerPacket(PacketRegistry.DATA_EXPORT_RESULT, backendDataExportResultConsumer);
 
         transport.registerPacket(PacketRegistry.GEO_REQUEST, (ctx, req) -> {
         });
         transport.registerPacket(PacketRegistry.TRANSLATION_REQUEST, (ctx, req) -> {
         });
         transport.registerPacket(PacketRegistry.PROFILE_UPDATE_EXTERN, (ctx, req) -> {
+        });
+        transport.registerPacket(PacketRegistry.DATA_EXPORT_REQUEST, (ctx, req) -> {
         });
     }
 

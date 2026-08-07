@@ -6,16 +6,10 @@ import com.google.inject.name.Names;
 import org.omni.packets.PacketRegistrar;
 import org.omni.transport.TransportConnector;
 import org.omni.transport.TransportSender;
-import org.omni.transport.endpoint.GeoEndpoint;
-import org.omni.transport.endpoint.ProfileEndpoint;
-import org.omni.transport.endpoint.ServerConfigurationEndpoint;
-import org.omni.transport.endpoint.TranslationEndpoint;
+import org.omni.transport.endpoint.*;
 import org.pytenix.socket.ExternPacketRegistrar;
 import org.pytenix.socket.SocketTransportSender;
-import org.pytenix.socket.endpoint.ConfigurationSocketEndpoint;
-import org.pytenix.socket.endpoint.GeoSocketEndpoint;
-import org.pytenix.socket.endpoint.ProfileSocketEndpoint;
-import org.pytenix.socket.endpoint.TranslationSocketEndpoint;
+import org.pytenix.socket.endpoint.*;
 import org.pytenix.socket.listener.*;
 import org.pytenix.socket.socket.WebSocketService;
 import org.transport.TransportOptions;
@@ -49,6 +43,7 @@ public class SocketModule extends AbstractModule {
         bind(ServerConfigurationEndpoint.class).to(ConfigurationSocketEndpoint.class).in(Scopes.SINGLETON);
         bind(ProfileEndpoint.class).to(ProfileSocketEndpoint.class).in(Scopes.SINGLETON);
         bind(TranslationEndpoint.class).to(TranslationSocketEndpoint.class).in(Scopes.SINGLETON);
+        bind(DataExportEndpoint.class).to(DataExportSocketEndpoint.class).in(Scopes.SINGLETON);
 
 
         Multibinder<Object> omniListeners = Multibinder.newSetBinder(binder(), Object.class, Names.named("omniListeners"));

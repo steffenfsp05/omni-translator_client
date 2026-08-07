@@ -17,6 +17,7 @@ import org.omni.packets.data.ConsentRefreshRequestData;
 import org.omni.profile.AbstractAnalyticsSecret;
 import org.omni.profile.AnalyticsKey;
 import org.omni.proto.generated.Protobuf;
+import org.omni.transport.endpoint.DataExportEndpoint;
 import org.omni.transport.endpoint.ProfileEndpoint;
 
 import java.util.*;
@@ -27,6 +28,7 @@ public class OmniCommand implements BasicCommand {
     private final EventService eventService;
     private final AbstractAnalyticsSecret abstractAnalyticsSecret;
     private final ProfileEndpoint profileEndpoint;
+    private final DataExportEndpoint dataExportEndpoint;
 
     private final MiniMessage mm = MiniMessage.miniMessage();
 
@@ -34,11 +36,13 @@ public class OmniCommand implements BasicCommand {
     public OmniCommand(
             EventService eventService,
             AbstractAnalyticsSecret abstractAnalyticsSecret,
-            ProfileEndpoint profileEndpoint
+            ProfileEndpoint profileEndpoint,
+            DataExportEndpoint dataExportEndpoint
     ) {
         this.eventService = eventService;
         this.abstractAnalyticsSecret = abstractAnalyticsSecret;
         this.profileEndpoint = profileEndpoint;
+        this.dataExportEndpoint = dataExportEndpoint;
     }
 
     @Override
@@ -236,8 +240,15 @@ public class OmniCommand implements BasicCommand {
 
     private void handleExport(Player p) {
         p.sendMessage(mm.deserialize("<yellow>Export-Anfrage wird an Backend gesendet..."));
-    }
+        dataExportEndpoint.sendRequest(p.getUniqueId()).thenAccept(dataId -> {
 
+            String dataUrl = "http://192.168.178.121:8083/api/v1/analytics/data?id="+dataId;
+
+            String message = String.format("<yellow>Du kannst deine Daten einsehen unter:\n" +
+                    " <click:open_url:'%s'><underlined><blue>%s</blue></underlined></click>\n<red>Dieser Link ist für 24 Stunden gültig.", dataUrl, dataUrl);
+            p.sendMessage(mm.deserialize(message));
+        });
+    }
     private void handleDelete(Player p) {
         p.sendMessage(mm.deserialize("<red>Lösch-Anfrage für alle deine Daten wurde gesendet."));
     }

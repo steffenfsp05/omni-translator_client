@@ -47,6 +47,23 @@ message ServerConfiguration {
   repeated string words = 5;
 }
 
+message DataExportRequest
+{
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+
+  bytes analytics_id = 3;
+}
+
+message DataExportResult
+{
+  fixed64 request_id_most_sig = 1;
+  fixed64 request_id_least_sig = 2;
+
+  string dataLink = 3;
+}
+
+
 message ConfigRequestPacket {
   int64 timestamp = 1;
 }
@@ -197,5 +214,7 @@ message PacketWrapper {
     ProfileExternRequest profile_extern_request = 11;
     ProfileExternUpdate profile_extern_update = 12;
     CacheInvalidationRequest cache_invalidation_request = 13;
+    DataExportRequest data_export_request = 14;
+    DataExportResult data_export_result = 15;
   }
 }

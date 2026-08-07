@@ -85,4 +85,16 @@ public class PacketRegistry {
                     13,
                     Protobuf.CacheInvalidationRequest.parser()
             );
+
+    public static final PacketDefinition<Protobuf.DataExportRequest> DATA_EXPORT_REQUEST =
+            new PacketDefinition<>(
+                    14,
+                    Protobuf.DataExportRequest.parser()
+            );
+
+    public static final PacketDefinition<Protobuf.DataExportResult> DATA_EXPORT_RESULT =
+            new PacketDefinition<>(
+                    15,
+                    Protobuf.DataExportResult.parser()
+            );
 }
