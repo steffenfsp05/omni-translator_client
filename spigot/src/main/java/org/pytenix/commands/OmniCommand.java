@@ -22,6 +22,9 @@ import org.omni.transport.endpoint.ProfileEndpoint;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Singleton
@@ -164,7 +167,6 @@ public class OmniCommand implements BasicCommand {
             p.sendMessage(mm.deserialize("<red>This player does not exist on this server!"));
             return;
         }
-        DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss - dd.MM.yyyy");
 
         profileEndpoint.sendRequest(player.getUniqueId()).thenAccept(profileResultData -> {
             p.sendMessage(mm.deserialize("<gold>--- OmniTranslator Privacy (" + player.getName() + ") ---"));
@@ -190,14 +192,18 @@ public class OmniCommand implements BasicCommand {
         });
     }
 
-    final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss - dd.MM.yyyy");
 
-    public String formatMillis(long millis)
+    public String formatMillis(long millisSinceEpoch)
     {
-        if(millis <=  0)
-            return "<red>No data";
+        if (millisSinceEpoch == 0)
+            return "No data";
 
-        return dateFormat.format(millis);
+        Instant instant = Instant.ofEpochMilli(millisSinceEpoch);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS Z")
+                .withZone(ZoneId.of("UTC"));
+
+        return formatter.format(instant);
     }
 
     private void handleConsent(Player p, boolean accept, String[] args) {
