@@ -50,7 +50,7 @@ public class ExternPacketRegistrar implements PacketRegistrar<WebSocket> {
         });
         transport.registerPacket(PacketRegistry.TRANSLATION_REQUEST, (ctx, req) -> {
         });
-        transport.registerPacket(PacketRegistry.PROFILE_UPDATE_EXTERN, (ctx, req) -> {
+        transport.registerPacket(PacketRegistry.PROFILE_UPDATE, (ctx, req) -> {
         });
         transport.registerPacket(PacketRegistry.DATA_EXPORT_REQUEST, (ctx, req) -> {
         });

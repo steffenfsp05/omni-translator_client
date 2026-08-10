@@ -7,12 +7,12 @@ import org.omni.packets.data.ProfileResultData;
 import org.omni.proto.generated.Protobuf;
 
 @Singleton
-public class ExternProfileUpdateMapper extends AbstractPacketMapper<Protobuf.ProfileUpdate, ProfileUpdateData> {
+public class ProfileUpdateMapper extends AbstractPacketMapper<Protobuf.ProfileUpdate, ProfileUpdateData> {
 
 
     final ProfileMapper profileMapper = new ProfileMapper();
 
-    public ExternProfileUpdateMapper() {
+    public ProfileUpdateMapper() {
         super(Protobuf.ProfileUpdate.class, ProfileUpdateData.class);
     }
 
