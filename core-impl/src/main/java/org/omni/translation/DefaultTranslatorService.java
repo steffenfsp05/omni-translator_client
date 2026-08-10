@@ -86,6 +86,10 @@ public class DefaultTranslatorService implements TranslatorService {
                                 profileData.translationConsent().equals(Protobuf.ConsentType.AUTO)) {
                             return true;
                         }
+
+                        if(profileData.translationConsent().equals(Protobuf.ConsentType.UNKNOWN))
+                            return false;
+
                         return !profileData.translationConsent().equals(Protobuf.ConsentType.DECLINED);
                     })
                     .exceptionally(throwable -> false);
