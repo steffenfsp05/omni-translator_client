@@ -1,6 +1,6 @@
 package org.omni.packets.data;
 
-public record ProfileExternUpdateData(
+public record ProfileUpdateData(
         ProfileResultData profileData
 ) {
 

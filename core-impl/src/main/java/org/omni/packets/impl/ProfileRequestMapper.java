@@ -3,22 +3,22 @@ package org.omni.packets.impl;
 import com.google.inject.Singleton;
 import com.google.protobuf.ByteString;
 import org.omni.packets.AbstractPacketMapper;
-import org.omni.packets.data.ProfileExternRequestData;
+import org.omni.packets.data.ProfileRequestData;
 import org.omni.proto.generated.Protobuf;
 
 import java.util.UUID;
 
 @Singleton
-public class ExternProfileRequestMapper extends AbstractPacketMapper<Protobuf.ProfileExternRequest, ProfileExternRequestData> {
+public class ProfileRequestMapper extends AbstractPacketMapper<Protobuf.ProfileRequest, ProfileRequestData> {
 
 
-    public ExternProfileRequestMapper() {
-        super(Protobuf.ProfileExternRequest.class, ProfileExternRequestData.class);
+    public ProfileRequestMapper() {
+        super(Protobuf.ProfileRequest.class, ProfileRequestData.class);
     }
 
     @Override
-    public Protobuf.ProfileExternRequest to(ProfileExternRequestData packet) {
-        return Protobuf.ProfileExternRequest.newBuilder()
+    public Protobuf.ProfileRequest to(ProfileRequestData packet) {
+        return Protobuf.ProfileRequest.newBuilder()
                 .setRequestIdMostSig(packet.requestId().getMostSignificantBits())
                 .setRequestIdLeastSig(packet.requestId().getLeastSignificantBits())
                 .setAnalyticsId(ByteString.copyFrom(packet.analyticId()))
@@ -26,8 +26,8 @@ public class ExternProfileRequestMapper extends AbstractPacketMapper<Protobuf.Pr
     }
 
     @Override
-    public ProfileExternRequestData from(Protobuf.ProfileExternRequest packet) {
-        return new ProfileExternRequestData(
+    public ProfileRequestData from(Protobuf.ProfileRequest packet) {
+        return new ProfileRequestData(
                 new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig()),
                 packet.getAnalyticsId().toByteArray()
         );

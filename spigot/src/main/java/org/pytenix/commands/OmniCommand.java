@@ -20,6 +20,8 @@ import org.omni.proto.generated.Protobuf;
 import org.omni.transport.endpoint.DataExportEndpoint;
 import org.omni.transport.endpoint.ProfileEndpoint;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Singleton
@@ -162,12 +164,15 @@ public class OmniCommand implements BasicCommand {
             p.sendMessage(mm.deserialize("<red>This player does not exist on this server!"));
             return;
         }
+        DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss - dd.MM.yyyy");
 
         profileEndpoint.sendRequest(player.getUniqueId()).thenAccept(profileResultData -> {
             p.sendMessage(mm.deserialize("<gold>--- OmniTranslator Privacy (" + player.getName() + ") ---"));
             p.sendMessage(mm.deserialize("<gray>Analytics Id: <white>" + formatAnalyticId(player.getUniqueId())));
             p.sendMessage(mm.deserialize("<gray>Translation Status: " + formatConsentStatus(profileResultData.translationConsent())));
             p.sendMessage(mm.deserialize("<gray>Analytics Status: " + formatConsentStatus(profileResultData.analyticConsent())));
+            p.sendMessage(mm.deserialize("<gray>Analytics Last Opt-In: " + formatMillis(profileResultData.analyticsAcceptedTimestamp())));
+            p.sendMessage(mm.deserialize("<gray>Translation Last Opt-In: " + formatMillis(profileResultData.translationsAcceptedTimestamp())));
         });
     }
 
@@ -175,11 +180,24 @@ public class OmniCommand implements BasicCommand {
         final UUID playerId = p.getUniqueId();
 
         profileEndpoint.sendRequest(playerId).thenAccept(profileResultData -> {
+
             p.sendMessage(mm.deserialize("<gold>--- OmniTranslator Privacy ---"));
             p.sendMessage(mm.deserialize("<gray>Your Analytics Id: <white>" + formatAnalyticId(playerId)));
             p.sendMessage(mm.deserialize("<gray>Translation Status: " + formatConsentStatus(profileResultData.translationConsent())));
             p.sendMessage(mm.deserialize("<gray>Analytics Status: " + formatConsentStatus(profileResultData.analyticConsent())));
+            p.sendMessage(mm.deserialize("<gray>Analytics Last Opt-In: " + formatMillis(profileResultData.analyticsAcceptedTimestamp())));
+            p.sendMessage(mm.deserialize("<gray>Translation Last Opt-In: " + formatMillis(profileResultData.translationsAcceptedTimestamp())));
         });
+    }
+
+    final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss - dd.MM.yyyy");
+
+    public String formatMillis(long millis)
+    {
+        if(millis <=  0)
+            return "<red>No data";
+
+        return dateFormat.format(millis);
     }
 
     private void handleConsent(Player p, boolean accept, String[] args) {

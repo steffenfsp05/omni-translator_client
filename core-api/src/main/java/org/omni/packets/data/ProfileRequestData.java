@@ -2,7 +2,7 @@ package org.omni.packets.data;
 
 import java.util.UUID;
 
-public record ProfileExternRequestData(
+public record ProfileRequestData(
         UUID requestId,
         byte[] analyticId
 ) {
@@ -10,7 +10,7 @@ public record ProfileExternRequestData(
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ProfileExternRequestData that = (ProfileExternRequestData) o;
+        ProfileRequestData that = (ProfileRequestData) o;
         return
                 java.util.Arrays.equals(analyticId, that.analyticId) &&
                         java.util.Objects.equals(requestId, that.requestId);

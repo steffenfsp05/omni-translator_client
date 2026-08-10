@@ -24,6 +24,8 @@ public class ProfileMapper extends AbstractPacketMapper<Protobuf.ProfilePacket, 
                 .setRequestIdMostSig(packet.requestId().getMostSignificantBits())
                 .setRequestIdLeastSig(packet.requestId().getLeastSignificantBits())
                 .setAnalyticsId(ByteString.copyFrom(packet.analyticId()))
+                .setTranslationsAcceptedTimestamp(packet.translationsAcceptedTimestamp())
+                .setAnalyticsAcceptedTimestamp(packet.analyticsAcceptedTimestamp())
                 .build();
     }
 
@@ -33,7 +35,9 @@ public class ProfileMapper extends AbstractPacketMapper<Protobuf.ProfilePacket, 
                 new UUID(packet.getRequestIdMostSig(), packet.getRequestIdLeastSig()),
                 packet.getAnalyticsId().toByteArray(),
                 packet.getTranslationConsentType(),
-                packet.getAnalyticsConsentType()
+                packet.getAnalyticsConsentType(),
+                packet.getAnalyticsAcceptedTimestamp(),
+                packet.getTranslationsAcceptedTimestamp()
         );
     }
 

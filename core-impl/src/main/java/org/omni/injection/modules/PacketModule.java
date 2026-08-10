@@ -27,7 +27,7 @@ public class PacketModule extends AbstractModule {
         mapperBinder.addBinding().to(ConsentRefreshRequestMapper.class).in(Scopes.SINGLETON);
         mapperBinder.addBinding().to(HeartBeatRequestMapper.class).in(Scopes.SINGLETON);
         mapperBinder.addBinding().to(TrackPlayerRequestMapper.class).in(Scopes.SINGLETON);
-        mapperBinder.addBinding().to(ExternProfileRequestMapper.class).in(Scopes.SINGLETON);
+        mapperBinder.addBinding().to(ProfileRequestMapper.class).in(Scopes.SINGLETON);
         mapperBinder.addBinding().to(ExternProfileUpdateMapper.class).in(Scopes.SINGLETON);
         mapperBinder.addBinding().to(CacheInvalidationRequestMapper.class).in(Scopes.SINGLETON);
         mapperBinder.addBinding().to(DataExportRequestMapper.class).in(Scopes.SINGLETON);

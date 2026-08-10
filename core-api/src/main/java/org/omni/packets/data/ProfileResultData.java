@@ -8,7 +8,9 @@ public record ProfileResultData(
         UUID requestId,
         byte[] analyticId,
         Protobuf.ConsentType translationConsent,
-        Protobuf.ConsentType analyticConsent
+        Protobuf.ConsentType analyticConsent,
+        long analyticsAcceptedTimestamp,
+        long translationsAcceptedTimestamp
 
 ) {
     public static ProfileResultData createDefault(byte[] analyticId, UUID requestId) {
@@ -17,7 +19,9 @@ public record ProfileResultData(
                 requestId,
                 analyticId,
                 Protobuf.ConsentType.UNKNOWN,
-                Protobuf.ConsentType.UNKNOWN
+                Protobuf.ConsentType.UNKNOWN,
+                0,
+                0
         );
     }
 
@@ -26,7 +30,9 @@ public record ProfileResultData(
                 newRequestId,
                 this.analyticId,
                 this.translationConsent,
-                this.analyticConsent
+                this.analyticConsent,
+                this.analyticsAcceptedTimestamp,
+                this.translationsAcceptedTimestamp
         );
     }
 
@@ -36,7 +42,9 @@ public record ProfileResultData(
                 this.requestId,
                 this.analyticId,
                 newTranslationConsent,
-                this.analyticConsent
+                this.analyticConsent,
+                this.analyticsAcceptedTimestamp,
+                (newTranslationConsent == Protobuf.ConsentType.EXPLICIT ? System.currentTimeMillis() : this.translationsAcceptedTimestamp)
         );
     }
     public ProfileResultData withAnalyticConsentType(Protobuf.ConsentType newAnalyticConsent) {
@@ -44,7 +52,9 @@ public record ProfileResultData(
                 this.requestId,
                 this.analyticId,
                 this.translationConsent,
-                newAnalyticConsent
+                newAnalyticConsent,
+                (newAnalyticConsent == Protobuf.ConsentType.EXPLICIT ? System.currentTimeMillis() : this.analyticsAcceptedTimestamp),
+                this.translationsAcceptedTimestamp
         );
     }
 

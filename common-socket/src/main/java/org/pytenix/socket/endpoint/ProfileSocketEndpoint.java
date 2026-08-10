@@ -4,11 +4,10 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.omni.packets.PacketMapperRegistry;
 import org.omni.packets.PacketRegistry;
 import org.omni.packets.data.CacheInvalidationRequest;
-import org.omni.packets.data.ProfileExternRequestData;
-import org.omni.packets.data.ProfileExternUpdateData;
+import org.omni.packets.data.ProfileRequestData;
+import org.omni.packets.data.ProfileUpdateData;
 import org.omni.packets.data.ProfileResultData;
 import org.omni.profile.AbstractAnalyticsSecret;
 import org.omni.profile.AnalyticsKey;
@@ -62,7 +61,7 @@ public class ProfileSocketEndpoint extends AbstractDeduplicatingEndpoint<Analyti
         AnalyticsKey analyticsKey = abstractAnalyticsSecret.getAnalyticsKey(uuid);
         UUID requestId = UUID.randomUUID();
 
-        ProfileExternRequestData externProfileRequestData = new ProfileExternRequestData(
+        ProfileRequestData externProfileRequestData = new ProfileRequestData(
                 requestId,
                 analyticsKey.bytes()
         );
@@ -71,7 +70,9 @@ public class ProfileSocketEndpoint extends AbstractDeduplicatingEndpoint<Analyti
                 requestId,
                 analyticsKey.bytes(),
                 Protobuf.ConsentType.UNKNOWN,
-                Protobuf.ConsentType.UNKNOWN
+                Protobuf.ConsentType.UNKNOWN,
+                0,
+                0
         );
 
         return executeDeduplicated(
@@ -80,7 +81,7 @@ public class ProfileSocketEndpoint extends AbstractDeduplicatingEndpoint<Analyti
                 5,
                 () -> {
                     transportSender.sendPacket(
-                            PacketRegistry.PROFILE_REQUEST_EXTERN,
+                            PacketRegistry.PROFILE_REQUEST,
                             externProfileRequestData
                     );
                 },
@@ -99,8 +100,8 @@ public class ProfileSocketEndpoint extends AbstractDeduplicatingEndpoint<Analyti
 
         this.set(playerId, inbound);
 
-        transportSender.sendPacket(PacketRegistry.PROFILE_UPDATE_EXTERN,
-                new ProfileExternUpdateData(inbound));
+        transportSender.sendPacket(PacketRegistry.PROFILE_UPDATE,
+                new ProfileUpdateData(inbound));
 
         transportSender.sendPacket(PacketRegistry.CACHE_INVALIDATION,
                 new CacheInvalidationRequest(UUID.randomUUID(), new CacheInvalidationRequest.Profile(analyticsKey.bytes())));

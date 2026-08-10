@@ -128,16 +128,19 @@ message ProfilePacket {
 
   ConsentType translation_consent_type = 6;
   ConsentType analytics_consent_type = 7;
+
+  int64 analytics_accepted_timestamp = 8;
+  int64 translations_accepted_timestamp = 9;
 }
 
-message ProfileExternRequest {
+message ProfileRequest {
   string license = 1;
   fixed64 request_id_most_sig = 2;
   fixed64 request_id_least_sig = 3;
   bytes analytics_id = 4;
 }
 
-message ProfileExternUpdate {
+message ProfileUpdate {
   ProfilePacket profilePacket = 1;
 }
 
@@ -211,8 +214,8 @@ message PacketWrapper {
     ConsentRefreshRequest consent_refresh_request = 8;
     HeartbeatPacket heart_beat_packet = 9;
     TrackPlayerPacket track_player_packet = 10;
-    ProfileExternRequest profile_extern_request = 11;
-    ProfileExternUpdate profile_extern_update = 12;
+    ProfileRequest profile_request = 11;
+    ProfileUpdate profile_update = 12;
     CacheInvalidationRequest cache_invalidation_request = 13;
     DataExportRequest data_export_request = 14;
     DataExportResult data_export_result = 15;
