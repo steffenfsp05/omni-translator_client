@@ -2,6 +2,7 @@ package org.omni.packets.data;
 
 import org.omni.proto.generated.Protobuf;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public record ProfileResultData(
@@ -44,7 +45,7 @@ public record ProfileResultData(
                 newTranslationConsent,
                 this.analyticConsent,
                 this.analyticsAcceptedTimestamp,
-                (newTranslationConsent == Protobuf.ConsentType.EXPLICIT ? System.currentTimeMillis() : this.translationsAcceptedTimestamp)
+                (newTranslationConsent == Protobuf.ConsentType.EXPLICIT ? Instant.now().toEpochMilli() : this.translationsAcceptedTimestamp)
         );
     }
     public ProfileResultData withAnalyticConsentType(Protobuf.ConsentType newAnalyticConsent) {
@@ -53,7 +54,7 @@ public record ProfileResultData(
                 this.analyticId,
                 this.translationConsent,
                 newAnalyticConsent,
-                (newAnalyticConsent == Protobuf.ConsentType.EXPLICIT ? System.currentTimeMillis() : this.analyticsAcceptedTimestamp),
+                (newAnalyticConsent == Protobuf.ConsentType.EXPLICIT ? Instant.now().toEpochMilli() : this.analyticsAcceptedTimestamp),
                 this.translationsAcceptedTimestamp
         );
     }
