@@ -169,8 +169,10 @@ public class OmniCommand implements BasicCommand {
         }
 
         profileEndpoint.sendRequest(player.getUniqueId()).thenAccept(profileResultData -> {
+            String analyticId = formatAnalyticId(player.getUniqueId());
+
             p.sendMessage(mm.deserialize("<gold>--- OmniTranslator Privacy (" + player.getName() + ") ---"));
-            p.sendMessage(mm.deserialize("<gray>Analytics Id: <white>" + formatAnalyticId(player.getUniqueId())));
+            p.sendMessage(mm.deserialize("<gray>Analytics Id: <white><click:copy_to_clipboard:'" + analyticId + "'><hover:show_text:'<green>Klicke zum Kopieren'>" + analyticId + "</hover></click>"));
             p.sendMessage(mm.deserialize("<gray>Translation Status: " + formatConsentStatus(profileResultData.translationConsent())));
             p.sendMessage(mm.deserialize("<gray>Analytics Status: " + formatConsentStatus(profileResultData.analyticConsent())));
             p.sendMessage(mm.deserialize("<gray>Analytics Last Opt-In: " + formatMillis(profileResultData.analyticsAcceptedTimestamp())));
@@ -182,9 +184,10 @@ public class OmniCommand implements BasicCommand {
         final UUID playerId = p.getUniqueId();
 
         profileEndpoint.sendRequest(playerId).thenAccept(profileResultData -> {
+            String analyticId = formatAnalyticId(playerId);
 
             p.sendMessage(mm.deserialize("<gold>--- OmniTranslator Privacy ---"));
-            p.sendMessage(mm.deserialize("<gray>Your Analytics Id: <white>" + formatAnalyticId(playerId)));
+            p.sendMessage(mm.deserialize("<gray>Your Analytics Id: <white><click:copy_to_clipboard:'" + analyticId + "'><hover:show_text:'<green>Klicke zum Kopieren'>" + analyticId + "</hover></click>"));
             p.sendMessage(mm.deserialize("<gray>Translation Status: " + formatConsentStatus(profileResultData.translationConsent())));
             p.sendMessage(mm.deserialize("<gray>Analytics Status: " + formatConsentStatus(profileResultData.analyticConsent())));
             p.sendMessage(mm.deserialize("<gray>Analytics Last Opt-In: " + formatMillis(profileResultData.analyticsAcceptedTimestamp())));
