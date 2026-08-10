@@ -60,7 +60,7 @@ public class PlayerTrackerService {
 
             profileEndpoint.sendRequest(uuid).thenAccept(profileResultData ->
             {
-                if(profileResultData.analyticConsent().equals(Protobuf.ConsentType.DECLINED))
+                if(profileResultData.analyticConsent().equals(Protobuf.ConsentType.DECLINED) || profileResultData.analyticConsent().equals(Protobuf.ConsentType.UNKNOWN))
                     return;
 
                 translatorService.requiresTranslation(uuid).thenAccept(requiresTranslation ->
