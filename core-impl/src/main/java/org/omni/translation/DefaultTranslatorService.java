@@ -30,7 +30,6 @@ public class DefaultTranslatorService implements TranslatorService {
 
     final TranslationEndpoint translationEndpoint;
     final TranslationPipeline pipeline;
-    final EventService eventService;
     final PlayerLocaleProcessor playerLocaleProcessor;
     final ProfileEndpoint profileEndpoint;
 
@@ -46,14 +45,12 @@ public class DefaultTranslatorService implements TranslatorService {
             TranslationEndpoint translationEndpoint,
             TranslationPipeline pipeline,
             ProfileEndpoint profileEndpoint,
-            EventService eventService,
             PlayerLocaleProcessor playerLocaleProcessor) {
 
         this.translationEndpoint = translationEndpoint;
         this.pipeline = pipeline;
         this.playerLocaleProcessor = playerLocaleProcessor;
         this.profileEndpoint = profileEndpoint;
-        this.eventService = eventService;
 
     }
 
