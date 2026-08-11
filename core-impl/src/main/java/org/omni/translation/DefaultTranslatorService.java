@@ -11,7 +11,8 @@ import org.omni.entity.ServerConsentMode;
 import org.omni.entity.TranslationModule;
 import org.omni.event.EventService;
 import org.omni.packets.data.TranslationRequestData;
-import org.omni.placeholder.pipeline.impl.DefaultTranslationPipeline;
+import org.omni.placeholder.DefaultTranslationPipeline;
+import org.omni.placeholder.pipeline.TranslationPipeline;
 import org.omni.proto.generated.Protobuf;
 import org.omni.translation.locale.PlayerLocaleProcessor;
 import org.omni.transport.endpoint.ProfileEndpoint;
@@ -28,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class DefaultTranslatorService implements TranslatorService {
 
     final TranslationEndpoint translationEndpoint;
-    final DefaultTranslationPipeline pipeline;
+    final TranslationPipeline pipeline;
     final EventService eventService;
     final PlayerLocaleProcessor playerLocaleProcessor;
     final ProfileEndpoint profileEndpoint;
@@ -43,7 +44,7 @@ public class DefaultTranslatorService implements TranslatorService {
     @Inject
     public DefaultTranslatorService(
             TranslationEndpoint translationEndpoint,
-            DefaultTranslationPipeline pipeline,
+            TranslationPipeline pipeline,
             ProfileEndpoint profileEndpoint,
             EventService eventService,
             PlayerLocaleProcessor playerLocaleProcessor) {
@@ -64,8 +65,10 @@ public class DefaultTranslatorService implements TranslatorService {
 
         UUID batchId = UUID.randomUUID();
 
+
         String prepared = preparePayload(batchId, text);
-        return processAndRestore(batchId, prepared, lang, module);
+        System.out.println("BEFORE: " + text);
+        return processAndRestore(batchId, prepared, lang, module).whenComplete((s, throwable) ->System.out.println("AFTER: " + s));
     }
 
     @Override

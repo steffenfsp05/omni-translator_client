@@ -1,10 +1,11 @@
 package org.omni.injection.modules;
 
 import com.google.inject.*;
-import com.google.inject.multibindings.Multibinder;
+import org.omni.event.EventService;
+import org.omni.placeholder.*;
 import org.omni.placeholder.pipeline.TextProcessor;
 import org.omni.placeholder.pipeline.TranslationPipeline;
-import org.omni.placeholder.pipeline.impl.*;
+import org.omni.placeholder.processor.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,17 +21,22 @@ public class TranslationPipelineModule extends AbstractModule {
     @Provides
     @Singleton
     public List<TextProcessor> provideTranslationPipeline(
+            SystemProtectionProcessor systemProtectionProcessor,
             GradientProcessor gradientProcessor,
+            ColorProcessor colorProcessor,
+            PriceProcessor priceProcessor,
             NameProtectorProcessor nameProtectorProcessor,
             WordProtectorProcessor wordProtectorProcessor,
-            PlaceholderProcessor placeholderProcessor,
             NormalizerProcessor normalizerProcessor
     ) {
         return Arrays.asList(
+                systemProtectionProcessor,
                 gradientProcessor,
+                colorProcessor,
+                priceProcessor,
+                colorProcessor,
                 nameProtectorProcessor,
                 wordProtectorProcessor,
-                placeholderProcessor,
                 normalizerProcessor
         );
     }

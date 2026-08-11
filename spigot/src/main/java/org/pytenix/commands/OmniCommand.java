@@ -279,7 +279,17 @@ public class OmniCommand implements BasicCommand {
     }
     private void handleDelete(Player p) {
         p.sendMessage(mm.deserialize("<red>Lösch-Anfrage für alle deine Daten wurde gesendet."));
-    }
+
+        profileEndpoint.sendRequest(p.getUniqueId()).thenAccept(profileResultData -> {
+            var updatedProfile = profileResultData
+                    .withAnalyticConsentType(Protobuf.ConsentType.DECLINED);
+
+            profileEndpoint.update(updatedProfile);
+            p.sendMessage(mm.deserialize("<red>Es werden nun keine Analytics Daten über dich erfasst. Ältere Daten werden nach maximal 7 Tagen aggregiert und anonymisiert."));
+            });
+        }
+
+
 
     private void sendHelp(Player p) {
         p.sendMessage(mm.deserialize("<gold>OmniTranslator Commands:"));
