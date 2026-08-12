@@ -19,7 +19,7 @@ public class PlayerConnectListener {
     @Subscribe
     public void onConnect(LoginEvent event) {
 
-        String locale = event.getPlayer().getEffectiveLocale() == null ? null : event.getPlayer().getEffectiveLocale().toString();
+        String locale = event.getPlayer().getEffectiveLocale() == null ? null : event.getPlayer().getEffectiveLocale().toString().toLowerCase();
 
         eventService.callEvent(new PlayerConnectEvent(event.getPlayer().getUniqueId(), event.getPlayer().getUsername(),locale ));
     }

@@ -22,7 +22,7 @@ public class PlayerSettingsChangeListener {
         final Player player = event.getPlayer();
         String newLocale = event.getPlayerSettings().getLocale().toString();
 
-        eventService.callEvent(new PlayerSettingsChangeEvent(player.getUniqueId(), newLocale));
+        eventService.callEvent(new PlayerSettingsChangeEvent(player.getUniqueId(), newLocale.toLowerCase()));
     }
 
 
