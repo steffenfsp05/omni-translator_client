@@ -22,6 +22,7 @@ import org.pytenix.data.PlayerServerConnectListener;
 import org.pytenix.injection.TranslatorSpigotModule;
 import org.pytenix.listener.PlayerJoinQuitListener;
 import org.pytenix.listener.PlayerLocaleChangeListener;
+import org.pytenix.module.gui.cache.CacheInventoryInvalidationListener;
 import org.pytenix.network.VelocitySecretReader;
 import org.pytenix.network.listener.ConsentUpdateListener;
 import org.pytenix.service.ModuleService;
@@ -88,6 +89,7 @@ public class TranslatorPlugin extends JavaPlugin {
         EventService eventService = injector.getInstance(EventService.class);
 
         eventService.register(injector.getInstance(ConsentUpdateListener.class));
+        eventService.register(injector.getInstance(CacheInventoryInvalidationListener.class));
 
         Set<Object> omniListeners = injector.getInstance(Key.get(new TypeLiteral<>() {
         }, Names.named("omniListeners")));

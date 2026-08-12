@@ -38,4 +38,8 @@ public class ItemStackCache {
         int metaHash = item.hasItemMeta() ? item.getItemMeta().hashCode() : 0;
         return locale + ":" + item.getType().name() + ":" + metaHash;
     }
+    public void clearCache()
+    {
+        this.cache.invalidateAll();
+    }
 }
