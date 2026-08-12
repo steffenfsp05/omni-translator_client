@@ -16,6 +16,7 @@ import org.omni.event.EventService;
 import org.omni.injection.CoreModule;
 import org.omni.translation.TranslatorService;
 import org.omni.transport.TransportConnector;
+import org.pytenix.commands.DebugCommand;
 import org.pytenix.commands.OmniCommand;
 import org.pytenix.data.PlayerServerConnectListener;
 import org.pytenix.injection.TranslatorSpigotModule;
@@ -105,6 +106,9 @@ public class TranslatorPlugin extends JavaPlugin {
 
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
             event.registrar().register("omni", injector.getInstance(OmniCommand.class));
+        });
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
+            event.registrar().register("omnidebug", injector.getInstance(DebugCommand.class));
         });
 
         getServer().getCommandMap().register("translator", new org.bukkit.command.Command("testmsg") {

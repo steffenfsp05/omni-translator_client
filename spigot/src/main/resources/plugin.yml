@@ -20,3 +20,6 @@ commands:
   omni:
     description: "OmniTranslator Datenschutz-Befehle"
     usage: "/omni <info|accept|decline|toggle|export|delete>"
+  omnidebug:
+    description: "OmniTranslator Debug-Befehle"
+    usage: "/omnidebug"
