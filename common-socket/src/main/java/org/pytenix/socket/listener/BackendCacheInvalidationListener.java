@@ -10,6 +10,7 @@ import org.omni.profile.AnalyticsKey;
 import org.omni.translation.component.TextComponentService;
 import org.omni.transport.endpoint.ProfileEndpoint;
 import org.omni.transport.endpoint.TranslationEndpoint;
+import org.omni.util.SignalOperations;
 
 import java.util.Base64;
 import java.util.UUID;
@@ -38,13 +39,22 @@ public class BackendCacheInvalidationListener {
         System.out.println("RECIEVED: " + request);
 
         if (request.payload() instanceof CacheInvalidationRequest.Profile profilePayload) {
-            AnalyticsKey analyticsKey = new AnalyticsKey(profilePayload.analyticId());
-            UUID uuid = abstractAnalyticsSecret.getUuidFromAnalyticsKey(analyticsKey);
 
-            if (uuid == null)
-                return;
+            byte signal = SignalOperations.getSignal(profilePayload.analyticId());
 
-            profileEndpoint.invalidate(uuid);
+            if (signal == SignalOperations.SIGNAL_PROFILE_ALL) {
+                profileEndpoint.clear();
+            } else {
+                AnalyticsKey analyticsKey = new AnalyticsKey(profilePayload.analyticId());
+                UUID uuid = abstractAnalyticsSecret.getUuidFromAnalyticsKey(analyticsKey);
+
+                if (uuid == null)
+                    return;
+
+                profileEndpoint.invalidate(uuid);
+            }
+
+
 
         } else if (request.payload() instanceof CacheInvalidationRequest.Translation transPayload) {
 
