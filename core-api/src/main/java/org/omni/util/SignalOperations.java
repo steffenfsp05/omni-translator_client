@@ -12,7 +12,7 @@ public final class SignalOperations {
     private static final byte[] HEADER = new byte[] { 'O', 'M', 'N', 'I' };
 
     public static Predicate<CacheInvalidationRequest.Translation> CACHE_TRANSLATION_INVALIDATION_ALL =
-            translation -> translation.text().equals("*") && translation.language().equals("*") && translation.translationModule().equals(TranslationModule.LIVE_CHAT);
+            translation -> translation.text().equals("*") && translation.language().equals("*");
 
     public static final byte SIGNAL_PROFILE_ALL = 1;
 

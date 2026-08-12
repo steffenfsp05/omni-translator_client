@@ -64,7 +64,9 @@ public class BackendCacheInvalidationListener {
                     transPayload.translationModule()
             );
 
-            if (transPayload.text().equals("*") && transPayload.language().equals("*") && transPayload.translationModule().equals(TranslationModule.LIVE_CHAT)) {
+
+            if(SignalOperations.CACHE_TRANSLATION_INVALIDATION_ALL.test(transPayload))
+            {
                 translationEndpoint.clear();
                 textComponentService.clear();
                 System.out.println("CLEARED ALL DATA");
