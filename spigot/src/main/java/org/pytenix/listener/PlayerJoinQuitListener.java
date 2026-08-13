@@ -7,7 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.omni.event.EventService;
-import org.omni.event.register.player.PlayerConnectEvent;
+import org.omni.event.register.player.OmniPlayerConnectEvent;
 import org.omni.event.register.player.OmniPlayerDisconnectEvent;
 
 @Singleton
@@ -22,7 +22,7 @@ public class PlayerJoinQuitListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        this.eventService.callEvent(new PlayerConnectEvent(event.getPlayer().getUniqueId(), event.getPlayer().getName(), event.getPlayer().getLocale().toString()));
+        this.eventService.callEvent(new OmniPlayerConnectEvent(event.getPlayer().getUniqueId(), event.getPlayer().getName(), event.getPlayer().getLocale().toString()));
     }
 
     @EventHandler

@@ -3,7 +3,7 @@ package org.omni.locale.listener;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.omni.event.annotation.OmniSubscribe;
-import org.omni.event.register.player.PlayerConnectEvent;
+import org.omni.event.register.player.OmniPlayerConnectEvent;
 import org.omni.locale.LocaleManager;
 
 @Singleton
@@ -18,7 +18,7 @@ public class LocalePlayerConnectListener {
 
 
     @OmniSubscribe(priority = 92)
-    public void onConnect(PlayerConnectEvent event) {
+    public void onConnect(OmniPlayerConnectEvent event) {
 
 
         if(event.locale() != null)

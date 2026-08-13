@@ -8,7 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLocaleChangeEvent;
 import org.omni.event.EventService;
-import org.omni.event.register.player.PlayerSettingsChangeEvent;
+import org.omni.event.register.player.OmniPlayerSettingsChangeEvent;
 import org.pytenix.service.TaskScheduler;
 
 // ONLY FOR DEMO SERVER
@@ -27,7 +27,7 @@ public class PlayerLocaleChangeListener implements Listener {
     @EventHandler
     public void onLocaleChange(PlayerLocaleChangeEvent event) {
         Player player = event.getPlayer();
-        eventService.callEvent(new PlayerSettingsChangeEvent(player.getUniqueId(),event.locale().toString()));
+        eventService.callEvent(new OmniPlayerSettingsChangeEvent(player.getUniqueId(),event.locale().toString()));
 
         final Location originalLocation = player.getLocation().clone();
         Location refreshLocation = originalLocation.clone().add(0, 0, 200);

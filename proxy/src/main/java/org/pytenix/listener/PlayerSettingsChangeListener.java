@@ -5,7 +5,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerSettingsChangedEvent;
 import com.velocitypowered.api.proxy.Player;
 import org.omni.event.EventService;
-import org.omni.event.register.player.PlayerSettingsChangeEvent;
+import org.omni.event.register.player.OmniPlayerSettingsChangeEvent;
 
 public class PlayerSettingsChangeListener {
 
@@ -22,7 +22,7 @@ public class PlayerSettingsChangeListener {
         final Player player = event.getPlayer();
         String newLocale = event.getPlayerSettings().getLocale().toString();
 
-        eventService.callEvent(new PlayerSettingsChangeEvent(player.getUniqueId(), newLocale.toLowerCase()));
+        eventService.callEvent(new OmniPlayerSettingsChangeEvent(player.getUniqueId(), newLocale.toLowerCase()));
     }
 
 

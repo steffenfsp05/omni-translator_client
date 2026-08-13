@@ -4,7 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Singleton;
 import org.omni.event.annotation.OmniSubscribe;
-import org.omni.event.register.player.PlayerConnectEvent;
+import org.omni.event.register.player.OmniPlayerConnectEvent;
 import org.omni.event.register.player.OmniPlayerDisconnectEvent;
 import org.omni.placeholder.pipeline.TextProcessor;
 
@@ -26,7 +26,7 @@ public class NameProtectorProcessor implements TextProcessor {
             .expireAfterWrite(1, TimeUnit.MINUTES).build();
 
     @OmniSubscribe(priority = 91)
-    public void onConnect(PlayerConnectEvent event) {
+    public void onConnect(OmniPlayerConnectEvent event) {
         if (event.playerName() != null) {
             onlinePlayerNames.add(event.playerName().toLowerCase());
         }
