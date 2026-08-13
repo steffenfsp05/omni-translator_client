@@ -21,6 +21,7 @@ public class TranslationPipelineModule extends AbstractModule {
     @Provides
     @Singleton
     public List<TextProcessor> provideTranslationPipeline(
+            SmallCapsProcessor smallCapsProcessor,
             SystemProtectionProcessor systemProtectionProcessor,
             GradientProcessor gradientProcessor,
             ColorProcessor colorProcessor,
@@ -37,7 +38,8 @@ public class TranslationPipelineModule extends AbstractModule {
                 colorProcessor,
                 nameProtectorProcessor,
                 wordProtectorProcessor,
-                normalizerProcessor
+                normalizerProcessor,
+                smallCapsProcessor
         );
     }
 }

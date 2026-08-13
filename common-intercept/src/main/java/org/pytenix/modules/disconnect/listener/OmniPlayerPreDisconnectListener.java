@@ -47,6 +47,7 @@ public class OmniPlayerPreDisconnectListener {
                                 .thenAccept(s ->
                                 {
                                     System.out.println("CALLED!!!! 67");
+                                    System.out.println("REASON-: " + s);
                                     event.setReason(s);
                                 }));
             }
