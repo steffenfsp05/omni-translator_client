@@ -6,7 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.omni.event.annotation.OmniSubscribe;
-import org.omni.event.register.player.ConsentUpdateEvent;
+import org.omni.event.register.player.OmniConsentUpdateEvent;
 import org.pytenix.service.TaskScheduler;
 
 @Singleton
@@ -20,7 +20,7 @@ public class ConsentUpdateListener {
     }
 
     @OmniSubscribe(priority = 90)
-    public void onConsentUpdate(ConsentUpdateEvent event) {
+    public void onConsentUpdate(OmniConsentUpdateEvent event) {
         taskScheduler.runSyncLater(() -> {
             Player player = Bukkit.getPlayer(event.refreshRequestData().playerId());
             if (player == null) return;

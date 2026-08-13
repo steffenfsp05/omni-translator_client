@@ -14,7 +14,8 @@ public enum TranslationModule {
     HOLOGRAM("hologram"),
     PLUGIN_CHAT("plugin_chat"),
     SIGNS("signs"),
-    MOTD("motd");
+    MOTD("motd"),
+    KICK_BAN("kick_ban");
 
 
     String moduleName;

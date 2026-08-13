@@ -3,7 +3,7 @@ package org.omni.locale.listener;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.omni.event.annotation.OmniSubscribe;
-import org.omni.event.register.player.PlayerDisconnectEvent;
+import org.omni.event.register.player.OmniPlayerDisconnectEvent;
 import org.omni.locale.LocaleManager;
 
 @Singleton
@@ -18,7 +18,7 @@ public class LocalePlayerDisconnectListener {
 
 
     @OmniSubscribe(priority = 92)
-    public void onDisconnect(PlayerDisconnectEvent event) {
+    public void onDisconnect(OmniPlayerDisconnectEvent event) {
         localeManager.cleanupPlayer(event.playerId());
 
     }

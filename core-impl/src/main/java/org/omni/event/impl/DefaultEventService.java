@@ -11,6 +11,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -76,6 +77,20 @@ public class DefaultEventService implements EventService {
         }
     }
 
+    public <T> CompletableFuture<T> callEventAsync(T event) {
+        RegisteredHandler[] eventHandlers = handlers.get(event.getClass());
+
+        if (eventHandlers == null || eventHandlers.length == 0) {
+            return CompletableFuture.completedFuture(event);
+        }
+
+        CompletableFuture<Void> chain = CompletableFuture.completedFuture(null);
+        for (RegisteredHandler handler : eventHandlers) {
+            chain = chain.thenCompose(v -> handler.executeAsync(event));
+        }
+
+        return chain.thenApply(v -> event);
+    }
 
     public <T> T callEvent(T event) {
         RegisteredHandler[] eventHandlers = handlers.get(event.getClass());

@@ -26,7 +26,7 @@ public class ConsentRefreshConsumer extends MappedPacketReceiveConsumer<String, 
     public void handle(PacketContext<String> context, ConsentRefreshRequestData javaPacket) {
         profileService.cacheProvider().invalidate(javaPacket.playerId());
         if (Bukkit.getPlayer(javaPacket.playerId()) != null) {
-            eventService.callEvent(new ConsentUpdateEvent(javaPacket));
+            eventService.callEvent(new OmniConsentUpdateEvent(javaPacket));
         }
     }
 

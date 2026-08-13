@@ -5,7 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.inject.Singleton;
 import org.omni.event.annotation.OmniSubscribe;
 import org.omni.event.register.player.PlayerConnectEvent;
-import org.omni.event.register.player.PlayerDisconnectEvent;
+import org.omni.event.register.player.OmniPlayerDisconnectEvent;
 import org.omni.placeholder.pipeline.TextProcessor;
 
 import java.util.HashMap;
@@ -33,7 +33,7 @@ public class NameProtectorProcessor implements TextProcessor {
     }
 
     @OmniSubscribe(priority = 91)
-    public void onDisconnect(PlayerDisconnectEvent event) {
+    public void onDisconnect(OmniPlayerDisconnectEvent event) {
         if (event.playerName() != null) {
             onlinePlayerNames.remove(event.playerName().toLowerCase());
         }

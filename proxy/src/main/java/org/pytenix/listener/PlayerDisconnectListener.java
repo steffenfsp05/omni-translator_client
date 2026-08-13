@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import org.omni.event.EventService;
-import org.omni.event.register.player.PlayerDisconnectEvent;
+import org.omni.event.register.player.OmniPlayerDisconnectEvent;
 
 public class PlayerDisconnectListener {
 
@@ -17,6 +17,6 @@ public class PlayerDisconnectListener {
 
     @Subscribe
     public void onDisconnect(DisconnectEvent event) {
-        eventService.callEvent(new PlayerDisconnectEvent(event.getPlayer().getUniqueId(), event.getPlayer().getUsername()));
+        eventService.callEvent(new OmniPlayerDisconnectEvent(event.getPlayer().getUniqueId(), event.getPlayer().getUsername()));
     }
 }

@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.omni.event.EventService;
-import org.omni.event.register.player.ConsentUpdateEvent;
+import org.omni.event.register.player.OmniConsentUpdateEvent;
 import org.omni.packets.data.ConsentRefreshRequestData;
 import org.omni.profile.AbstractAnalyticsSecret;
 import org.omni.profile.AnalyticsKey;
@@ -20,8 +20,6 @@ import org.omni.proto.generated.Protobuf;
 import org.omni.transport.endpoint.DataExportEndpoint;
 import org.omni.transport.endpoint.ProfileEndpoint;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -235,7 +233,7 @@ public class OmniCommand implements BasicCommand {
 
             profileEndpoint.update(updatedProfile);
 
-            eventService.callEvent(new ConsentUpdateEvent(
+            eventService.callEvent(new OmniConsentUpdateEvent(
                     new ConsentRefreshRequestData(UUID.randomUUID(), p.getUniqueId(), newTranslation, newAnalytics)
             ));
 

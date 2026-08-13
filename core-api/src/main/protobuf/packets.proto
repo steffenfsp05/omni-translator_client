@@ -31,6 +31,7 @@ enum Module {
   MODULE_PLUGIN_CHAT = 4;
   MODULE_SIGNS = 5;
   MODULE_MOTD = 6;
+  MODULE_KICK_BAN = 7;
 }
 
 enum CacheInvalidationType {
