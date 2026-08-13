@@ -37,6 +37,7 @@ public class LiveChatModule extends AbstractTranslatorModule {
 
     }
 
+    //TODO: REFACTOR
     @Override
     public void init() {
         Bukkit.getPluginManager().registerEvents(chatListener, translatorPlugin);

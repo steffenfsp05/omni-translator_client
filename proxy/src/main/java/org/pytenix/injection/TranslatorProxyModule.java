@@ -38,6 +38,7 @@ public class TranslatorProxyModule extends AbstractModule {
         velocityListeners.addBinding().to(PlayerConnectListener.class).in(Scopes.SINGLETON);
         velocityListeners.addBinding().to(PlayerDisconnectListener.class).in(Scopes.SINGLETON);
         velocityListeners.addBinding().to(PlayerSettingsChangeListener.class).in(Scopes.SINGLETON);
+        velocityListeners.addBinding().to(PlayerConnectionInterruptListener.class).in(Scopes.SINGLETON);
 
 
         bind(SystemChatPacketListener.class).asEagerSingleton();

@@ -17,10 +17,11 @@ import lombok.Getter;
 import org.omni.event.EventService;
 import org.omni.injection.CoreModule;
 import org.omni.transport.TransportConnector;
+import org.pytenix.injection.InterceptModule;
 import org.pytenix.injection.TranslatorProxyModule;
 import org.pytenix.module.chat.listener.SystemChatPacketListener;
 import org.pytenix.roi.inject.RoiModule;
-import org.pytenix.socket.inject.SocketModule;
+import org.pytenix.socket.injection.SocketModule;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -71,6 +72,7 @@ public class TranslatorPlugin {
                 new CoreModule(dataDirectory),
                 new SocketModule(remoteAddress),
                 new RoiModule(),
+                new InterceptModule(),
                 new TranslatorProxyModule(
                         this,
                         secret

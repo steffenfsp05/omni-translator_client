@@ -15,6 +15,7 @@
         <module>spigot</module>
         <module>common-socket</module>
         <module>common-roi</module>
+        <module>common-intercept</module>
     </modules>
 
     <properties>

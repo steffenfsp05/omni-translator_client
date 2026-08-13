@@ -1,5 +1,7 @@
 package org.omni.event;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface EventService {
 
 
@@ -9,4 +11,5 @@ public interface EventService {
 
     <T> T callEvent(T event);
 
+    <T> CompletableFuture<T> callEventAsync(T event);
 }

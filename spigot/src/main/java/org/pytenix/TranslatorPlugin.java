@@ -1,8 +1,6 @@
 package org.pytenix;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.*;
-import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
@@ -11,7 +9,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.omni.entity.ServerConfiguration;
 import org.omni.event.EventService;
 import org.omni.injection.CoreModule;
 import org.omni.translation.TranslatorService;
@@ -19,17 +16,17 @@ import org.omni.transport.TransportConnector;
 import org.pytenix.commands.DebugCommand;
 import org.pytenix.commands.OmniCommand;
 import org.pytenix.data.PlayerServerConnectListener;
+import org.pytenix.injection.InterceptModule;
 import org.pytenix.injection.TranslatorSpigotModule;
+import org.pytenix.listener.PlayerConnectionInterruptListener;
 import org.pytenix.listener.PlayerJoinQuitListener;
 import org.pytenix.listener.PlayerLocaleChangeListener;
 import org.pytenix.module.gui.cache.CacheInventoryInvalidationListener;
 import org.pytenix.network.VelocitySecretReader;
 import org.pytenix.network.listener.ConsentUpdateListener;
 import org.pytenix.service.ModuleService;
-import org.pytenix.socket.inject.SocketModule;
+import org.pytenix.socket.injection.SocketModule;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Set;
 
 @Getter
@@ -68,6 +65,7 @@ public class TranslatorPlugin extends JavaPlugin {
         Injector injector = Guice.createInjector(
                 new CoreModule(getDataFolder().toPath()),
                 new SocketModule(remoteAddress),
+                new InterceptModule(),
                 new TranslatorSpigotModule(this)
         );
 
@@ -88,6 +86,7 @@ public class TranslatorPlugin extends JavaPlugin {
 
         EventService eventService = injector.getInstance(EventService.class);
 
+        //TODO: CLEANUO
         eventService.register(injector.getInstance(ConsentUpdateListener.class));
         eventService.register(injector.getInstance(CacheInventoryInvalidationListener.class));
 
@@ -101,6 +100,7 @@ public class TranslatorPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(injector.getInstance(PlayerJoinQuitListener.class), this);
         Bukkit.getPluginManager().registerEvents(injector.getInstance(PlayerLocaleChangeListener.class), this);
         Bukkit.getPluginManager().registerEvents(injector.getInstance(PlayerServerConnectListener.class), this);
+        Bukkit.getPluginManager().registerEvents(injector.getInstance(PlayerConnectionInterruptListener.class), this);
 
     }
 
