@@ -1,4 +1,4 @@
-package org.pytenix.socket.inject;
+package org.pytenix.socket.injection;
 
 import com.google.inject.*;
 import com.google.inject.multibindings.Multibinder;
